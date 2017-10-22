@@ -1,5 +1,7 @@
 # Project of DigitalAssetsManagement2017@ZJU
 # Created by Yunzhe, Asaki, KenBoNely, Oreki.
-## Project Name: Undefined
-## Project Due: Unknown
-## Project Target: Uncertain
+## Project Name: Berryfolio
+## Project Due: 2017.11.18
+## Project Target: Demo
+
+Run Run.bat or Run.sh(Linux) to start the server.
