@@ -53,3 +53,6 @@ config.*
 
 # Thumbs.db:
 Thumbs.db
+
+# Data folder:
+data/
