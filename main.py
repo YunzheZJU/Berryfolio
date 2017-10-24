@@ -3,17 +3,18 @@
 import os
 from utils import make_dirs
 import dbOperation
-from flask import Flask, url_for, render_template, request, send_from_directory
-from werkzeug.utils import secure_filename
-
-ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
+from flask import Flask, request, send_from_directory
+from flask_uploads import UploadSet, configure_uploads, IMAGES, patch_request_class
 
 
 # 我也不知道为什么，总之这句必须有
 app = Flask(__name__)
-app.config['UPLOAD_FOLDER'] = os.path.join(os.path.abspath("."), "data")
-make_dirs([app.config['UPLOAD_FOLDER']])
-app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
+app.config['UPLOADED_PHOTOS_DEST'] = os.path.join(os.path.abspath("."), "data")  # 文件储存地址
+make_dirs([app.config['UPLOADED_PHOTOS_DEST']])
+
+photos = UploadSet('photos', IMAGES)
+configure_uploads(app, photos)
+patch_request_class(app)  # 文件大小限制，默认为16MB
 
 
 html = '''
@@ -21,30 +22,18 @@ html = '''
     <title>Upload File</title>
     <h1>图片上传</h1>
     <form method=post enctype=multipart/form-data>
-         <input type=file name=file>
+         <input type=file name=photo>
          <input type=submit value=上传>
     </form>
     '''
 
 
-def allowed_file(filename):
-    return '.' in filename and filename.rsplit('.', 1)[1] in ALLOWED_EXTENSIONS
-
-
-@app.route('/uploads/<filename>')
-def uploaded_file(filename):
-    return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
-
-
 @app.route('/', methods=['GET', 'POST'])
 def upload_file():
-    if request.method == 'POST':
-        file = request.files['file']
-        if file and allowed_file(file.filename):
-            filename = secure_filename(file.filename)
-            file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-            file_url = url_for('uploaded_file', filename=filename)
-            return html + '<br><img src=' + file_url + '>'
+    if request.method == 'POST' and 'photo' in request.files:
+        filename = photos.save(request.files['photo'])
+        file_url = photos.url(filename)
+        return html + '<br><img src=' + file_url + '>'
     return html
 
 
