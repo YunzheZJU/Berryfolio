@@ -55,4 +55,4 @@ config.*
 Thumbs.db
 
 # Data folder:
-data/
+berryfolio/data/
