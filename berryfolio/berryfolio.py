@@ -13,7 +13,7 @@ from wtforms import SubmitField
 
 # 我也不知道为什么，总之这句必须有
 app = Flask(__name__)
-app.config.from_object(__name__)  # load config from this file , berryfolio.py
+app.config.from_object(__name__)  # load config from this file, berryfolio.py
 # 加载默认配置
 app.config.update(dict(
     DATABASE=os.path.join(app.root_path, 'berryfolio.db'),

@@ -49,7 +49,7 @@ docs/_build/
 venv/
 
 # Config files:
-config.*
+# config.*
 
 # Thumbs.db:
 Thumbs.db
