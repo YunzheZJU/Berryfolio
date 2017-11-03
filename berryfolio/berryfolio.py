@@ -2,6 +2,7 @@
 # 为方便阅读，使用中文注释
 import os
 from utils import make_dirs, check_username
+from logger import logger
 import sqlite3
 import db
 from flask import Flask, render_template, g, make_response, json, request, session, redirect, url_for
@@ -16,10 +17,10 @@ app = Flask(__name__)
 app.config.from_object(__name__)  # load config from this file, berryfolio.py
 # 加载默认配置
 app.config.update(dict(
-    DATABASE=os.path.join(app.root_path, 'berryfolio.db'),
+    # DATABASE=os.path.join(app.root_path, 'berryfolio.db'),
     SECRET_KEY='Thisismykeyafuibsvseibgf',
-    USERNAME='DAM',
-    PASSWORD='passworddam2017',
+    # USERNAME='DAM',
+    # PASSWORD='passworddam2017',
     UPLOADED_PHOTOS_DEST=os.path.join(app.root_path, "data")
 ))
 make_dirs([app.config['UPLOADED_PHOTOS_DEST']])
@@ -29,41 +30,39 @@ configure_uploads(app, photos)
 patch_request_class(app)  # 文件大小限制，默认为16MB
 
 
-def connect_db():
-    """Connects to the specific database."""
-    rv = sqlite3.connect(app.config['DATABASE'])
-    rv.row_factory = sqlite3.Row
-    return rv
+# def connect_db():
+#     """Connects to the specific database."""
+#     rv = sqlite3.connect(app.config['DATABASE'])
+#     rv.row_factory = sqlite3.Row
+#     return rv
+
+
+def get_db():
+    """在本次请求产生的全局变量g中创建一个唯一的数据库操作对象"""
+    if not hasattr(g, 'sqlite_db'):
+        g.sqlite_db = db.DbConnect()
+    return g.sqlite_db
 
 
 def init_db():
+    """利用写好的sql脚本初始化数据库"""
     db = get_db()
     with app.open_resource('schema.sql', mode='r') as f:
-        db.cursor().executescript(f.read())
-    db.commit()
+        db.execute_scripts(f.readlines())
 
 
 @app.cli.command('initdb')
 def initdb_command():
-    """Initializes the database."""
+    """初始化数据库的命令行命令"""
     init_db()
     print('Initialized the database.')
 
 
-def get_db():
-    """Opens a new database connection if there is none yet for the
-    current application context.
-    """
-    if not hasattr(g, 'sqlite_db'):
-        g.sqlite_db = connect_db()
-    return g.sqlite_db
-
-
-@app.teardown_appcontext
-def close_db(error):
-    """Closes the database again at the end of the request."""
-    if hasattr(g, 'sqlite_db'):
-        g.sqlite_db.close()
+# @app.teardown_appcontext
+# def close_db(error):
+#     """Closes the database again at the end of the request."""
+#     if hasattr(g, 'sqlite_db'):
+#         g.sqlite_db.close()
 
 
 class UploadForm(FlaskForm):
@@ -71,6 +70,12 @@ class UploadForm(FlaskForm):
         FileAllowed(photos, u'只能上传图片！'),
         FileRequired(u'文件未选择！')])
     submit = SubmitField(u'上传')
+
+
+@app.route('/')
+def index():
+    db = get_db()
+    return "<h1>Hello</h1>"
 
 
 @app.route('/upload', methods=['GET', 'POST'])
@@ -206,3 +211,7 @@ def delete():
     # TODO: 从数据库和文件系统中删除文件或目录及其相关信息
     status = ['success']
     return json.dumps(status), [('Content-Type', 'application/json;charset=utf-8')]
+
+
+if __name__ == '__main__':
+    app.run(port=8080)

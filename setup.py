@@ -7,7 +7,7 @@ setup(
     install_requires=[
         'flask',
         'flask_uploads',
-        'flask_wtf',
         'WTForms',
+        'flask_wtf',
     ],
 )

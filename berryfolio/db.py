@@ -10,14 +10,16 @@ class DbConnect:
         self.db = None
         try:
             # 打开数据库连接
+            logger.info("Connecting to database...")
             self.db = sqlite3.connect(DB_PATH)
         except Exception as ex:
             logger.error("Fail to connect to database: " + ex.message)
             # raise Exception("Fail to connect to database: " + ex.__str__())
 
-    def __exit__(self, exc_type, exc_val, exc_tb):
+    def __del__(self):
         try:
             # 关闭数据库连接
+            logger.info("Closing database...")
             self.db.close()
         except Exception as ex:
             logger.error("Fail to close database: " + ex.message)
@@ -25,6 +27,7 @@ class DbConnect:
 
     def _query(self, sql):
         try:
+            logger.info("Querying sql " + sql + "...")
             # 获得数据库指针
             cursor = self.db.cursor()
             # 执行SQL语句
@@ -39,6 +42,7 @@ class DbConnect:
 
     def _execute(self, sql):
         try:
+            logger.info("Executing sql " + sql + "...")
             # 获得数据库指针
             cursor = self.db.cursor()
             # 执行SQL语句
@@ -56,6 +60,7 @@ class DbConnect:
     # Function 0: Execute Scripts
     def execute_scripts(self, scripts):
         try:
+            logger.info("Executing scripts ...")
             # 获得数据库指针
             cursor = self.db.cursor()
             for sql in scripts:

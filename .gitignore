@@ -51,8 +51,8 @@ venv/
 # Config files:
 # config.*
 
-# Thumbs.db:
-Thumbs.db
-
 # Data folder:
 berryfolio/data/
+
+# Database file:
+*.db
