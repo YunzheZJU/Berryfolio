@@ -1,5 +1,4 @@
 #!/bin/bash
-. venv/Scripts/activate
 pip install --editable .
 export FLASK_APP=berryfolio
 export FLASK_DEBUG=true

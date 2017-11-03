@@ -3,8 +3,7 @@
 import os
 from utils import make_dirs, check_username
 from logger import logger
-import sqlite3
-import db
+import dbOperation
 from flask import Flask, render_template, g, make_response, json, request, session, redirect, url_for
 from flask_uploads import UploadSet, configure_uploads, IMAGES, patch_request_class
 from flask_wtf import FlaskForm
@@ -40,7 +39,7 @@ patch_request_class(app)  # 文件大小限制，默认为16MB
 def get_db():
     """在本次请求产生的全局变量g中创建一个唯一的数据库操作对象"""
     if not hasattr(g, 'sqlite_db'):
-        g.sqlite_db = db.DbConnect()
+        g.sqlite_db = dbOperation.DbConnect()
     return g.sqlite_db
 
 

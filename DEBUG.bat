@@ -1,5 +1,4 @@
 @echo off
-venv\Scripts\activate
 pip install --editable .
 set FLASK_APP=berryfolio
 set FLASK_DEBUG=true

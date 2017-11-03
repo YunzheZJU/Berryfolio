@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import os
+import dbOperation
 
 
 def make_dirs(paths):
@@ -17,7 +18,7 @@ def check_username(username):
 
 
 class Dict(dict):
-    '''
+    """
     Simple dict but support access as x.y style.
 
     >>> d1 = Dict()
@@ -45,7 +46,7 @@ class Dict(dict):
     2
     >>> d3.c
     3
-    '''
+    """
     def __init__(self, names=(), values=(), **kw):
         super(Dict, self).__init__(**kw)
         for k, v in zip(names, values):
