@@ -3,7 +3,7 @@
 import os
 from utils import make_dirs, check_username
 import sqlite3
-import dbOperation
+import db
 from flask import Flask, render_template, g, make_response, json, request, session, redirect, url_for
 from flask_uploads import UploadSet, configure_uploads, IMAGES, patch_request_class
 from flask_wtf import FlaskForm
