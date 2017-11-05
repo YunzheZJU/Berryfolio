@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # 为方便阅读，使用中文注释
 import os
-from utils import make_dirs, check_username
+from utils import make_dirs, generate_verify_code, make_user_dir
 from logger import logger
 import dbOperation
 from flask import Flask, render_template, g, make_response, json, request, session, redirect, url_for
@@ -54,7 +54,7 @@ def init_db():
 def initdb_command():
     """初始化数据库的命令行命令"""
     init_db()
-    print('Initialized the database.')
+    logger.info('Initialized the database.')
 
 
 # @app.teardown_appcontext
@@ -92,42 +92,81 @@ def upload_file():
 
 
 # 这是通往网站首页的大门
-@app.route('/home', methods=['GET', 'POST'])
+@app.route('/home', methods=['GET'])
 def home():
     if request.method == 'GET':
         if 'username' in session:
+            username = session['username']
             # 检查到这个用户曾经登陆过
-            if check_username(session['username']):
+            db = get_db()
+            if db.check_username(username):
                 # 这是一个注册了的用户并且已经登录过，去个人主页
                 return redirect(url_for('mypage'))
             else:
                 # 未注册过的假冒用户，踢掉踢掉
                 session.pop('username', None)
-        # 返回一个正常的主页
-        return render_template('home.html')
+    return render_template('home.html')
+
+
+# 用户登录页
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    message = None
+    if request.method == 'GET':
+        (verifycode, filename) = generate_verify_code(app.root_path)
+        verifyurl = url_for('static', filename=filename)
+        return render_template('login.html', message=message, varifyurl=verifyurl, verifycode=verifycode)
     elif request.method == 'POST':
         if request.form['type'] == 'Login':
-            # TODO: 验证表单里的用户名密码
-            if request.form['username'] == 'Yunzhe' and request.form['password'] == 'Zhang':
-                # 登录成功，设置session（flask会以cookie的方式处理）
-                session['username'] = request.form['username']
-                # 登录成功，去mypage
-                return redirect(url_for('mypage'))
+            # 验证表单里的用户名密码
+            username = request.form['username']
+            password = request.form['password']
+            code = request.form['verifycode']
+            if code == request.form['code']:
+                db = get_db()
+                if db.login(username, password):
+                    # 登录成功，去mypage
+                    session['username'] = username
+                    return redirect(url_for('mypage'))
+                else:
+                    # 登录失败，滚回login
+                    message = "登录失败，请重试"
             else:
-                # 登录失败，滚回home
-                return render_template('home.html', message="登录失败，请重试")
+                message = "验证码错误"
         elif request.form['type'] == 'Register':
-            # TODO: 获得表单内容，检查并存入数据库，初始化文件夹
-            # 注册成功，去主页登录一下
-            return render_template('home.html', message="注册成功，请登录")
+            # 获得表单内容，检查并存入数据库，初始化目录并存入数据库
+            # 未做SQL注入的防范
+            username = request.form['username']
+            password = request.form['password']
+            code = request.form['verifycode']
+            if code == request.form['code']:
+                db = get_db()
+                if db.register(username, password):
+                    # 创建用户目录
+                    make_user_dir(app.root_path, username)
+                    # 在数据库中新增目录信息
+                    if db.add_dictionary("root", 1, None, username):
+                        # 注册成功，登录一下
+                        message = "注册成功，请登录"
+                    else:
+                        logger.error("Fail to add dictionary: name=%s, user=%s" % ("root", username))
+                        message = "注册失败，内部错误"
+                else:
+                    logger.error("Fail to register: username=%s" % username)
+                    message = "注册失败，请重试"
+            else:
+                message = "验证码错误"
+    return render_template('login.html', message=message)
 
 
 @app.route('/mypage', methods=['GET', 'POST'])
 def mypage():
     if request.method == 'GET':
         if 'username' in session:
-            # 检查到已经登录
-            if check_username(session['username']):
+            username = session['username']
+            # 检查到这个用户曾经登陆过
+            db = get_db()
+            if db.check_username(username):
                 # 这是一个注册了的用户，给你看自己的个人主页
                 # TODO: 从数据库获取这个用户的个人作品，传入模板
                 entity = {'entity_0': '12345', 'entity_1': '54321'}
@@ -136,7 +175,6 @@ def mypage():
             else:
                 # 未注册过的假冒用户，踢掉踢掉
                 session.pop('username', None)
-        # 这个用户没登陆就来个人主页，请回去吧
         return redirect(url_for('home'))
     elif request.method == 'POST':
         # TODO: 获得表单内容，检查并存入数据库，更新用户设置

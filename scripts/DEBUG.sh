@@ -1,4 +1,5 @@
 #!/bin/bash
+cd ..
 pip install --editable .
 export FLASK_APP=berryfolio
 export FLASK_DEBUG=true

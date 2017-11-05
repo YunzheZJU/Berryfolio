@@ -9,5 +9,6 @@ setup(
         'flask_uploads',
         'WTForms',
         'flask_wtf',
+        'Pillow',
     ],
 )

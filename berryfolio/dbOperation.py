@@ -38,7 +38,7 @@ class DbConnect:
         except Exception as ex:
             logger.error("Unable to query sql: " + sql + ". Exception: " + ex.message)
             # raise Exception("Unable to query sql: " + sql + ". Exception: " + ex.message)
-            return []
+            return None
 
     def _execute(self, sql):
         try:
@@ -66,6 +66,7 @@ class DbConnect:
             for sql in scripts:
                 # 执行SQL语句
                 cursor.execute(sql)
+                # print sql
             # 提交数据库事务
             self.db.commit()
             return 1
@@ -77,13 +78,103 @@ class DbConnect:
             return 0
 
     # Function 1: Registration
-    def registration(self, login_name, full_name, passwords):
+    def register(self, username, password):
+        """
+        用户注册
+        :param username: 用户名（唯一）
+        :param password: 密码
+        :return: 成功则返回username，否则返回None
+        """
         sql = "TODO: Write query language here"
         if self._execute(sql):
-            return 1
+            return username
         else:
-            return 0
+            return None
 
-    # Function 2:
+    # Function 2: Log in
+    def login(self, username, password):
+        """
+        用户登录
+        :param username: 用户名
+        :param password: 密码
+        :return: 匹配则返回1，否则返回0
+        """
+        return 1
 
-    # Function 3:
+    # Function 3: Check username
+    def check_username(self, username):
+        """
+        检查用户名是否注册过
+        :param username: 需要检查的用户名
+        :return: 存在则返回1，否则返回0
+        """
+        return 1
+
+    # Function 4: Add dictionary
+    def add_dictionary(self, name, type, parentID, user):
+        """
+        添加一条目录信息，目录ID自增
+        :param name: 目录的显示名
+        :param type: 目录的类型（具有子目录，为1；或不具有子目录，为2）
+        :param parentID: 父目录的ID（根目录时为None）
+        :param user: 目录所属用户名
+        :return: 成功则返回目录ID，否则返回0
+        """
+        return 1
+
+    # Function 5: Add file
+    def add_file(self, parentID, filename, description, filepath):
+        """
+        添加一条文件信息，文件ID自增
+        :param parentID: 存放文件的目录的ID
+        :param filename: 文件名
+        :param description: 描述
+        :param filepath: 文件存放路径
+        :return: 成功则返回文件ID，否则返回0
+        """
+        return 1
+
+    # Function 6: Get directory ID where type == 1
+    def get_user_dir_1(self, username):
+        """
+        获取某用户的所有可创建子目录的目录ID，即目录类型为1
+        :param username: 用户名
+        :return: 成功则返回list，存储所有目录ID，否则返回None
+        """
+        return []
+
+    # Function 7: Get directory ID where type == 2
+    def get_user_dir_2(self, username):
+        """
+        获取某用户的所有可上传文件的目录ID，即目录类型为2
+        :param username: 用户名
+        :return: 成功则返回list，存储所有目录ID，否则返回None
+        """
+        return []
+
+    # Function 8: Get all files of a user
+    def get_user_files(self, username):
+        """
+        获取用户上传的所有文件
+        :param username: 用户名
+        :return: 成功则返回list，存储所有文件ID，否则返回None
+        """
+        return []
+
+    # Function 9: Get path of file
+    def get_path(self, fileID):
+        """
+        获得文件的存储路径
+        :param fileID: 文件ID
+        :return: 成功则返回文件的存储路径，否则返回None
+        """
+        return ""
+
+    # Function 10: Get children of a directory
+    def get_children(self, directoryID):
+        """
+        获得目录下的所有子目录ID或文件ID
+        :param directoryID: 需要索引的父目录ID
+        :return: 成功则返回list，存储所有子目录ID或文件ID，其中list的第一个元素标志其后的ID为目录ID（1）还是文件ID（2）
+        """
+        return []
