@@ -118,7 +118,7 @@ class DbConnect:
         :param type: 目录的类型（具有子目录，为1；或不具有子目录，为2）
         :param parentID: 父目录的ID（根目录时为None）
         :param user: 目录所属用户名
-        :return: 成功则返回目录ID，否则返回0
+        :return: 成功则返回目录ID，否则返回None
         """
         return 1
 
@@ -130,7 +130,7 @@ class DbConnect:
         :param filename: 文件名
         :param description: 描述
         :param filepath: 文件存放路径
-        :return: 成功则返回文件ID，否则返回0
+        :return: 成功则返回文件ID，否则返回None
         """
         return 1
 
@@ -141,7 +141,7 @@ class DbConnect:
         :param username: 用户名
         :return: 成功则返回list，存储所有目录ID，否则返回None
         """
-        return []
+        return [1, 3, 10]
 
     # Function 7: Get directory ID where type == 2
     def get_user_dir_2(self, username):
@@ -150,7 +150,7 @@ class DbConnect:
         :param username: 用户名
         :return: 成功则返回list，存储所有目录ID，否则返回None
         """
-        return []
+        return [2, 4]
 
     # Function 8: Get all files of a user
     def get_user_files(self, username):
@@ -159,7 +159,7 @@ class DbConnect:
         :param username: 用户名
         :return: 成功则返回list，存储所有文件ID，否则返回None
         """
-        return []
+        return [1, 2, 3, 4]
 
     # Function 9: Get path of file
     def get_path(self, fileID):
@@ -168,7 +168,7 @@ class DbConnect:
         :param fileID: 文件ID
         :return: 成功则返回文件的存储路径，否则返回None
         """
-        return ""
+        return "Yunzhe/root/folder/1.jpg"
 
     # Function 10: Get children of a directory
     def get_children(self, directoryID):
@@ -176,5 +176,62 @@ class DbConnect:
         获得目录下的所有子目录ID或文件ID
         :param directoryID: 需要索引的父目录ID
         :return: 成功则返回list，存储所有子目录ID或文件ID，其中list的第一个元素标志其后的ID为目录ID（1）还是文件ID（2）
+            ，否则返回None
         """
-        return []
+        return [1, 2, 4]
+
+    # Function 11: Get details a file
+    def get_file_details(self, fileID):
+        """
+        获得文件的详细信息
+        :param fileID: 文件ID
+        :return: 成功则返回list，依次存储文件名、描述、存储路径，否则返回None
+        """
+        return ['zhaopian', 'miaoshu', 'Yunzhe/root/folder/1.jpg']
+
+    # Function 12: Update file
+    def update_file_details(self, fileID, filename, description):
+        """
+        更新文件信息
+        :param fileID: 文件ID
+        :param filename: 文件名
+        :param description: 描述
+        :return: 成功则返回1，否则返回0
+        """
+        return 1
+
+    # Function 13: Get parent directory
+    def get_parent_id(self, directoryID):
+        """
+        获得父目录的ID
+        :param directoryID: 请求的子目录ID
+        :return: 成功则返回父目录ID，否则返回None
+        """
+        return 5
+
+    # Function 14: Get directory name
+    def get_dir_name(self, directoryID):
+        """
+        根据目录ID获得目录名
+        :param directoryID: 请求的目录ID
+        :return: 成功则返回目录名，否则返回None
+        """
+        return "folder"
+
+    # Function 15: Get root directory
+    def get_root_id(self, username):
+        """
+        根据用户名获得用户的根目录ID
+        :param username: 用户名
+        :return: 成功则返回目录ID，否则返回None
+        """
+        return 1
+
+    # Function 15: Get type of directory
+    def get_dir_type(self, directoryID):
+        """
+        根据目录ID获取目录类型
+        :param directoryID: 目录ID
+        :return: 成功则返回目录类型，否则返回None
+        """
+        return 1

@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 # 为方便阅读，使用中文注释
 import os
-from utils import make_dirs, generate_verify_code, make_user_dir
+import random
+from utils import make_dirs, generate_verify_code, make_user_dir, make_sub_dir, get_parent_path, generate_tree
 from logger import logger
 import dbOperation
 from flask import Flask, render_template, g, make_response, json, request, session, redirect, url_for
@@ -20,7 +21,7 @@ app.config.update(dict(
     SECRET_KEY='Thisismykeyafuibsvseibgf',
     # USERNAME='DAM',
     # PASSWORD='passworddam2017',
-    UPLOADED_PHOTOS_DEST=os.path.join(app.root_path, "data")
+    UPLOADED_PHOTOS_DEST=os.path.join(app.root_path, "static", "data")
 ))
 make_dirs([app.config['UPLOADED_PHOTOS_DEST']])
 
@@ -159,64 +160,115 @@ def login():
     return render_template('login.html', message=message)
 
 
+# 个人主页，展示16张随机作品
 @app.route('/mypage', methods=['GET', 'POST'])
-def mypage():
-    if request.method == 'GET':
-        if 'username' in session:
-            username = session['username']
-            # 检查到这个用户曾经登陆过
-            db = get_db()
-            if db.check_username(username):
-                # 这是一个注册了的用户，给你看自己的个人主页
-                # TODO: 从数据库获取这个用户的个人作品，传入模板
-                entity = {'entity_0': '12345', 'entity_1': '54321'}
-                username = session['username']
-                return render_template('mypage.html', entity=entity, username=username)
-            else:
-                # 未注册过的假冒用户，踢掉踢掉
-                session.pop('username', None)
-        return redirect(url_for('home'))
-    elif request.method == 'POST':
-        # TODO: 获得表单内容，检查并存入数据库，更新用户设置
-        # 更新成功
-        return render_template('mypage.html', message="用户设置已更新")
+def mypage(message):
+    if 'username' in session:
+        username = session['username']
+        # 检查到这个用户曾经登陆过
+        db = get_db()
+        if db.check_username(username):
+            # 这是一个注册了的用户，给你看自己的个人主页
+            if request.method == 'GET':
+                # 从数据库获取这个用户的个人作品，传入模板
+                filelist = db.get_user_files(username)
+                entity = None
+                if filelist:
+                    length = len(filelist)
+                    if 16 > length > 0:
+                        # 填充至16
+                        filelist = (filelist * (16 / length + 1))[:16]
+                    # 选16并构造url
+                    entity = map(lambda fileID: [url_for('static', filename=db.get_path(fileID))],
+                                 random.sample(filelist, 16))
+                else:
+                    message = "获取作品信息失败"
+                return render_template('mypage.html', entity=entity, username=username, message=message)
+            elif request.method == 'POST':
+                # TODO: 获得表单内容，检查并存入数据库，更新用户设置
+                message = "用户设置已更新"
+                return redirect(url_for(mypage, message=message))
+        else:
+            # 未注册过的假冒用户，踢掉踢掉
+            session.pop('username', None)
+    return redirect(url_for('home'))
 
 
+# 个人管理页面
 @app.route('/portfolio', methods=['GET', 'POST'])
-def portfolio():
-    if request.method == 'GET':
-        if 'username' in session:
-            # 检查到已经登录
-            if check_username(session['username']):
-                # 这是一个注册了的用户，给你管理自己的作品集
-                # TODO: 从数据库获取这个用户的目录信息，传入模板
-                directory = {'directory_0': '12345', 'directory_1': '54321'}
-                username = session['username']
-                return render_template('portfolio.html', directory=directory, username=username)
-            else:
-                # 未注册过的假冒用户，踢掉踢掉
-                session.pop('username', None)
-        # 这个用户没登陆就来个人主页，请回去吧
-        return redirect(url_for('home'))
-    elif request.method == 'POST':
-        if request.form['type'] == 'Photo':
-            # TODO: 获取表单内容，存入数据库，保存文件
-            return render_template('portfolio.html', message="上传成功")
-        elif request.form['type'] == 'Attribute':
-            # TODO: 获取表单内容，存入数据库，修改文件属性
-            return render_template('portfolio.html', message="修改成功")
-        elif request.form['type'] == 'directory':
-            # TODO: 获取表单内容，存入数据库，新增目录
-            return render_template('portfolio.html', message="增加目录成功")
+def portfolio(message):
+    if 'username' in session:
+        username = session['username']
+        # 检查到这个用户曾经登陆过
+        db = get_db()
+        if db.check_username(username):
+            # 这是一个注册了的用户，给你管理自己的作品集
+            if request.method == 'GET':
+                # 从数据库获取这个用户的目录信息，传入模板
+                root_id = db.get_root_id(username)
+                try:
+                    tree = generate_tree(db, root_id)
+                except Exception as ex:
+                    logger.error("Failure in constructing directory tree: " + ex.message)
+                    message = "获取目录信息失败"
+                    tree = {}
+                return render_template('portfolio.html', tree=tree, username=username, message=message)
+            elif request.method == 'POST':
+                message = "未知上传类型"
+                if request.form['type'] == 'Photo' and 'photo' in request.files:
+                    # 获取表单内容
+                    parentID = request.form['parentID']
+                    input_name = request.form['filename']
+                    description = request.form['description']
+                    # 保存文件
+                    filename = photos.save(request.files['photo'], username)
+                    file_path = os.path.join(username, filename)
+                    # 文件信息存入数据库
+                    if db.add_file(parentID, input_name, description, file_path):
+                        message = "上传成功"
+                    else:
+                        message = "上传失败"
+                elif request.form['type'] == 'Attribute':
+                    # 获取表单内容
+                    fileID = request.form['fileID']
+                    filename = request.form['filename']
+                    description = request.form['description']
+                    # 存入数据库
+                    if db.update_file_details(fileID, filename, description):
+                        message = "修改成功"
+                    else:
+                        message = "修改失败"
+                elif request.form['type'] == 'Directory':
+                    # 获取表单内容
+                    dname = request.form['name']
+                    dtype = request.form['type']
+                    parentID = request.form['parentID']
+                    # 存入数据库
+                    dirID = db.add_dictionary(dname, dtype, parentID, username)
+                    if dirID:
+                        # 新增目录
+                        parentpath = get_parent_path(db, dname, dirID)
+                        make_sub_dir(app.root_path, parentpath, dname)
+                        message = "增加目录成功"
+                    else:
+                        message = "增加目录失败"
+                redirect(url_for(portfolio, message=message))
+        else:
+            # 未注册过的假冒用户，踢掉踢掉
+            session.pop('username', None)
+    return redirect(url_for('home'))
 
 
+# 下载接口
 @app.route('/download', methods=['GET'])
 def download():
     if 'fileid' in request.args:
         # 获得file id
         fileid = request.args['fileid']
-        # TODO: 构造指向该文件的下载链接
-        return url_for(fileid)
+        db = get_db()
+        # 构造指向该文件的下载链接
+        filepath = os.path.join('data', db.get_path(fileid))
+        return app.send_static_file(filepath)
     elif 'directoryid' in request.args:
         # 获得directory id
         directoryid = request.args['directoryid']
@@ -225,6 +277,7 @@ def download():
         return url_for(directoryid)
 
 
+# 查询接口
 @app.route('/query', methods=['GET'])
 def query():
     if 'fileid' in request.args:
@@ -243,9 +296,18 @@ def query():
         return json.dumps(directoryinfo), [('Content-Type', 'application/json;charset=utf-8')]
 
 
+# 删除接口
 @app.route('/delete', methods=['POST'])
 def delete():
     # TODO: 从数据库和文件系统中删除文件或目录及其相关信息
+    status = ['success']
+    return json.dumps(status), [('Content-Type', 'application/json;charset=utf-8')]
+
+
+# 更新接口
+@app.route('/update', methods=['POST'])
+def delete():
+    # TODO: 更新文件信息
     status = ['success']
     return json.dumps(status), [('Content-Type', 'application/json;charset=utf-8')]
 

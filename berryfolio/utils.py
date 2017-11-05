@@ -29,9 +29,41 @@ def make_dirs(paths, clean=0):
 
 
 def make_user_dir(root_path, username):
-    user_dir = os.path.join(root_path, "data", username)
+    user_dir = os.path.join(root_path, "static", "data", username)
     make_dirs([user_dir], clean=1)
 
+
+def make_sub_dir(rootpath, parent, name):
+    sub_dir = os.path.join(rootpath, parent, name)
+    make_dirs([sub_dir])
+
+
+def get_parent_path(db, currentpath, dirID):
+    parentID = db.get_parent_id(dirID)
+    if parentID:
+        parentname = db.get_dir_name(dirID)
+        currentpath = os.path.join(parentname, currentpath)
+        get_parent_path(db, currentpath, parentID)
+    else:
+        return currentpath
+
+
+def generate_tree(db, nodeID):
+    """
+    递归构造节点树，囊括所有目录
+    :param db: 数据库操作对象
+    :param nodeID: 节点ID
+    :return: 节点，形如{1: ['root', {}]}
+    """
+    childrenID = db.get_children(nodeID)
+    dir_type = childrenID[0]
+    if dir_type == 1:
+        node = {nodeID: [db.get_dir_name(nodeID), {}]}
+        for childID in childrenID[1:]:
+            node[nodeID][1][childID] = [db.get_dir_name(nodeID), generate_tree(db, childID)]
+        return node
+    elif dir_type == 2:
+        return {}
 
 
 def generate_verify_code(root_path):
