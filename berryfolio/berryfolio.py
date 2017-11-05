@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
 # 为方便阅读，使用中文注释
 import os
+import shutil
 import random
-from utils import make_dirs, generate_verify_code, make_user_dir, make_sub_dir, get_parent_path, generate_tree
+from utils import *
 from logger import logger
 import dbOperation
 from flask import Flask, render_template, g, make_response, json, request, session, redirect, url_for
@@ -125,7 +126,7 @@ def login():
             code = request.form['verifycode']
             if code == request.form['code']:
                 db = get_db()
-                if db.login(username, password):
+                if db.match_user_pw(username, password):
                     # 登录成功，去mypage
                     session['username'] = username
                     return redirect(url_for('mypage'))
@@ -142,11 +143,11 @@ def login():
             code = request.form['verifycode']
             if code == request.form['code']:
                 db = get_db()
-                if db.register(username, password):
+                if db.add_user(username, password):
                     # 创建用户目录
                     make_user_dir(app.root_path, username)
                     # 在数据库中新增目录信息
-                    if db.add_dictionary("root", 1, None, username):
+                    if db.add_directory("root", 1, None, username):
                         # 注册成功，登录一下
                         message = "注册成功，请登录"
                     else:
@@ -171,7 +172,7 @@ def mypage(message):
             # 这是一个注册了的用户，给你看自己的个人主页
             if request.method == 'GET':
                 # 从数据库获取这个用户的个人作品，传入模板
-                filelist = db.get_user_files(username)
+                filelist = db.get_files_by_user(username)
                 entity = None
                 if filelist:
                     length = len(filelist)
@@ -179,7 +180,7 @@ def mypage(message):
                         # 填充至16
                         filelist = (filelist * (16 / length + 1))[:16]
                     # 选16并构造url
-                    entity = map(lambda fileID: [url_for('static', filename=db.get_path(fileID))],
+                    entity = map(lambda fileID: [url_for('static', filename=db.get_file_path(fileID))],
                                  random.sample(filelist, 16))
                 else:
                     message = "获取作品信息失败"
@@ -205,9 +206,9 @@ def portfolio(message):
             # 这是一个注册了的用户，给你管理自己的作品集
             if request.method == 'GET':
                 # 从数据库获取这个用户的目录信息，传入模板
-                root_id = db.get_root_id(username)
+                root_id = db.get_dir_root(username)
                 try:
-                    tree = generate_tree(db, root_id)
+                    tree = db.generate_tree(root_id)
                 except Exception as ex:
                     logger.error("Failure in constructing directory tree: " + ex.message)
                     message = "获取目录信息失败"
@@ -231,10 +232,19 @@ def portfolio(message):
                 elif request.form['type'] == 'Attribute':
                     # 获取表单内容
                     fileID = request.form['fileID']
+                    parentID = request.form['parentID']
                     filename = request.form['filename']
                     description = request.form['description']
+                    file_path_old = db.get_file_path(fileID)
+                    file_path = os.path.join(username, db.gen_parent_path(dirID=parentID),
+                                             file_path_old.split('\\')[-1])
                     # 存入数据库
-                    if db.update_file_details(fileID, filename, description):
+                    if db.update_file_info(fileID, parentID, filename, description, file_path):
+                        # 比对文件位置
+                        if file_path != file_path_old:
+                            # 移动文件
+                            shutil.move(path_to_data(app.root_path, file_path_old),
+                                        path_to_data(app.root_path, file_path))
                         message = "修改成功"
                     else:
                         message = "修改失败"
@@ -244,10 +254,10 @@ def portfolio(message):
                     dtype = request.form['type']
                     parentID = request.form['parentID']
                     # 存入数据库
-                    dirID = db.add_dictionary(dname, dtype, parentID, username)
+                    dirID = db.add_directory(dname, dtype, parentID, username)
                     if dirID:
                         # 新增目录
-                        parentpath = get_parent_path(db, dname, dirID)
+                        parentpath = db.gen_parent_path(dirID=parentID)
                         make_sub_dir(app.root_path, parentpath, dname)
                         message = "增加目录成功"
                     else:
@@ -267,7 +277,7 @@ def download():
         fileid = request.args['fileid']
         db = get_db()
         # 构造指向该文件的下载链接
-        filepath = os.path.join('data', db.get_path(fileid))
+        filepath = os.path.join('data', db.get_file_path(fileid))
         return app.send_static_file(filepath)
     elif 'directoryid' in request.args:
         # 获得directory id
@@ -283,17 +293,20 @@ def query():
     if 'fileid' in request.args:
         # 获得file id
         fileid = request.args['fileid']
-        # TODO: 获得该文件的相关信息
-        fileinfo = []
+        db = get_db()
+        # 获得该文件的相关信息
+        fileinfo = db.get_file_info(fileid)
+        if fileinfo is None:
+            fileinfo = {"status": "Failed"}
         # 返回文件信息
         return json.dumps(fileinfo), [('Content-Type', 'application/json;charset=utf-8')]
-    elif 'directoryid' in request.args:
-        # 获得directory id
-        directoryid = request.args['directoryid']
-        # TODO: 获得该目录的相关信息
-        directoryinfo = []
-        # 返回目录信息
-        return json.dumps(directoryinfo), [('Content-Type', 'application/json;charset=utf-8')]
+    # elif 'directoryid' in request.args:
+    #     # 获得directory id
+    #     directoryid = request.args['directoryid']
+    #     # TODO: 获得该目录的相关信息
+    #     directoryinfo = []
+    #     # 返回目录信息
+    #     return json.dumps(directoryinfo), [('Content-Type', 'application/json;charset=utf-8')]
 
 
 # 删除接口
