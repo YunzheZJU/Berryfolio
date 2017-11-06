@@ -86,7 +86,7 @@ class DbConnect:
         :param password: 密码
         :return: 成功则返回username，否则返回None
         """
-        sql = "TODO: Write query language here"
+        sql = "INSERT INTO Users (Name, Password) VALUES (username, password)"
         if self._execute(sql):
             return username
         else:
@@ -100,7 +100,11 @@ class DbConnect:
         :param password: 密码
         :return: 匹配则返回1，否则返回0
         """
-        return 1
+        sql = "SELECT * FROM Users WHERE Name = username AND Password = password"
+        if self._execute(sql):
+            return 1
+        else:
+            return 0
 
     # Function 3: Check username
     def check_username(self, username):
@@ -109,7 +113,11 @@ class DbConnect:
         :param username: 需要检查的用户名
         :return: 存在则返回1，否则返回0
         """
-        return 1
+        sql = "SELECT * FROM Users WHERE Username = username"
+        if self._execute(sql):
+            return 1
+        else:
+            return 0
 
     # Function 4: Add dictionary
     def add_directory(self, name, type, parentID, user):
@@ -121,7 +129,11 @@ class DbConnect:
         :param user: 目录所属用户名
         :return: 成功则返回目录ID，否则返回None
         """
-        return 1
+        sql = "INSERT INTO Directories (Name, Type, ParentID, User) VALUES (name, type, parentID, user)"
+        if self._execute(sql):
+            return dID
+        else:
+            return None
 
     # Function 5: Add file
     def add_file(self, parentID, filename, description, filepath):
@@ -133,7 +145,11 @@ class DbConnect:
         :param filepath: 文件存放路径
         :return: 成功则返回文件ID，否则返回None
         """
-        return 1
+        sql = ""
+        if self._execute(sql):
+            return dID
+        else:
+            return None
 
     # Function 6: Get children of a directory
     def get_dir_children(self, directoryID):
