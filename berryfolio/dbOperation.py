@@ -145,9 +145,9 @@ class DbConnect:
         :param filepath: 文件存放路径
         :return: 成功则返回文件ID，否则返回None
         """
-        sql = ""
+        sql = "INSERT INTO Files (Name, ParentID, Description, Filepath) VALUES (name, parentID, description, filepath)"
         if self._execute(sql):
-            return dID
+            return fID
         else:
             return None
 
@@ -159,7 +159,8 @@ class DbConnect:
         :return: 成功则返回list，存储所有子目录ID或文件ID，其中list的第一个元素标志其后的ID为目录ID（1）还是文件ID（2）
             ，否则返回None
         """
-        return [1, 2, 4]
+        sql = "SELECT ChildrenList FROM Directories WHERE dID = directoryID"
+        return self._execute(sql)
 
     # Function 7: Get root directory
     def get_dir_root(self, username):
@@ -168,7 +169,8 @@ class DbConnect:
         :param username: 用户名
         :return: 成功则返回目录ID，否则返回None
         """
-        return 1
+        sql = "SELECT dID FROM USERS WHERE Username = username"
+        return self._execute(sql)
 
     # Function 8: Get type of directory
     def get_dir_type(self, directoryID):
@@ -177,7 +179,8 @@ class DbConnect:
         :param directoryID: 目录ID
         :return: 成功则返回目录类型，否则返回None
         """
-        return 1
+        sql = "SELECT Type FROM Directories WHERE dID = directoryID"
+        return self._execute(sql)
 
     # Function 9: Get directory ID where type == 1
     def get_dirs_by_user(self, username, type=1):
@@ -187,7 +190,8 @@ class DbConnect:
         :param type: 目录类型，1或2，默认为1
         :return: 成功则返回list，存储所有目录ID，否则返回None
         """
-        return [1, 3, 10]
+        sql = "SELECT ChildrenList FROM Directories WHERE Type = type AND User = username"
+        return self._execute(sql)
 
     # Function 10: Get path of file
     def get_file_path(self, fileID):
@@ -196,7 +200,8 @@ class DbConnect:
         :param fileID: 文件ID
         :return: 成功则返回文件的存储路径，形如"Yunzhe/root/folder/1.jpg"，否则返回None
         """
-        return "Yunzhe/root/folder/1.jpg"
+        sql = "SELECT Filepath FROM Files WHERE fID = fileID"
+        return self._execute(sql)
 
     # Function 11: Get details a file
     def get_file_info(self, fileID):
@@ -205,6 +210,7 @@ class DbConnect:
         :param fileID: 文件ID
         :return: 成功则返回dict，依次存储状态码（success或者failed）、文件名、描述、存储路径，否则返回None
         """
+        sql = "状态码？"
         return {'status': 'success', 'filename': 'zhaopian', 'description': 'miaoshu',
                 'filepath': 'Yunzhe/root/folder/1.jpg'}
 
@@ -215,7 +221,8 @@ class DbConnect:
         :param username: 用户名
         :return: 成功则返回list，存储所有文件ID，否则返回None
         """
-        return [1, 2, 3, 4]
+        sql = "SELECT * FROM Files WHERE User = username"
+        return self._execute(sql)
 
     # Function 13: Update file
     def update_file_info(self, fileID, parentID, filename, description, filepath):
@@ -228,7 +235,11 @@ class DbConnect:
         :param filepath: 文件存储路径，形如"Yunzhe/root/folder/1.jpg"
         :return: 成功则返回1，否则返回0
         """
-        return 1
+        sql = "UPDATE Files SET ParentID = parentID, Filename = filename, Description = description, Filepath = filepath WHERE fID = fileID"
+        if(self._execute(sql)):
+            return 1
+        else:
+            return 0
 
     # Function 14: Get parent directory
     def get_parent_id(self, ID, type):
@@ -238,7 +249,11 @@ class DbConnect:
         :param type: 传入ID的类型，目录ID为1，文件ID为2
         :return: 成功则返回父目录ID，否则返回None
         """
-        return 5
+        if(type == 1):
+            sql = "SELECT ParentID FROM Directories WHERE dID = ID"
+        else:
+            sql = "SELECT ParentID FROM Files WHERE fID = ID"
+        return self._execute(sql)
 
     # Function 15: Get directory name
     def get_name(self, ID, type):
@@ -248,7 +263,11 @@ class DbConnect:
         :param type: 传入ID的类型，目录ID为1，文件ID为2
         :return: 成功则返回name，否则返回None
         """
-        return "folder"
+        if(type == 1):
+            sql = "SELECT Name FROM Directories WHERE dID = ID"
+        else:
+            sql = "SELECT Name FROM Files WHERE fID = ID"
+        return self._execute(sql)
 
     # Function 16: Generate parent path of dir
     def gen_parent_path(self, currentpath=None, dirID=None):
