@@ -3,6 +3,7 @@ import os
 import config
 from PIL import Image, ImageDraw, ImageFont, ImageFilter
 import random
+import zipfile
 
 
 # 随机字母:
@@ -110,49 +111,31 @@ def generate_global(root_path):
     config.GLOBAL['DATA_PATH'] = os.path.join(root_path, "data")
     config.GLOBAL['STATIC_PATH'] = os.path.join(root_path, 'static')
     config.GLOBAL['FONT_PATH'] = os.path.join(root_path, 'static', 'fonts')
+    config.GLOBAL['TEMP_PATH'] = os.path.join(root_path, 'temp')
     return 1
 
 
-# class Dict(dict):
-#     """
-#     Simple dict but support access as x.y style.
-#
-#     >>> d1 = Dict()
-#     >>> d1['x'] = 100
-#     >>> d1.x
-#     100
-#     >>> d1.y = 200
-#     >>> d1['y']
-#     200
-#     >>> d2 = Dict(a=1, b=2, c='3')
-#     >>> d2.c
-#     '3'
-#     >>> d2['empty']
-#     Traceback (most recent call last):
-#         ...
-#     KeyError: 'empty'
-#     >>> d2.empty
-#     Traceback (most recent call last):
-#         ...
-#     AttributeError: 'Dict' object has no attribute 'empty'
-#     >>> d3 = Dict(('a', 'b', 'c'), (1, 2, 3))
-#     >>> d3.a
-#     1
-#     >>> d3.b
-#     2
-#     >>> d3.c
-#     3
-#     """
-#     def __init__(self, names=(), values=(), **kw):
-#         super(Dict, self).__init__(**kw)
-#         for k, v in zip(names, values):
-#             self[k] = v
-#
-#     def __getattr__(self, key):
-#         try:
-#             return self[key]
-#         except KeyError:
-#             raise AttributeError(r"'Dict' object has no attribute '%s'" % key)
-#
-#     def __setattr__(self, key, value):
-#         self[key] = value
+def make_zip(folder, zipname):
+    """
+    对folder下的目录和文件压缩
+    :param folder: 输入的folder，相对路径或绝对路径
+    :param zipname: 压缩文件名
+    :return: 成功则返回压缩文件的路径，否则返回None
+    """
+    z = None
+    try:
+        zip_path = os.path.join(config.GLOBAL['TEMP_PATH'], zipname)
+        z = zipfile.ZipFile(zip_path, "w")
+        for path, dirs, files in os.walk(folder):
+            for filename in files:
+                file_path = os.path.join(path, filename)
+                file_path_in_zip = os.path.join(path, filename).split(folder + os.sep)[-1]
+                print file_path
+                print file_path_in_zip
+                z.write(file_path, file_path_in_zip)
+        z.close()
+        return zip_path
+    except StandardError:
+        if z:
+            z.close()
+        return None

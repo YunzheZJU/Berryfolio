@@ -5,7 +5,7 @@ import shutil
 from utils import *
 from logger import logger
 from dbOperation import DbConnect
-from flask import Flask, render_template, g, make_response, json, request, session, redirect, url_for
+from flask import Flask, render_template, g, make_response, json, request, session, redirect, url_for, send_from_directory
 from flask_uploads import UploadSet, configure_uploads, IMAGES, patch_request_class
 from flask_wtf import FlaskForm
 from flask_wtf.file import FileField, FileRequired, FileAllowed
@@ -271,19 +271,35 @@ def portfolio(message):
 # 下载接口
 @app.route('/download', methods=['GET'])
 def download():
-    if 'fileid' in request.args:
-        # 获得file id
-        fileid = request.args['fileid']
+    if 'username' in session:
+        username = session['username']
+        # 检查到这个用户曾经登陆过
         db = get_db()
-        # 构造指向该文件的下载链接
-        filepath = os.path.join('data', db.get_file_path(fileid))
-        return app.send_static_file(filepath)
-    elif 'directoryid' in request.args:
-        # 获得directory id
-        directoryid = request.args['directoryid']
-        # TODO: 生成压缩包
-        # TODO: 构造指向该压缩包的下载链接
-        return url_for(directoryid)
+        if db.check_username(username):
+            # 这是一个注册了的用户，给你下载
+            if 'fileid' in request.args:
+                # 获得file id
+                fileid = request.args['fileid']
+                # 构造指向该文件的下载链接
+                filepath = os.path.join('data', db.get_file_path(fileid))
+                return app.send_static_file(filepath)
+            elif 'directoryid' in request.args:
+                # 获得directory id
+                directoryid = request.args['directoryid']
+                # 构造目录路径
+                directory_name = db.get_name(directoryid, 1)
+                parentpath = db.gen_parent_path(dirID=directoryid)
+                directory_path = add_data_path_prefix(os.path.join(username, parentpath, directory_name))
+                # 生成压缩包
+                zip_name = username + ".zip"
+                zip_path = make_zip(directory_path, zip_name)
+                if zip_path:
+                    # 构造指向该压缩包的下载链接
+                    return send_from_directory(config.GLOBAL['TEMP_PATH'], zip_name, as_attachment=True)
+        else:
+            # 未注册过的假冒用户，踢掉踢掉
+            session.pop('username', None)
+    return redirect(url_for('home'))
 
 
 # 查询接口
@@ -312,14 +328,6 @@ def query():
 @app.route('/delete', methods=['POST'])
 def delete():
     # TODO: 从数据库和文件系统中删除文件或目录及其相关信息
-    status = ['success']
-    return json.dumps(status), [('Content-Type', 'application/json;charset=utf-8')]
-
-
-# 更新接口
-@app.route('/update', methods=['POST'])
-def update():
-    # TODO: 更新文件信息
     status = ['success']
     return json.dumps(status), [('Content-Type', 'application/json;charset=utf-8')]
 
