@@ -19,20 +19,12 @@ app.config.from_object(__name__)  # load config from this file, berryfolio.py
 # 加载默认配置
 app.config.update(dict(
     SECRET_KEY='Thisismykeyafuibsvseibgf',
-    UPLOADED_PHOTOS_DEST=config.GLOBAL['DATA_PATH']
+    UPLOADED_PHOTOS_DEST=config.GLOBAL['TEMP_PATH']
 ))
-make_dirs([app.config['UPLOADED_PHOTOS_DEST']])
 
 photos = UploadSet('photos', IMAGES)
 configure_uploads(app, photos)
 patch_request_class(app)  # 文件大小限制，默认为16MB
-
-
-# def connect_db():
-#     """Connects to the specific database."""
-#     rv = sqlite3.connect(app.config['DATABASE'])
-#     rv.row_factory = sqlite3.Row
-#     return rv
 
 
 def get_db():
@@ -54,13 +46,6 @@ def initdb_command():
     """初始化数据库的命令行命令"""
     init_db()
     logger.info('Initialized the database.')
-
-
-# @app.teardown_appcontext
-# def close_db(error):
-#     """Closes the database again at the end of the request."""
-#     if hasattr(g, 'sqlite_db'):
-#         g.sqlite_db.close()
 
 
 class UploadForm(FlaskForm):
@@ -220,12 +205,24 @@ def portfolio(message):
                     parentID = request.form['parentID']
                     input_name = request.form['filename']
                     description = request.form['description']
-                    # 保存文件
-                    filename = photos.save(request.files['photo'], username)
-                    file_path = os.path.join(username, filename)  # FIXME
+                    dir_name = db.get_name(parentID, 1)
+                    dir_path = os.path.join(config.GLOBAL['DATA_PATH'], username,
+                                            db.gen_parent_path(dirID=parentID), dir_name)
+                    # 保存文件至临时目录
+                    filename = photos.save(request.files['photo'])
+                    file_path_old = os.path.join(config.GLOBAL['TEMP_PATH'], filename)
+                    file_path = os.path.join(dir_path, filename)
                     # 文件信息存入数据库
-                    if db.add_file(parentID, input_name, description, file_path):
-                        message = "上传成功"
+                    fileID = db.add_file(parentID, input_name, description, file_path)
+                    if fileID:
+                        # 为文件添加数字水印
+                        if add_watermark(add_data_path_prefix(file_path_old),
+                                         add_data_path_prefix(file_path)):
+                            message = "上传成功"
+                        else:
+                            # TODO: 添加水印失败，回滚数据库操作
+                            # db.del_file(fileID)
+                            message = "内部错误"
                     else:
                         message = "上传失败"
                 elif request.form['type'] == 'Attribute':
@@ -315,13 +312,6 @@ def query():
             fileinfo = {"status": "Failed"}
         # 返回文件信息
         return json.dumps(fileinfo), [('Content-Type', 'application/json;charset=utf-8')]
-    # elif 'directoryid' in request.args:
-    #     # 获得directory id
-    #     directoryid = request.args['directoryid']
-    #     # TODO: 获得该目录的相关信息
-    #     directoryinfo = []
-    #     # 返回目录信息
-    #     return json.dumps(directoryinfo), [('Content-Type', 'application/json;charset=utf-8')]
 
 
 # 删除接口

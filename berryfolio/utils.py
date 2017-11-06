@@ -4,6 +4,15 @@ import config
 from PIL import Image, ImageDraw, ImageFont, ImageFilter
 import random
 import zipfile
+from logger import logger
+
+
+def encode_color(s, w):
+    return ((w & 192) >> 6) + (s & 252)
+
+
+def decode_color(s):
+    return (s & 3) << 6
 
 
 # 随机字母:
@@ -112,6 +121,7 @@ def generate_global(root_path):
     config.GLOBAL['STATIC_PATH'] = os.path.join(root_path, 'static')
     config.GLOBAL['FONT_PATH'] = os.path.join(root_path, 'static', 'fonts')
     config.GLOBAL['TEMP_PATH'] = os.path.join(root_path, 'temp')
+    config.GLOBAL['WM_PATH'] = os.path.join(root_path, 'static', 'images', 'wm.jpg')
     return 1
 
 
@@ -138,4 +148,45 @@ def make_zip(folder, zipname):
     except StandardError:
         if z:
             z.close()
+        return None
+
+
+def add_watermark(src, dst, wm=config.GLOBAL['WM_PATH']):
+    try:
+        filename = src.split("\\")[-1].split(".")[0]
+        path_png = os.path.join(config.GLOBAL['TEMP_PATH'], filename + "_converted.png")
+        # Convert the source image to PNG RGBA and save it
+        s_img = Image.open(src)
+        s_img.save(path_png)
+        s_img.close()
+        # Open the converted png image and load pixel info
+        s_img = Image.open(path_png).convert("RGB")
+        s_p = s_img.load()
+        w, h = s_img.size
+        # Open the watermark image and resize it
+        w_img = Image.open(wm)
+        w_p = w_img.resize((w, h)).load()
+        # Create an image for storing results
+        d_img = Image.new("RGB", (w, h))
+        d_p = d_img.load()
+        # print s_img.format, "%dx%d" % (w, h), s_img.mode
+        for x in range(w):
+            for y in range(h):
+                (rw, gw, bw) = w_p[x, y]
+                (rs, gs, bs) = s_p[x, y]
+                rd = encode_color(rs, rw)
+                gd = encode_color(gs, gw)
+                bd = encode_color(bs, bw)
+                d_p[x, y] = (rd, gd, bd)
+                # print rs, rw, (rw & 248) >> 5, rs & 7, rs & 248
+                # exit(0)
+        # Save the result
+        d_img.save(dst)
+        # Close the files.
+        s_img.close()
+        w_img.close()
+        d_img.close()
+        return dst
+    except StandardError as ex:
+        logger.error("Error occurred during watermarking: " + ex.message)
         return None
