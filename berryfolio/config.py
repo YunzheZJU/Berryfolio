@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-
-LOG_PATH = "log.log"
-
-DB_PATH = "berryfolio.db"
+GLOBAL = {
+    'DB_PATH': "berryfolio.db",
+    'LOG_PATH': "log.log"
+}

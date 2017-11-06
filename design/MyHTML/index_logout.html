@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Bootstrap blog template</title>
+	<link rel="stylesheet" href="asset/bootstrap/css/bootstrap.min.css">
+	<link rel="stylesheet" href="asset/css/style.css" type="text/css">
+</head>
+<body>
+	<div class="container" >
+		<div class="row">
+			<div class="col-md-6">
+				<h1>标题</h1>
+				<h4>小标题</h4>
+			</div>
+			<a id="log_a" href="login.html" style="display: none;">login</a>
+			<a id="reg_a" href="register.html" style="display: none;">register</a>
+			<div class="col-md-3">
+				
+				<img onclick="log_a.click()" id="login" src="asset/image/log.png">
+			</div>
+			<div class="col-md-3">
+				<img onclick="reg_a.click()" id="register" src="asset/image/reg.png">
+			</div>
+		</div>
+	</div>
+
+	<img src="asset/image/longImage.png">
+
+	<footer>
+		<div class="row" style="padding-top: 60px; clear: both;">
+			<div class="col-md-12 text-center"><p><small>&copy; Copyright DAM </small></p></div>
+		</div>
+		</footer>
+	<script src="asset/jquery/jquery.min.js"></script>
+	<script src="asset/bootstrap/js/bootstrap.min.js"></script>
+ 
+</body>
+</html>

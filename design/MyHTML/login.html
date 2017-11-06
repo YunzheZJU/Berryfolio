@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta name="description" content="Free HTML5 Template by FreeHTML5.co" />
+	<meta name="keywords" content="free html5, free template, free bootstrap, html5, css3, mobile first, responsive" />
+
+
+	<title>Bootstrap blog template</title>
+	<link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700,300' rel='stylesheet' type='text/css'>
+	<link rel="stylesheet" href="asset/bootstrap/css/bootstrap.min.css">
+	<link rel="stylesheet" href="asset/css/style.css" type="text/css">
+	<link rel="stylesheet" href="asset/css/animate.css" >
+	<!-- Modernizr JS -->
+	<script src="asset/js/modernizr-2.6.2.min.js"></script>
+	<!-- FOR IE9 below -->
+	<!--[if lt IE 9]>
+	<script src="asset/js/respond.min.js"></script>
+	<![endif]-->
+	<script src="asset/js/canvas2image.js" type="text/javascript" charset="utf-8"></script>
+</head>
+<body onload="draw()">
+
+	<div class="container">
+		<div class="row">
+			<div class="col-md-4 col-md-offset-4">  					
+  			</div>
+  		</div>
+		<div class="row">
+			<div class="col-md-4 col-md-offset-4 ">
+				<p class="center">
+					<img class="title"src="asset/image/login.png">
+  				</p>
+  			</div>
+		</div>
+		<div class="row">
+			<div class="col-md-4 ">
+					<img class="meo" src="asset/image/DAMeo.png">
+			</div>
+			<div class="col-md-4 .col-md-offset-4">
+					<!-- Start Sign In Form -->
+				<form action="index_login.html" class="fh5co-form animate-box" data-animate-effect="fadeIn">
+					<h2>Log In</h2>
+					<div class="form-group">
+						<label for="username" class="sr-only">Username</label>
+						<input type="text" class="form-control" id="username" placeholder="用户名" autocomplete="off">
+					</div>
+					<div class="form-group">
+						<label for="password" class="sr-only">Password</label>
+						<input type="password" class="form-control" id="password" placeholder="密码" autocomplete="off">
+					</div>
+					<div class="form-group">
+						<label for="check" class="sr-only">验证码</label>
+						<input type="password" class="form-control" id="check" placeholder="验证码" autocomplete="off">
+					</div>
+					<div class="form-group">
+						<label for="remember"><input type="checkbox" id="remember"> Remember Me</label>
+					</div>
+					
+					<div class="form-group">
+						<p>Not registered? <a >Sign Up</a> | <a>Forgot Password?</a></p>
+					</div>
+					<div class="form-group ">
+						<button  onclick="form.submit();" class = "btn-primary"></button>
+						<!--<input type="submit" value=" " class="btn-primary">-->
+					</div>
+				</form>
+					<!-- END Sign In Form -->
+			</div>
+			<div class="col-md-4">
+					<canvas id="myCanvas" width="300" height="540">
+			</div>
+		</div>
+	</div>
+	
+
+	<script src="asset/js/jquery.min.js"></script>
+	<script src="asset/bootstrap/js/bootstrap.min.js"></script>
+	<!-- Placeholder -->
+	<script src="asset/js/jquery.placeholder.min.js"></script>
+	<!-- Waypoints -->
+	<script src="asset/js/jquery.waypoints.min.js"></script>
+	<!-- Main JS -->
+	<script src="asset/js/main.js"></script>
+
+	<script>
+		function draw(){
+  			var c=document.getElementById("myCanvas"),
+       			ctx=c.getContext('2d');
+   			c.width=500;
+    		c.height=900;
+    		ctx.rect(0,0,c.width,c.height);
+    		ctx.fillStyle='transparent';//画布填充颜色
+    		ctx.fill();
+    		var img1 = new Image;
+    		img1.src = "asset/image/checkDAMeo.png";
+    		img1.onload=function(){
+                ctx.drawImage(img1,0,0,300,540);
+            }
+    		var img2 = new Image;
+    		img2.src =  "asset/image/check1.png";
+    		img2.onload=function(){
+                ctx.drawImage(img2,0,0,300,540);
+            }
+            ctx.font = "30px Qing";
+            ctx.fillStyle = "red";
+            ctx.fillText("动态生成的验证码", 90, 230);
+		}
+	</script>
+ 
+</body>
+</html>

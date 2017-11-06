@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Bootstrap blog template</title>
+	<link rel="stylesheet" href="asset/bootstrap/css/bootstrap.min.css">
+	<link rel="stylesheet" href="asset/css/style.css" type="text/css">
+	<script src="http://cdn.static.runoob.com/libs/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+</head>
+<body onload="loadCata();">
+	<nav class="navbar navbar-inverse navbar-fixed-top">
+      <div class="container-fluid">
+        <div class="navbar-header">
+         	<button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+           		<span class="sr-only">Toggle navigation</span>
+            	<span class="icon-bar"></span>
+            	<span class="icon-bar"></span>
+            	<span class="icon-bar"></span>
+          	</button>
+          	 <a class="navbar-brand" >作品集名称</a>
+          	 <p>这是我的作品集</p>
+        </div>
+        <div id="navbar" class="navbar-collapse collapse">
+          <ul class="nav navbar-nav navbar-right">
+            <li><a href="index_login.html">主页</a></li>
+            <li><a href="setting.html">设置</a></li>
+            <li><a href="index_logout.html">退出</a></li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+
+	<div class="container-fluid">
+      <div class="row">
+        <div class="col-sm-3 col-md-2 sidebar">
+          <ul class="nav nav-sidebar">
+            <li class="active"><a href="#">Overview <span class="sr-only">(current)</span></a></li>
+            <li><a href="#">Reports</a></li>
+            <li><a href="#">Analytics</a></li>
+            <li><a href="#">Export</a></li>
+          </ul>
+          <ul class="nav nav-sidebar">
+            <li><a href="">Nav item</a></li>
+            <li><a href="">Nav item again</a></li>
+            <li><a href="">One more nav</a></li>
+            <li><a href="">Another nav item</a></li>
+            <li><a href="">More navigation</a></li>
+          </ul>
+          <ul class="nav nav-sidebar">
+            <li><a href="">Nav item again</a></li>
+            <li><a href="">One more nav</a></li>
+            <li><a href="">Another nav item</a></li>
+          </ul>
+          <img onclick="addList.click()" src="asset/image/add.png"/>
+          <a href="add.html" id="addList" style="display: none;">a</a>
+          <!-- Button trigger modal -->
+		</div>
+    </div>
+<!-- 按钮触发模态框 -->
+<!-- Button trigger modal -->
+<button type="button" class="btn btn-primary btn-lg" data-toggle="modal" data-target="#myModal">
+  Launch demo modal
+</button>
+<!-- Modal -->
+<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="myModalLabel">下载文件夹</h4>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+			<label for="list_l" class="col-sm-1 control-label">下载</label>
+   			<div class="input-group col-md-9">
+    			<input id="Cata_now" type="text" class="form-control " placeholder="DAM">
+     				<div class="input-group-btn">
+     					<button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">目录选择 <span class="caret"></span></button>
+        				<ul id = "cata" class="dropdown-menu dropdown-menu-right">
+        							<!--这里会动态添加目录-->
+        				</ul>
+  					</div><!-- /btn-group -->
+      
+    		</div><!-- /input-group -->
+		<div>
+      </div>
+      <div class="modal-footer">
+      	<button type="button" class="btn btn-primary">download</button>
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+	<script src="asset/bootstrap/js/jquery.min.js"></script>
+	<script src="asset/bootstrap/js/bootstrap.min.js"></script>
+<script type="text/javascript">
+	function browseFolder(path) {
+    	try {
+        	var Message = "\u8bf7\u9009\u62e9\u6587\u4ef6\u5939"; //选择框提示信息
+        	var Shell = new ActiveXObject("Shell.Application");
+        	var Folder = Shell.BrowseForFolder(0, Message, 64, 17); //起始目录为：我的电脑
+        	//var Folder = Shell.BrowseForFolder(0, Message, 0); //起始目录为：桌面
+        	if (Folder != null) {
+            	Folder = Folder.items(); // 返回 FolderItems 对象
+            	Folder = Folder.item(); // 返回 Folderitem 对象
+            	Folder = Folder.Path; // 返回路径
+            	if (Folder.charAt(Folder.length - 1) != "\\") {
+                	Folder = Folder + "\\";
+            	}
+            	document.getElementById(path).value = Folder;
+            	return Folder;
+        	}
+    	}
+    	catch (e) {
+        	alert(e.message);
+    	}
+	}
+</script>
+	<script>
+		function loadCata()//动态生成下拉菜单中的目录选项
+		{
+			var Cata = new Array();//在这个需要后端传递数据替换
+			Cata[0]="A1"
+			Cata[1]="A2"
+			Cata[2]="A3"
+			Cata[3]="-"//代表分界线
+			Cata[4]="P1"
+			for(var i=0; i < 5;i++){
+				var node=document.createElement("LI");
+				var Cata_a=document.createElement("A");
+				if(Cata[i]!="-"){
+					Cata_a.innerHTML=Cata[i];
+					Cata_a.setAttribute( 'onclick', "changeCata(this.innerHTML);");
+				}
+				else{
+					node.setAttribute( 'class', "divider");
+					node.setAttribute( 'role', "separator");
+				}
+				node.appendChild(Cata_a);				
+				document.getElementById("cata").appendChild(node);
+			}
+
+		}
+		function changeCata(name){
+			document.getElementById("Cata_now").setAttribute('placeholder',name);
+		}
+		</script>
+</body>
+</html>

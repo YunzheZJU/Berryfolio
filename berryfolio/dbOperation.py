@@ -2,7 +2,7 @@
 # 在这里写数据库相关函数，会被main.py导入
 import sqlite3
 from os.path import join
-from config import DB_PATH
+import config
 from logger import logger
 
 
@@ -12,7 +12,7 @@ class DbConnect:
         try:
             # 打开数据库连接
             logger.info("Connecting to database...")
-            self.db = sqlite3.connect(DB_PATH)
+            self.db = sqlite3.connect(config.GLOBAL['DB_PATH'])
         except Exception as ex:
             logger.error("Fail to connect to database: " + ex.message)
             # raise Exception("Fail to connect to database: " + ex.__str__())
@@ -240,7 +240,7 @@ class DbConnect:
         获得请求的目录ID的路径（不包含自身）
         :param currentpath: 递归时时用到的当前路径
         :param dirID: 请求的目录ID
-        :return: 从根目录到该目录的路径（不包含该目录）
+        :return: 从根目录到该目录的路径（不包含该目录），形如"root\\folder\\sub"
         """
         parentID = self.get_parent_id(dirID, 1)
         if parentID:

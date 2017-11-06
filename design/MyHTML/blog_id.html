@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Bootstrap blog template</title>
+	<link rel="stylesheet" href="asset/bootstrap/css/bootstrap.min.css">
+	<link rel="stylesheet" href="asset/css/style.css" type="text/css">
+</head>
+<body>
+	<div class="container" >
+		<div class="row">
+			<div class="col-md-1">
+				<div class="avatar-circle">
+					<img class="circle"src="asset/image/avatarKen.png"/>
+				</div>
+			</div>
+			<div class="col-md-5">
+				<p>我的名字是KenBoNely！</p>
+			</div>
+			<a id="port_a" href="portfolio.html" style="display: none;">作品集</a>
+			<a id="set_a" href="setting.html" style="display: none;">设置</a>
+			<a id="exit_a" href="index_logout.html" style="display: none;">退出</a>
+
+			<div class="col-md-2">
+				<img onclick="port_a.click()" id="portfolio" src="asset/image/portfolio.png">
+			</div>
+			<div class="col-md-2">
+				<img onclick="set_a.click()" id="setting" src="asset/image/set.png">
+			</div>
+			<div class="col-md-2">
+				<img onclick="exit_a.click()" id="exit" src="asset/image/exit.png">
+			</div>
+		</div>
+		<div class="avatar-circle row">
+			<img class="circle"src="asset/image/avatarother.png"/>
+			这是其他人的主页，还没规划好
+		</div>
+	</div>
+
+
+	<script src="asset/jquery/jquery.min.js"></script>
+	<script src="asset/bootstrap/js/bootstrap.min.js"></script>
+ 
+</body>
+</html>

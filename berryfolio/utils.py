@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import os
+import config
 from PIL import Image, ImageDraw, ImageFont, ImageFilter
 import random
 
@@ -28,27 +29,58 @@ def make_dirs(paths, clean=0):
             os.mkdir(path)
 
 
-def path_to_data(root_path, path):
-    return os.path.join(root_path, "static", "data", path)
+def add_data_path_prefix(path):
+    """
+    为路径套上前缀路径，前缀到data/为止
+    :param path: 用户目录物理路径，应以用户名开头，形如"Yunzhe/root"
+    :return: 结果路径，形如"/home/pi/data/Yunzhe/root"
+    """
+    return os.path.join(config.GLOBAL['DATA_PATH'], path)
 
 
-def make_user_dir(root_path, username):
-    user_dir = path_to_data(root_path, username)
-    make_dirs([user_dir], clean=1)
+def make_user_dir(username):
+    """
+    在data/目录下建立用户文件夹
+    :param username: 用户名
+    :return: 成功则返回用户文件夹的绝对路径，否则返回None
+    """
+    try:
+        user_dir = add_data_path_prefix(username)
+        make_dirs([user_dir], clean=1)
+        return user_dir
+    except IOError:
+        return None
 
 
-def make_sub_dir(rootpath, parent, name):
-    sub_dir = os.path.join(path_to_data(rootpath, parent), name)
-    make_dirs([sub_dir])
+def make_user_sub_dir(username, parent, name):
+    """
+    在parent文件夹下创建子文件夹
+    :param username: 用户名
+    :param parent: 父目录路径，相对用户文件夹的路径
+    :param name: 新文件夹名
+    :return: 成功则返回子目录的绝对路径，否则返回None
+    """
+    try:
+        path = os.path.join(username, parent) if parent else username
+        sub_dir = os.path.join(add_data_path_prefix(path), name)
+        make_dirs([sub_dir])
+        return sub_dir
+    except IOError:
+        return None
 
 
-def generate_verify_code(root_path):
-    # 240 x 60:
-    width = 60 * 4
-    height = 60
+def generate_verify_code(width=240, height=40, font_family='Arial.ttf', font_size=36):
+    """
+    生成4个字符的验证码图片
+    :param width: 图片宽度
+    :param height: 图片高度
+    :param font_family: 字体
+    :param font_size: 字号
+    :return: 验证码和图片的相对路径，形如('TABD', "images/generate/vcode.jpg)
+    """
     image = Image.new('RGB', (width, height), (255, 255, 255))
     # 创建Font对象:
-    font = ImageFont.truetype(os.path.join(root_path, 'static', 'fonts', 'Arial.ttf'), 36)
+    font = ImageFont.truetype(os.path.join(config.GLOBAL['FONT_PATH'], font_family), font_size)
     # 创建Draw对象:
     draw = ImageDraw.Draw(image)
     # 存储结果字符
@@ -60,12 +92,25 @@ def generate_verify_code(root_path):
     # 输出文字:
     for t in range(4):
         char.append(rnd_char())
-        draw.text((60 * t + 10, 10), char[-1], font=font, fill=rnd_color2())
+        draw.text((width / 4 * t + 10, 10), char[-1], font=font, fill=rnd_color2())
     # 模糊:
     image = image.filter(ImageFilter.BLUR)
-    image_path = os.path.join('images', 'generate', 'code.jpg')
-    image.save(os.path.join(root_path, 'static', image_path))
+    image_path = os.path.join('images', 'generate', 'vcode.jpg')
+    image.save(os.path.join(config.GLOBAL['STATIC_PATH'], image_path))
     return char, image_path
+
+
+def generate_global(root_path):
+    """
+    根据传入的root_path建立一系列GLOBAL参数，绝对路径
+    :param root_path: app.root_path
+    :return: 成功则返回1，否则返回0
+    """
+    config.GLOBAL['ROOT_PATH'] = root_path
+    config.GLOBAL['DATA_PATH'] = os.path.join(root_path, "data")
+    config.GLOBAL['STATIC_PATH'] = os.path.join(root_path, 'static')
+    config.GLOBAL['FONT_PATH'] = os.path.join(root_path, 'static', 'fonts')
+    return 1
 
 
 # class Dict(dict):

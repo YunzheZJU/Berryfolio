@@ -2,10 +2,9 @@
 # 为方便阅读，使用中文注释
 import os
 import shutil
-import random
 from utils import *
 from logger import logger
-import dbOperation
+from dbOperation import DbConnect
 from flask import Flask, render_template, g, make_response, json, request, session, redirect, url_for
 from flask_uploads import UploadSet, configure_uploads, IMAGES, patch_request_class
 from flask_wtf import FlaskForm
@@ -15,14 +14,12 @@ from wtforms import SubmitField
 
 # 我也不知道为什么，总之这句必须有
 app = Flask(__name__)
+generate_global(app.root_path)
 app.config.from_object(__name__)  # load config from this file, berryfolio.py
 # 加载默认配置
 app.config.update(dict(
-    # DATABASE=os.path.join(app.root_path, 'berryfolio.db'),
     SECRET_KEY='Thisismykeyafuibsvseibgf',
-    # USERNAME='DAM',
-    # PASSWORD='passworddam2017',
-    UPLOADED_PHOTOS_DEST=os.path.join(app.root_path, "static", "data")
+    UPLOADED_PHOTOS_DEST=config.GLOBAL['DATA_PATH']
 ))
 make_dirs([app.config['UPLOADED_PHOTOS_DEST']])
 
@@ -41,7 +38,7 @@ patch_request_class(app)  # 文件大小限制，默认为16MB
 def get_db():
     """在本次请求产生的全局变量g中创建一个唯一的数据库操作对象"""
     if not hasattr(g, 'sqlite_db'):
-        g.sqlite_db = dbOperation.DbConnect()
+        g.sqlite_db = DbConnect()
     return g.sqlite_db
 
 
@@ -145,9 +142,11 @@ def login():
                 db = get_db()
                 if db.add_user(username, password):
                     # 创建用户目录
-                    make_user_dir(app.root_path, username)
+                    make_user_dir(username)
                     # 在数据库中新增目录信息
                     if db.add_directory("root", 1, None, username):
+                        # 创建用户目录下的根目录
+                        make_user_sub_dir(username, None, "root")
                         # 注册成功，登录一下
                         message = "注册成功，请登录"
                     else:
@@ -223,7 +222,7 @@ def portfolio(message):
                     description = request.form['description']
                     # 保存文件
                     filename = photos.save(request.files['photo'], username)
-                    file_path = os.path.join(username, filename)
+                    file_path = os.path.join(username, filename)  # FIXME
                     # 文件信息存入数据库
                     if db.add_file(parentID, input_name, description, file_path):
                         message = "上传成功"
@@ -243,8 +242,8 @@ def portfolio(message):
                         # 比对文件位置
                         if file_path != file_path_old:
                             # 移动文件
-                            shutil.move(path_to_data(app.root_path, file_path_old),
-                                        path_to_data(app.root_path, file_path))
+                            shutil.move(add_data_path_prefix(file_path_old),
+                                        add_data_path_prefix(file_path))
                         message = "修改成功"
                     else:
                         message = "修改失败"
@@ -258,7 +257,7 @@ def portfolio(message):
                     if dirID:
                         # 新增目录
                         parentpath = db.gen_parent_path(dirID=parentID)
-                        make_sub_dir(app.root_path, parentpath, dname)
+                        make_user_sub_dir(username, parentpath, dname)
                         message = "增加目录成功"
                     else:
                         message = "增加目录失败"
@@ -319,7 +318,7 @@ def delete():
 
 # 更新接口
 @app.route('/update', methods=['POST'])
-def delete():
+def update():
     # TODO: 更新文件信息
     status = ['success']
     return json.dumps(status), [('Content-Type', 'application/json;charset=utf-8')]

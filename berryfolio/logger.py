@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 import logging
-from config import LOG_PATH
+import config
 
 logger = logging.getLogger('berryfolio')
 logger.setLevel(logging.DEBUG)
@@ -9,7 +9,7 @@ logger.setLevel(logging.DEBUG)
 formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
 
 # file log
-fh = logging.FileHandler(LOG_PATH)
+fh = logging.FileHandler(config.GLOBAL['LOG_PATH'])
 fh.setLevel(logging.DEBUG)
 fh.setFormatter(formatter)
 logger.addHandler(fh)
