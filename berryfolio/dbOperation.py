@@ -120,24 +120,24 @@ class DbConnect:
         return 0
 
     # Function 4: Add dictionary
-    def add_directory(self, name, type, parentID, user):
+    def add_directory(self, name, dir_type, pid, user):
         """
         添加一条目录信息，目录ID自增
         :param name: 目录的显示名
-        :param type: 目录的类型（具有子目录，为1；或不具有子目录，为2）
-        :param parentID: 父目录的ID（根目录时为None）
+        :param dir_type: 目录的类型（具有子目录，为1；或不具有子目录，为2）
+        :param pid: 父目录的ID（根目录时为None）
         :param user: 目录所属用户名
         :return: 成功则返回目录ID，否则返回None
         """
         sql = "INSERT INTO Directory (name, type, user) VALUES ('%s', %d, '%s')" \
-              % (name, type, user)
+              % (name, dir_type, user)
         if self._execute(sql):
             sql = "SELECT last_insert_ROWID() FROM Directory"
             results = self._query(sql)
             if results:
                 rowid = results[0][0]
-                if parentID:
-                    sql = "UPDATE Directory SET parentID = %d WHERE ROWID = %d" % (parentID, rowid)
+                if pid:
+                    sql = "UPDATE Directory SET parentID = %d WHERE ROWID = %d" % (pid, rowid)
                     if self._execute(sql):
                         return rowid
                 else:
@@ -145,48 +145,48 @@ class DbConnect:
         return 0
 
     # Function 5: Add file
-    def add_file(self, parentID, filename, description, filepath, username):
+    def add_file(self, pid, filename, description, file_path, username):
         """
         添加一条文件信息，文件ID自增
-        :param parentID: 存放文件的目录的ID
+        :param pid: 存放文件的目录的ID
         :param filename: 文件名
         :param description: 描述
-        :param filepath: 文件存放路径
+        :param file_path: 文件存放路径
         :param username: 文件所属用户
         :return: 成功则返回文件ID，否则返回None
         """
         sql = "INSERT INTO File (name, parentID, path, user) VALUES ('%s', %d, '%s', '%s')" \
-              % (filename, parentID, filepath, username)
+              % (filename, pid, file_path, username)
         if self._execute(sql):
             sql = "SELECT last_insert_ROWID() FROM File"
             results = self._query(sql)
             if results:
-                ROWID = results[0][0]
+                rowid = results[0][0]
                 if description:
-                    sql = "UPDATE File SET description = '%s' WHERE ROWID = %d" % (description, ROWID)
+                    sql = "UPDATE File SET description = '%s' WHERE ROWID = %d" % (description, rowid)
                     if self._execute(sql):
-                        return ROWID
+                        return rowid
                 else:
-                    return ROWID
+                    return rowid
         return 0
 
     # Function 6: Get children of a directory
-    def get_dir_children(self, directoryID):
+    def get_dir_children(self, did):
         """
         获得目录下的所有子目录ID或文件ID
-        :param directoryID: 需要索引的父目录ID
+        :param did: 需要索引的父目录ID
         :return: 成功则返回list，存储所有子目录ID或文件ID，其中list的第一个元素标志其后的ID为目录ID（1）还是文件ID（2）
             ，否则返回None
         """
-        type = self.get_dir_type(directoryID)
+        dir_type = self.get_dir_type(did)
         sql = ""
-        if type == 1:
-            sql = "SELECT ROWID FROM Directory WHERE parentID = %d" % directoryID
-        elif type == 2:
-            sql = "SELECT ROWID FROM File WHERE parentID = %d" % directoryID
+        if dir_type == 1:
+            sql = "SELECT ROWID FROM Directory WHERE parentID = %d" % did
+        elif dir_type == 2:
+            sql = "SELECT ROWID FROM File WHERE parentID = %d" % did
         results = self._query(sql)
         if results:
-            results = [type] + map(lambda tp: tp[0], results)
+            results = [dir_type] + map(lambda tp: tp[0], results)
             return results
         return None
 
@@ -204,27 +204,27 @@ class DbConnect:
         return None
 
     # Function 8: Get type of directory
-    def get_dir_type(self, directoryID):
+    def get_dir_type(self, did):
         """
         根据目录ID获取目录类型
-        :param directoryID: 目录ID
+        :param did: 目录ID
         :return: 成功则返回目录类型，否则返回None
         """
-        sql = "SELECT type FROM Directory WHERE ROWID = %d" % directoryID
+        sql = "SELECT type FROM Directory WHERE ROWID = %d" % did
         results = self._query(sql)
         if results:
             return results[0][0]
         return 0
 
     # Function 9: Get directory ID where type == 1
-    def get_dirs_by_user(self, username, type=1):
+    def get_dirs_by_user(self, username, rtype=1):
         """
         获取某用户的所有指定类型的目录ID，
         :param username: 用户名
-        :param type: 目录类型，1或2，默认为1
+        :param rtype: 目录类型，1或2，默认为1
         :return: 成功则返回list，存储所有目录ID，否则返回None
         """
-        sql = "SELECT ROWID FROM Directory WHERE user = '%s' AND type = %d " % (username, type)
+        sql = "SELECT ROWID FROM Directory WHERE user = '%s' AND type = %d " % (username, rtype)
         results = self._query(sql)
         if results:
             results = map(lambda tp: tp[0], results)
@@ -232,33 +232,31 @@ class DbConnect:
         return None
 
     # Function 10: Get path of file
-    def get_file_path(self, fileID):
+    def get_file_path(self, fid):
         """
         获得文件的存储路径
-        :param fileID: 文件ID
+        :param fid: 文件ID
         :return: 成功则返回文件的存储路径，形如"Yunzhe/root/folder/1.jpg"，否则返回None
         """
-        sql = "SELECT path FROM File WHERE ROWID = %d" % fileID
+        sql = "SELECT path FROM File WHERE ROWID = %d" % fid
         results = self._query(sql)
         if results:
             return results[0][0].encode('utf-8')
         return None
 
     # Function 11: Get details a file
-    def get_file_info(self, fileID):
+    def get_file_info(self, fid):
         """
         获得文件的详细信息
-        :param fileID: 文件ID
+        :param fid: 文件ID
         :return: 返回dict，依次存储状态码（success或者failed，若为failed则无需后面字段）、文件名、描述、存储路径
         """
-        sql = "SELECT * FROM File WHERE ROWID = %d" % fileID
+        sql = "SELECT * FROM File WHERE ROWID = %d" % fid
         results = self._query(sql)
         if results:
             results = extract_file_info(results[0])
             return results
         return {'status': 'failed'}
-        # return {'status': 'success', 'filename': 'zhaopian', 'description': 'miaoshu',
-        #         'filepath': 'Yunzhe/root/folder/1.jpg'}
 
     # Function 12: Get all files of a user
     def get_files_by_user(self, username):
@@ -275,96 +273,93 @@ class DbConnect:
         return None
 
     # Function 13: Update file
-    def update_file_info(self, fileID, parentID, filename, description, filepath):
+    def update_file_info(self, fid, pid, filename, description, file_path):
         """
         更新文件信息
-        :param fileID: 文件ID
-        :param parentID: 父目录ID
+        :param fid: 文件ID
+        :param pid: 父目录ID
         :param filename: 文件名
         :param description: 描述
-        :param filepath: 文件存储路径，形如"Yunzhe/root/folder/1.jpg"
+        :param file_path: 文件存储路径，形如"Yunzhe/root/folder/1.jpg"
         :return: 成功则返回1，否则返回0
         """
         sql = "UPDATE File SET parentID = %d, name = '%s', path = '%s' WHERE ROWID = %d" \
-              % (parentID, filename, filepath, fileID)
+              % (pid, filename, file_path, fid)
         if self._execute(sql):
             if description:
-                sql = "UPDATE File SET description = '%s' WHERE ROWID = %d" % (description, fileID)
+                sql = "UPDATE File SET description = '%s' WHERE ROWID = %d" % (description, fid)
             else:
-                sql = "UPDATE File SET description = NULL WHERE ROWID = %d" % fileID
+                sql = "UPDATE File SET description = NULL WHERE ROWID = %d" % fid
             if self._execute(sql):
                 return 1
         return 0
 
     # Function 14: Get parent directory
-    def get_parent_id(self, ID, type):
+    def get_parent_id(self, rid, rtype):
         """
         获得父目录的ID
-        :param ID: 请求的ID
-        :param type: 传入ID的类型，目录ID为1，文件ID为2
+        :param rid: 请求的ID
+        :param rtype: 传入ID的类型，目录ID为1，文件ID为2
         :return: 成功则返回父目录ID（无父目录时返回None），否则返回None
         """
         sql = ""
-        if type == 1:
-            sql = "SELECT parentID FROM Directory WHERE ROWID = %d" % ID
-        elif type == 2:
-            sql = "SELECT parentID FROM File WHERE ROWID = %d" % ID
+        if rtype == 1:
+            sql = "SELECT parentID FROM Directory WHERE ROWID = %d" % rid
+        elif rtype == 2:
+            sql = "SELECT parentID FROM File WHERE ROWID = %d" % rid
         results = self._query(sql)
         if results:
             return results[0][0]
         return None
 
-    # Function 15: Get name of directory of file
-    def get_name(self, ID, type):
+    # Function 15: Get name of a directory or file
+    def get_name(self, rid, rtype):
         """
         根据ID获得name
-        :param ID: 请求的ID
-        :param type: 传入ID的类型，目录ID为1，文件ID为2
+        :param rid: 请求的ID
+        :param rtype: 传入ID的类型，目录ID为1，文件ID为2
         :return: 成功则返回name，否则返回None
         """
         sql = ""
-        if type == 1:
-            sql = "SELECT name FROM Directory WHERE ROWID = %d" % ID
-        elif type == 2:
-            sql = "SELECT name FROM File WHERE ROWID = %d" % ID
+        if rtype == 1:
+            sql = "SELECT name FROM Directory WHERE ROWID = %d" % rid
+        elif rtype == 2:
+            sql = "SELECT name FROM File WHERE ROWID = %d" % rid
         results = self._query(sql)
         if results:
-            return results[0][0]
+            return results[0][0].encode('utf-8')
         return None
 
     # Function 16: Generate parent path of dir
-    def gen_parent_path(self, currentpath=None, dirID=None):
+    def gen_parent_path(self, current_path=None, dir_id=None):
         """
         获得请求的目录ID的路径（不包含自身）
-        :param currentpath: 递归时时用到的当前路径
-        :param dirID: 请求的目录ID
+        :param current_path: 递归时时用到的当前路径
+        :param dir_id: 请求的目录ID
         :return: 从根目录到该目录的路径（不包含该目录），形如"root\\folder\\sub"
         """
-        parentID = self.get_parent_id(dirID, 1)
-        if parentID:
-            parentname = self.get_name(dirID, 1)
-            currentpath = join(parentname, currentpath) if currentpath else parentname
-            self.gen_parent_path(currentpath, parentID)
-        else:
-            return currentpath
+        pid = self.get_parent_id(dir_id, 1)
+        if pid:
+            parentname = self.get_name(pid, 1)
+            current_path = join(parentname, current_path) if current_path else parentname
+            current_path = self.gen_parent_path(current_path, pid)
+        return current_path
 
     # Function 17: Generate directory tree
-    def generate_tree(self, nodeID):
+    def generate_tree(self, nid):
         """
         递归构造节点树，囊括所有目录
-        :param nodeID: 节点ID
-        :return: 节点，形如{1: ['root', {}]}
+        :param nid: 节点ID
+        :return: 节点，形如{1: ['root', {2: ['folder', {3: ['sub', {7: ['sud', {}]}]}], 4: ['folder1', {}]}]}
         """
-        childrenID = self.get_dir_children(nodeID)
-        dir_type = childrenID[0]
-        if dir_type == 1:
-            node = {nodeID: [self.get_name(nodeID, 1), {}]}
-            for childID in childrenID[1:]:
-                node[nodeID][1] = dict(node[nodeID][1], **self.generate_tree(childID))
-                # node[nodeID][1][childID] = [self.get_name(childID, 1), self.generate_tree(childID)]
-            return node
-        elif dir_type == 2:
-            return {}
+        cids = self.get_dir_children(nid)
+        node = {nid: [self.get_name(nid, 1), {}]}
+        if cids:
+            dir_type = cids[0]
+            if dir_type == 1:
+                for cid in cids[1:]:
+                    node[nid][1] = dict(node[nid][1], **self.generate_tree(cid))
+        return node
 
 
 if __name__ == '__main__':
@@ -384,11 +379,14 @@ if __name__ == '__main__':
         # F4
         print db.add_directory("root", 1, None, "Yunzhe")
         print db.add_directory("folder", 1, 1, "Yunzhe")
-        print db.add_directory("sub", 2, 2, "Yunzhe")
+        print db.add_directory("sub", 1, 2, "Yunzhe")
+        print db.add_directory("folder1", 1, 1, "Yunzhe")
+        print db.add_directory("folder2", 1, 1, "Yunzhe")
         print db.add_directory("root", 1, None, "Asaki")
+        print db.add_directory("sud", 2, 3, "Yunzhe")
         # F5
-        print db.add_file(3, "photo1.jpg", "hahahah", "Yunzhe/root/folder/sub")
-        print db.add_file(3, "photo1.jpg", None, "Yunzhe/root/folder/sub")
+        print db.add_file(3, "photo1.jpg", "hahahah", "Yunzhe/root/folder/sub", "Yunzhe")
+        print db.add_file(3, "photo1.jpg", None, "Yunzhe/root/folder/sub", "Yunzhe")
         # F6
         print db.get_dir_children(1)
         print db.get_dir_children(2)
@@ -437,19 +435,7 @@ if __name__ == '__main__':
         print db.get_name(1, 2)
         print db.get_name(3, 2)
         print db.get_name(6, 3)
-    # F1
-    db.add_user("Yunzhe", "123456")
-    # F4
-    db.add_directory("root", 1, None, "Yunzhe")
-    db.add_directory("folder", 1, 1, "Yunzhe")
-    db.add_directory("sub", 2, 2, "Yunzhe")
-    db.add_directory("folder1", 1, 1, "Yunzhe")
-    db.add_directory("folder2", 1, 1, "Yunzhe")
-    db.add_directory("root", 1, None, "Asaki")
-    # F5
-    db.add_file(3, "photo1.jpg", "hahahah", "Yunzhe/root/folder/sub", "Yunzhe")
-    db.add_file(3, "photo2.jpg", None, "Yunzhe/root/folder/sub", "Yunzhe")
-    # F16
-    # print db.gen_parent_path(dirID=3)
-    # F17
-    print db.generate_tree(1)
+        # F16
+        print db.gen_parent_path(dir_id=7)
+        # F17
+        print db.generate_tree(1)

@@ -235,7 +235,7 @@ def portfolio(message):
                     filename = request.form['filename']
                     description = request.form['description']
                     file_path_old = db.get_file_path(fileID)
-                    file_path = os.path.join(username, db.gen_parent_path(dirID=parentID),
+                    file_path = os.path.join(username, db.gen_parent_path(dir_id=parentID),
                                              file_path_old.split('\\')[-1])
                     # 存入数据库
                     if db.update_file_info(fileID, parentID, filename, description, file_path):
@@ -256,7 +256,7 @@ def portfolio(message):
                     dirID = db.add_directory(dname, dtype, parentID, username)
                     if dirID:
                         # 新增目录
-                        parentpath = db.gen_parent_path(dirID=parentID)
+                        parentpath = db.gen_parent_path(dir_id=parentID)
                         make_user_sub_dir(username, parentpath, dname)
                         message = "增加目录成功"
                     else:
