@@ -224,7 +224,7 @@ def portfolio(message):
                     filename = photos.save(request.files['photo'], username)
                     file_path = os.path.join(username, filename)  # FIXME
                     # 文件信息存入数据库
-                    if db.add_file(parentID, input_name, description, file_path):
+                    if db.add_file(parentID, input_name, description, file_path, username):
                         message = "上传成功"
                     else:
                         message = "上传失败"
@@ -295,8 +295,9 @@ def query():
         db = get_db()
         # 获得该文件的相关信息
         fileinfo = db.get_file_info(fileid)
-        if fileinfo is None:
-            fileinfo = {"status": "Failed"}
+        # fileinfo['status']代表获取状态
+        # if fileinfo is None:
+        #     fileinfo = {"status": "Failed"}
         # 返回文件信息
         return json.dumps(fileinfo), [('Content-Type', 'application/json;charset=utf-8')]
     # elif 'directoryid' in request.args:

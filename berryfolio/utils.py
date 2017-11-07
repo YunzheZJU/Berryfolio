@@ -113,6 +113,18 @@ def generate_global(root_path):
     return 1
 
 
+def extract_file_info(file_info):
+    """
+    从传入的文件信息元组中提取必要信息：文件名（可能为unicode）、描述（可能为空）、存储路径
+    :param file_info: 存储文件信息的元组，形如(1, u'photo1.jpg', u'hahahah', 3, u'Yunzhe/root/folder/sub', u'Yunzhe')
+    :return: 存储文件关键信息的字典，形如{'filename': 'photo1.jpg', 'description': 'hahahah', 'path': 'Yunzhe/root/folder/sub'}
+    """
+    # 将可能存在的unicode元素转换为str
+    converted = map(lambda tp: tp.encode('utf-8') if isinstance(tp, unicode) else tp, file_info)
+    return {'status': 'success', 'filename': converted[1], 'description': converted[2] if converted[2] else '',
+            'path': converted[4]}
+
+
 # class Dict(dict):
 #     """
 #     Simple dict but support access as x.y style.

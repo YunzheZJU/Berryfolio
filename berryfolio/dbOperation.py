@@ -4,6 +4,7 @@ import sqlite3
 from os.path import join
 import config
 from logger import logger
+from utils import extract_file_info
 
 
 class DbConnect:
@@ -131,41 +132,42 @@ class DbConnect:
         sql = "INSERT INTO Directory (name, type, user) VALUES ('%s', %d, '%s')" \
               % (name, type, user)
         if self._execute(sql):
-            sql = "SELECT last_insert_rowid() FROM Directory"
+            sql = "SELECT last_insert_ROWID() FROM Directory"
             results = self._query(sql)
             if results:
-                rowid = results[0][0]
+                ROWID = results[0][0]
                 if parentID:
-                    sql = "UPDATE Directory SET parentID = %d WHERE rowid = %d" % (parentID, rowid)
+                    sql = "UPDATE Directory SET parentID = %d WHERE ROWID = %d" % (parentID, ROWID)
                     if self._execute(sql):
-                        return rowid
+                        return ROWID
                 else:
-                    return rowid
+                    return ROWID
         return 0
 
     # Function 5: Add file
-    def add_file(self, parentID, filename, description, filepath):
+    def add_file(self, parentID, filename, description, filepath, username):
         """
         添加一条文件信息，文件ID自增
         :param parentID: 存放文件的目录的ID
         :param filename: 文件名
         :param description: 描述
         :param filepath: 文件存放路径
+        :param username: 文件所属用户
         :return: 成功则返回文件ID，否则返回None
         """
-        sql = "INSERT INTO File (name, parentID, path) VALUES ('%s', %d, '%s')" \
-              % (filename, parentID, filepath)
+        sql = "INSERT INTO File (name, parentID, path, user) VALUES ('%s', %d, '%s', '%s')" \
+              % (filename, parentID, filepath, username)
         if self._execute(sql):
-            sql = "SELECT last_insert_rowid() FROM File"
+            sql = "SELECT last_insert_ROWID() FROM File"
             results = self._query(sql)
             if results:
-                rowid = results[0][0]
+                ROWID = results[0][0]
                 if description:
-                    sql = "UPDATE File SET description = '%s' WHERE rowid = %d" % (description, rowid)
+                    sql = "UPDATE File SET description = '%s' WHERE ROWID = %d" % (description, ROWID)
                     if self._execute(sql):
-                        return rowid
+                        return ROWID
                 else:
-                    return rowid
+                    return ROWID
         return 0
 
     # Function 6: Get children of a directory
@@ -179,12 +181,12 @@ class DbConnect:
         type = self.get_dir_type(directoryID)
         sql = ""
         if type == 1:
-            sql = "SELECT rowid FROM Directory WHERE parentID = %d" % directoryID
+            sql = "SELECT ROWID FROM Directory WHERE parentID = %d" % directoryID
         elif type == 2:
-            sql = "SELECT rowid FROM File WHERE parentID = %d" % directoryID
+            sql = "SELECT ROWID FROM File WHERE parentID = %d" % directoryID
         results = self._query(sql)
         if results:
-            # TODO
+            results = [type] + map(lambda tp: tp[0], results)
             return results
         return None
 
@@ -195,8 +197,11 @@ class DbConnect:
         :param username: 用户名
         :return: 成功则返回目录ID，否则返回None
         """
-        sql = "SELECT dID FROM USERS WHERE Username = username"
-        return self._execute(sql)
+        sql = "SELECT ROWID FROM Directory WHERE user = '%s' AND parentID ISNULL " % username
+        results = self._query(sql)
+        if results:
+            return results[0][0]
+        return None
 
     # Function 8: Get type of directory
     def get_dir_type(self, directoryID):
@@ -205,7 +210,7 @@ class DbConnect:
         :param directoryID: 目录ID
         :return: 成功则返回目录类型，否则返回None
         """
-        sql = "SELECT type FROM Directory WHERE rowid = %d" % directoryID
+        sql = "SELECT type FROM Directory WHERE ROWID = %d" % directoryID
         results = self._query(sql)
         if results:
             return results[0][0]
@@ -219,8 +224,12 @@ class DbConnect:
         :param type: 目录类型，1或2，默认为1
         :return: 成功则返回list，存储所有目录ID，否则返回None
         """
-        sql = "SELECT ChildrenList FROM Directories WHERE Type = type AND User = username"
-        return self._execute(sql)
+        sql = "SELECT ROWID FROM Directory WHERE user = '%s' AND type = %d " % (username, type)
+        results = self._query(sql)
+        if results:
+            results = map(lambda tp: tp[0], results)
+            return results
+        return None
 
     # Function 10: Get path of file
     def get_file_path(self, fileID):
@@ -229,19 +238,27 @@ class DbConnect:
         :param fileID: 文件ID
         :return: 成功则返回文件的存储路径，形如"Yunzhe/root/folder/1.jpg"，否则返回None
         """
-        sql = "SELECT Filepath FROM Files WHERE fID = fileID"
-        return self._execute(sql)
+        sql = "SELECT path FROM File WHERE ROWID = %d" % fileID
+        results = self._query(sql)
+        if results:
+            return results[0][0].encode('utf-8')
+        return None
 
     # Function 11: Get details a file
     def get_file_info(self, fileID):
         """
         获得文件的详细信息
         :param fileID: 文件ID
-        :return: 成功则返回dict，依次存储状态码（success或者failed）、文件名、描述、存储路径，否则返回None
+        :return: 返回dict，依次存储状态码（success或者failed，若为failed则无需后面字段）、文件名、描述、存储路径
         """
-        sql = "状态码？"
-        return {'status': 'success', 'filename': 'zhaopian', 'description': 'miaoshu',
-                'filepath': 'Yunzhe/root/folder/1.jpg'}
+        sql = "SELECT * FROM File WHERE ROWID = %d" % fileID
+        results = self._query(sql)
+        if results:
+            results = extract_file_info(results[0])
+            return results
+        return {'status': 'failed'}
+        # return {'status': 'success', 'filename': 'zhaopian', 'description': 'miaoshu',
+        #         'filepath': 'Yunzhe/root/folder/1.jpg'}
 
     # Function 12: Get all files of a user
     def get_files_by_user(self, username):
@@ -250,8 +267,12 @@ class DbConnect:
         :param username: 用户名
         :return: 成功则返回list，存储所有文件ID，否则返回None
         """
-        sql = "SELECT * FROM Files WHERE User = username"
-        return self._execute(sql)
+        sql = "SELECT ROWID FROM File WHERE user = '%s'" % username
+        results = self._query(sql)
+        if results:
+            results = map(lambda tp: tp[0], results)
+            return results
+        return None
 
     # Function 13: Update file
     def update_file_info(self, fileID, parentID, filename, description, filepath):
@@ -351,26 +372,48 @@ if __name__ == '__main__':
         print db.add_directory("root", 1, None, "Yunzhe")
         print db.add_directory("folder", 1, 1, "Yunzhe")
         print db.add_directory("sub", 2, 2, "Yunzhe")
-        print db.add_directory("root", 1, 1, "Asaki")
+        print db.add_directory("root", 1, None, "Asaki")
         # F5
         print db.add_file(3, "photo1.jpg", "hahahah", "Yunzhe/root/folder/sub")
         print db.add_file(3, "photo1.jpg", None, "Yunzhe/root/folder/sub")
+        # F6
+        print db.get_dir_children(1)
+        print db.get_dir_children(2)
+        print db.get_dir_children(3)
+        # F7
+        print db.get_dir_root("Yunzhe")
+        print db.get_dir_root("Asaki")
+        print db.get_dir_root("A")
+        # F8
+        print db.get_dir_type(1)
+        print db.get_dir_type(2)
+        print db.get_dir_type(3)
+        print db.get_dir_type(4)
+        print db.get_dir_type(5)
+        # F9
+        print db.get_dirs_by_user("Yunzhe")
+        print db.get_dirs_by_user("Yunzhe", 2)
+        print db.get_dirs_by_user("Asaki")
+        print db.get_dirs_by_user("Asaki", 2)
+        # F10
+        print db.get_file_path(1)
+        print db.get_file_path(2)
+        print db.get_file_path(3)
+        # F11
+        print db.get_file_info(1)
+        print db.get_file_info(2)
+        print db.get_file_info(3)
+    # F1
+    db.add_user("Yunzhe", "123456")
     # F4
     db.add_directory("root", 1, None, "Yunzhe")
     db.add_directory("folder", 1, 1, "Yunzhe")
     db.add_directory("sub", 2, 2, "Yunzhe")
     db.add_directory("folder1", 1, 1, "Yunzhe")
     db.add_directory("folder2", 1, 1, "Yunzhe")
+    db.add_directory("root", 1, None, "Asaki")
     # F5
-    db.add_file(3, "photo1.jpg", "hahahah", "Yunzhe/root/folder/sub")
-    db.add_file(3, "photo2.jpg", None, "Yunzhe/root/folder/sub")
-    # F8
-    db.get_dir_type(1)
-    db.get_dir_type(2)
-    db.get_dir_type(3)
-    db.get_dir_type(4)
-    db.get_dir_type(5)
-    # F6
-    print db.get_dir_children(1)
-    print db.get_dir_children(2)
-    print db.get_dir_children(3)
+    db.add_file(3, "photo1.jpg", "hahahah", "Yunzhe/root/folder/sub", "Yunzhe")
+    db.add_file(3, "photo2.jpg", None, "Yunzhe/root/folder/sub", "Yunzhe")
+    # F12
+    print db.get_files_by_user("Yunzhe")
