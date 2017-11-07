@@ -3,6 +3,16 @@ import os
 import config
 from PIL import Image, ImageDraw, ImageFont, ImageFilter
 import random
+import zipfile
+from logger import logger
+
+
+def encode_color(s, w):
+    return ((w & 192) >> 6) + (s & 252)
+
+
+def decode_color(s):
+    return (s & 3) << 6
 
 
 # 随机字母:
@@ -110,6 +120,8 @@ def generate_global(root_path):
     config.GLOBAL['DATA_PATH'] = os.path.join(root_path, "data")
     config.GLOBAL['STATIC_PATH'] = os.path.join(root_path, 'static')
     config.GLOBAL['FONT_PATH'] = os.path.join(root_path, 'static', 'fonts')
+    config.GLOBAL['TEMP_PATH'] = os.path.join(root_path, 'temp')
+    config.GLOBAL['WM_PATH'] = os.path.join(root_path, 'static', 'images', 'wm.jpg')
     return 1
 
 
@@ -125,46 +137,68 @@ def extract_file_info(file_info):
             'path': converted[4]}
 
 
-# class Dict(dict):
-#     """
-#     Simple dict but support access as x.y style.
-#
-#     >>> d1 = Dict()
-#     >>> d1['x'] = 100
-#     >>> d1.x
-#     100
-#     >>> d1.y = 200
-#     >>> d1['y']
-#     200
-#     >>> d2 = Dict(a=1, b=2, c='3')
-#     >>> d2.c
-#     '3'
-#     >>> d2['empty']
-#     Traceback (most recent call last):
-#         ...
-#     KeyError: 'empty'
-#     >>> d2.empty
-#     Traceback (most recent call last):
-#         ...
-#     AttributeError: 'Dict' object has no attribute 'empty'
-#     >>> d3 = Dict(('a', 'b', 'c'), (1, 2, 3))
-#     >>> d3.a
-#     1
-#     >>> d3.b
-#     2
-#     >>> d3.c
-#     3
-#     """
-#     def __init__(self, names=(), values=(), **kw):
-#         super(Dict, self).__init__(**kw)
-#         for k, v in zip(names, values):
-#             self[k] = v
-#
-#     def __getattr__(self, key):
-#         try:
-#             return self[key]
-#         except KeyError:
-#             raise AttributeError(r"'Dict' object has no attribute '%s'" % key)
-#
-#     def __setattr__(self, key, value):
-#         self[key] = value
+def make_zip(folder, zipname):
+    """
+    对folder下的目录和文件压缩
+    :param folder: 输入的folder，相对路径或绝对路径
+    :param zipname: 压缩文件名
+    :return: 成功则返回压缩文件的路径，否则返回None
+    """
+    z = None
+    try:
+        zip_path = os.path.join(config.GLOBAL['TEMP_PATH'], zipname)
+        z = zipfile.ZipFile(zip_path, "w")
+        for path, dirs, files in os.walk(folder):
+            for filename in files:
+                file_path = os.path.join(path, filename)
+                file_path_in_zip = os.path.join(path, filename).split(folder + os.sep)[-1]
+                print file_path
+                print file_path_in_zip
+                z.write(file_path, file_path_in_zip)
+        z.close()
+        return zip_path
+    except StandardError:
+        if z:
+            z.close()
+        return None
+
+
+def add_watermark(src, dst, wm=config.GLOBAL['WM_PATH']):
+    try:
+        filename = src.split("\\")[-1].split(".")[0]
+        path_png = os.path.join(config.GLOBAL['TEMP_PATH'], filename + "_converted.png")
+        # Convert the source image to PNG RGBA and save it
+        s_img = Image.open(src)
+        s_img.save(path_png)
+        s_img.close()
+        # Open the converted png image and load pixel info
+        s_img = Image.open(path_png).convert("RGB")
+        s_p = s_img.load()
+        w, h = s_img.size
+        # Open the watermark image and resize it
+        w_img = Image.open(wm)
+        w_p = w_img.resize((w, h)).load()
+        # Create an image for storing results
+        d_img = Image.new("RGB", (w, h))
+        d_p = d_img.load()
+        # print s_img.format, "%dx%d" % (w, h), s_img.mode
+        for x in range(w):
+            for y in range(h):
+                (rw, gw, bw) = w_p[x, y]
+                (rs, gs, bs) = s_p[x, y]
+                rd = encode_color(rs, rw)
+                gd = encode_color(gs, gw)
+                bd = encode_color(bs, bw)
+                d_p[x, y] = (rd, gd, bd)
+                # print rs, rw, (rw & 248) >> 5, rs & 7, rs & 248
+                # exit(0)
+        # Save the result
+        d_img.save(dst)
+        # Close the files.
+        s_img.close()
+        w_img.close()
+        d_img.close()
+        return dst
+    except StandardError as ex:
+        logger.error("Error occurred during watermarking: " + ex.message)
+        return None

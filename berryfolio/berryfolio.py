@@ -5,7 +5,7 @@ import shutil
 from utils import *
 from logger import logger
 from dbOperation import DbConnect
-from flask import Flask, render_template, g, make_response, json, request, session, redirect, url_for
+from flask import Flask, render_template, g, make_response, json, request, session, redirect, url_for, send_from_directory
 from flask_uploads import UploadSet, configure_uploads, IMAGES, patch_request_class
 from flask_wtf import FlaskForm
 from flask_wtf.file import FileField, FileRequired, FileAllowed
@@ -19,20 +19,12 @@ app.config.from_object(__name__)  # load config from this file, berryfolio.py
 # 加载默认配置
 app.config.update(dict(
     SECRET_KEY='Thisismykeyafuibsvseibgf',
-    UPLOADED_PHOTOS_DEST=config.GLOBAL['DATA_PATH']
+    UPLOADED_PHOTOS_DEST=config.GLOBAL['TEMP_PATH']
 ))
-make_dirs([app.config['UPLOADED_PHOTOS_DEST']])
 
 photos = UploadSet('photos', IMAGES)
 configure_uploads(app, photos)
 patch_request_class(app)  # 文件大小限制，默认为16MB
-
-
-# def connect_db():
-#     """Connects to the specific database."""
-#     rv = sqlite3.connect(app.config['DATABASE'])
-#     rv.row_factory = sqlite3.Row
-#     return rv
 
 
 def get_db():
@@ -54,13 +46,6 @@ def initdb_command():
     """初始化数据库的命令行命令"""
     init_db()
     logger.info('Initialized the database.')
-
-
-# @app.teardown_appcontext
-# def close_db(error):
-#     """Closes the database again at the end of the request."""
-#     if hasattr(g, 'sqlite_db'):
-#         g.sqlite_db.close()
 
 
 class UploadForm(FlaskForm):
@@ -220,12 +205,24 @@ def portfolio(message):
                     parentID = request.form['parentID']
                     input_name = request.form['filename']
                     description = request.form['description']
-                    # 保存文件
-                    filename = photos.save(request.files['photo'], username)
-                    file_path = os.path.join(username, filename)  # FIXME
+                    dir_name = db.get_name(parentID, 1)
+                    dir_path = os.path.join(config.GLOBAL['DATA_PATH'], username,
+                                            db.gen_parent_path(dir_id=parentID), dir_name)
+                    # 保存文件至临时目录
+                    filename = photos.save(request.files['photo'])
+                    file_path_old = os.path.join(config.GLOBAL['TEMP_PATH'], filename)
+                    file_path = os.path.join(dir_path, filename)
                     # 文件信息存入数据库
-                    if db.add_file(parentID, input_name, description, file_path, username):
-                        message = "上传成功"
+                    fileID = db.add_file(parentID, input_name, description, file_path, username)
+                    if fileID:
+                        # 为文件添加数字水印
+                        if add_watermark(add_data_path_prefix(file_path_old),
+                                         add_data_path_prefix(file_path)):
+                            message = "上传成功"
+                        else:
+                            # TODO: 添加水印失败，回滚数据库操作
+                            # db.del_file(fileID)
+                            message = "内部错误"
                     else:
                         message = "上传失败"
                 elif request.form['type'] == 'Attribute':
@@ -271,19 +268,35 @@ def portfolio(message):
 # 下载接口
 @app.route('/download', methods=['GET'])
 def download():
-    if 'fileid' in request.args:
-        # 获得file id
-        fileid = request.args['fileid']
+    if 'username' in session:
+        username = session['username']
+        # 检查到这个用户曾经登陆过
         db = get_db()
-        # 构造指向该文件的下载链接
-        filepath = os.path.join('data', db.get_file_path(fileid))
-        return app.send_static_file(filepath)
-    elif 'directoryid' in request.args:
-        # 获得directory id
-        directoryid = request.args['directoryid']
-        # TODO: 生成压缩包
-        # TODO: 构造指向该压缩包的下载链接
-        return url_for(directoryid)
+        if db.check_username(username):
+            # 这是一个注册了的用户，给你下载
+            if 'fileid' in request.args:
+                # 获得file id
+                fileid = request.args['fileid']
+                # 构造指向该文件的下载链接
+                filepath = os.path.join('data', db.get_file_path(fileid))
+                return app.send_static_file(filepath)
+            elif 'directoryid' in request.args:
+                # 获得directory id
+                directoryid = request.args['directoryid']
+                # 构造目录路径
+                directory_name = db.get_name(directoryid, 1)
+                parentpath = db.gen_parent_path(dir_id=directoryid)
+                directory_path = add_data_path_prefix(os.path.join(username, parentpath, directory_name))
+                # 生成压缩包
+                zip_name = username + ".zip"
+                zip_path = make_zip(directory_path, zip_name)
+                if zip_path:
+                    # 构造指向该压缩包的下载链接
+                    return send_from_directory(config.GLOBAL['TEMP_PATH'], zip_name, as_attachment=True)
+        else:
+            # 未注册过的假冒用户，踢掉踢掉
+            session.pop('username', None)
+    return redirect(url_for('home'))
 
 
 # 查询接口
@@ -300,27 +313,12 @@ def query():
         #     fileinfo = {"status": "Failed"}
         # 返回文件信息
         return json.dumps(fileinfo), [('Content-Type', 'application/json;charset=utf-8')]
-    # elif 'directoryid' in request.args:
-    #     # 获得directory id
-    #     directoryid = request.args['directoryid']
-    #     # TODO: 获得该目录的相关信息
-    #     directoryinfo = []
-    #     # 返回目录信息
-    #     return json.dumps(directoryinfo), [('Content-Type', 'application/json;charset=utf-8')]
 
 
 # 删除接口
 @app.route('/delete', methods=['POST'])
 def delete():
     # TODO: 从数据库和文件系统中删除文件或目录及其相关信息
-    status = ['success']
-    return json.dumps(status), [('Content-Type', 'application/json;charset=utf-8')]
-
-
-# 更新接口
-@app.route('/update', methods=['POST'])
-def update():
-    # TODO: 更新文件信息
     status = ['success']
     return json.dumps(status), [('Content-Type', 'application/json;charset=utf-8')]
 
