@@ -86,7 +86,7 @@ class DbConnect:
         :param password: 密码
         :return: 成功则返回username，否则返回None
         """
-        sql = "INSERT INTO Users (Name, Password) VALUES (username, password)"
+        sql = "INSERT INTO User (username, password) VALUES ('%s', '%s')" % (username, password)
         if self._execute(sql):
             return username
         else:
@@ -100,8 +100,9 @@ class DbConnect:
         :param password: 密码
         :return: 匹配则返回1，否则返回0
         """
-        sql = "SELECT * FROM Users WHERE Name = username AND Password = password"
-        if self._execute(sql):
+        sql = "SELECT * FROM User WHERE username = '%s' AND password = '%s'" % (username, password)
+        results = self._query(sql)
+        if results:
             return 1
         else:
             return 0
@@ -113,8 +114,9 @@ class DbConnect:
         :param username: 需要检查的用户名
         :return: 存在则返回1，否则返回0
         """
-        sql = "SELECT * FROM Users WHERE Username = username"
-        if self._execute(sql):
+        sql = "SELECT * FROM User WHERE username = '%s'" % username
+        results = self._query(sql)
+        if results:
             return 1
         else:
             return 0
@@ -131,7 +133,8 @@ class DbConnect:
         """
         sql = "INSERT INTO Directories (Name, Type, ParentID, User) VALUES (name, type, parentID, user)"
         if self._execute(sql):
-            return dID
+            return 1
+            # return dID
         else:
             return None
 
@@ -147,7 +150,8 @@ class DbConnect:
         """
         sql = "INSERT INTO Files (Name, ParentID, Description, Filepath) VALUES (name, parentID, description, filepath)"
         if self._execute(sql):
-            return fID
+            return 1
+            # return fID
         else:
             return None
 
@@ -302,3 +306,15 @@ class DbConnect:
             return node
         elif dir_type == 2:
             return {}
+
+
+if __name__ == '__main__':
+    db = DbConnect()
+    with open('schema.sql', mode='r') as f:
+        db.execute_scripts(f.readlines())
+    print db.add_user("Yunzhe", "123456")
+    print db.match_user_pw("Yunzhe", "123456")
+    print db.match_user_pw("Yunzhe", "12345")
+    print db.match_user_pw("Yunzh", "123456")
+    print db.check_username("Yunzhe")
+    print db.check_username("Y")

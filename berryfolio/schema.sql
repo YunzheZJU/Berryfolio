@@ -1,2 +1,6 @@
-drop table if exists entries;
-create table entries (id integer primary key autoincrement, title text not null, text text not null);
+DROP TABLE IF EXISTS User;
+CREATE TABLE User (username TEXT PRIMARY KEY NOT NULL, password TEXT NOT NULL);
+DROP TABLE IF EXISTS Directory;
+CREATE TABLE Directory (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL, type INTEGER NOT NULL, parentID INTEGER, user TEXT NOT NULL);
+DROP TABLE IF EXISTS File;
+CREATE TABLE File(id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL, description TEXT, parentID INTEGER NOT NULL, path TEXT NOT NULL)
