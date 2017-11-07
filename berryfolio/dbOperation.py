@@ -20,7 +20,7 @@ class DbConnect:
     def __del__(self):
         try:
             # 关闭数据库连接
-            logger.info("Closing database...")
+            logger.info("Closing database connection...")
             self.db.close()
         except Exception as ex:
             logger.error("Fail to close database: " + ex.message)
@@ -28,7 +28,7 @@ class DbConnect:
 
     def _query(self, sql):
         try:
-            logger.info("Querying sql " + sql + "...")
+            logger.info("Querying sql: " + sql + "...")
             # 获得数据库指针
             cursor = self.db.cursor()
             # 执行SQL语句
@@ -43,7 +43,7 @@ class DbConnect:
 
     def _execute(self, sql):
         try:
-            logger.info("Executing sql " + sql + "...")
+            logger.info("Executing sql: " + sql + "...")
             # 获得数据库指针
             cursor = self.db.cursor()
             # 执行SQL语句
@@ -89,8 +89,7 @@ class DbConnect:
         sql = "INSERT INTO User (username, password) VALUES ('%s', '%s')" % (username, password)
         if self._execute(sql):
             return username
-        else:
-            return None
+        return None
 
     # Function 2: Log in
     def match_user_pw(self, username, password):
@@ -104,8 +103,7 @@ class DbConnect:
         results = self._query(sql)
         if results:
             return 1
-        else:
-            return 0
+        return 0
 
     # Function 3: Check username
     def check_username(self, username):
@@ -118,8 +116,7 @@ class DbConnect:
         results = self._query(sql)
         if results:
             return 1
-        else:
-            return 0
+        return 0
 
     # Function 4: Add dictionary
     def add_directory(self, name, type, parentID, user):
@@ -131,12 +128,20 @@ class DbConnect:
         :param user: 目录所属用户名
         :return: 成功则返回目录ID，否则返回None
         """
-        sql = "INSERT INTO Directories (Name, Type, ParentID, User) VALUES (name, type, parentID, user)"
+        sql = "INSERT INTO Directory (name, type, user) VALUES ('%s', %d, '%s')" \
+              % (name, type, user)
         if self._execute(sql):
-            return 1
-            # return dID
-        else:
-            return None
+            sql = "SELECT last_insert_rowid() FROM Directory"
+            results = self._query(sql)
+            if results:
+                rowid = results[0][0]
+                if parentID:
+                    sql = "UPDATE Directory SET parentID = %d WHERE rowid = %d" % (parentID, rowid)
+                    if self._execute(sql):
+                        return rowid
+                else:
+                    return rowid
+        return 0
 
     # Function 5: Add file
     def add_file(self, parentID, filename, description, filepath):
@@ -148,12 +153,20 @@ class DbConnect:
         :param filepath: 文件存放路径
         :return: 成功则返回文件ID，否则返回None
         """
-        sql = "INSERT INTO Files (Name, ParentID, Description, Filepath) VALUES (name, parentID, description, filepath)"
+        sql = "INSERT INTO File (name, parentID, path) VALUES ('%s', %d, '%s')" \
+              % (filename, parentID, filepath)
         if self._execute(sql):
-            return 1
-            # return fID
-        else:
-            return None
+            sql = "SELECT last_insert_rowid() FROM File"
+            results = self._query(sql)
+            if results:
+                rowid = results[0][0]
+                if description:
+                    sql = "UPDATE File SET description = '%s' WHERE rowid = %d" % (description, rowid)
+                    if self._execute(sql):
+                        return rowid
+                else:
+                    return rowid
+        return 0
 
     # Function 6: Get children of a directory
     def get_dir_children(self, directoryID):
@@ -163,8 +176,17 @@ class DbConnect:
         :return: 成功则返回list，存储所有子目录ID或文件ID，其中list的第一个元素标志其后的ID为目录ID（1）还是文件ID（2）
             ，否则返回None
         """
-        sql = "SELECT ChildrenList FROM Directories WHERE dID = directoryID"
-        return self._execute(sql)
+        type = self.get_dir_type(directoryID)
+        sql = ""
+        if type == 1:
+            sql = "SELECT rowid FROM Directory WHERE parentID = %d" % directoryID
+        elif type == 2:
+            sql = "SELECT rowid FROM File WHERE parentID = %d" % directoryID
+        results = self._query(sql)
+        if results:
+            # TODO
+            return results
+        return None
 
     # Function 7: Get root directory
     def get_dir_root(self, username):
@@ -183,8 +205,11 @@ class DbConnect:
         :param directoryID: 目录ID
         :return: 成功则返回目录类型，否则返回None
         """
-        sql = "SELECT Type FROM Directories WHERE dID = directoryID"
-        return self._execute(sql)
+        sql = "SELECT type FROM Directory WHERE rowid = %d" % directoryID
+        results = self._query(sql)
+        if results:
+            return results[0][0]
+        return 0
 
     # Function 9: Get directory ID where type == 1
     def get_dirs_by_user(self, username, type=1):
@@ -312,9 +337,40 @@ if __name__ == '__main__':
     db = DbConnect()
     with open('schema.sql', mode='r') as f:
         db.execute_scripts(f.readlines())
-    print db.add_user("Yunzhe", "123456")
-    print db.match_user_pw("Yunzhe", "123456")
-    print db.match_user_pw("Yunzhe", "12345")
-    print db.match_user_pw("Yunzh", "123456")
-    print db.check_username("Yunzhe")
-    print db.check_username("Y")
+    if 0:
+        # F1
+        print db.add_user("Yunzhe", "123456")
+        # F2
+        print db.match_user_pw("Yunzhe", "123456")
+        print db.match_user_pw("Yunzhe", "12345")
+        print db.match_user_pw("Yunzh", "123456")
+        # F3
+        print db.check_username("Yunzhe")
+        print db.check_username("Y")
+        # F4
+        print db.add_directory("root", 1, None, "Yunzhe")
+        print db.add_directory("folder", 1, 1, "Yunzhe")
+        print db.add_directory("sub", 2, 2, "Yunzhe")
+        print db.add_directory("root", 1, 1, "Asaki")
+        # F5
+        print db.add_file(3, "photo1.jpg", "hahahah", "Yunzhe/root/folder/sub")
+        print db.add_file(3, "photo1.jpg", None, "Yunzhe/root/folder/sub")
+    # F4
+    db.add_directory("root", 1, None, "Yunzhe")
+    db.add_directory("folder", 1, 1, "Yunzhe")
+    db.add_directory("sub", 2, 2, "Yunzhe")
+    db.add_directory("folder1", 1, 1, "Yunzhe")
+    db.add_directory("folder2", 1, 1, "Yunzhe")
+    # F5
+    db.add_file(3, "photo1.jpg", "hahahah", "Yunzhe/root/folder/sub")
+    db.add_file(3, "photo2.jpg", None, "Yunzhe/root/folder/sub")
+    # F8
+    db.get_dir_type(1)
+    db.get_dir_type(2)
+    db.get_dir_type(3)
+    db.get_dir_type(4)
+    db.get_dir_type(5)
+    # F6
+    print db.get_dir_children(1)
+    print db.get_dir_children(2)
+    print db.get_dir_children(3)
