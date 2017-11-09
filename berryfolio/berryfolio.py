@@ -57,7 +57,6 @@ class UploadForm(FlaskForm):
 
 @app.route('/')
 def index():
-    db = get_db()
     return "<h1>Hello</h1>"
 
 
@@ -96,17 +95,10 @@ def home():
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     message = None
-    if request.method == 'GET':
-        (verifycode, filename) = generate_verify_code()
-        verifyurl = url_for('static', filename=filename)
-        print verifyurl
-        print verifyurl.decode('utf-8')
-        return render_template('login.html', message=message, verifyurl=verifyurl.decode('utf-8'), verifycode=verifycode)
-    elif request.method == 'POST':
-        print 0
-        print request.form
+    (vcode, filename) = generate_verify_code()
+    vcode_url = url_for('static', filename=filename).decode('utf-8')
+    if request.method == 'POST':
         if request.form['btn'] == u'Login':
-            print 1
             # 验证表单里的用户名密码
             username = request.form['username']
             password = request.form['password']
@@ -116,19 +108,19 @@ def login():
                 if db.match_user_pw(username, password):
                     # 登录成功，去mypage
                     session['username'] = username
+                    message = u"登陆成功"
                     return redirect(url_for('mypage'))
                 else:
                     # 登录失败，滚回login
-                    message = "登录失败，请重试"
+                    message = u"登录失败，请重试"
             else:
-                message = "验证码错误"
+                message = u"验证码错误"
         elif request.form['btn'] == u'Register':
-            print 2
             # 获得表单内容，检查并存入数据库，初始化目录并存入数据库
             # 未做SQL注入的防范
             username = request.form['username']
             password = request.form['password']
-            code = request.form['verifycode']
+            code = request.form['vcode']
             if code == request.form['code']:
                 db = get_db()
                 if db.add_user(username, password):
@@ -139,21 +131,30 @@ def login():
                         # 创建用户目录下的根目录
                         make_user_sub_dir(username, None, "root")
                         # 注册成功，登录一下
-                        message = "注册成功，请登录"
+                        message = u"注册成功，请登录"
                     else:
                         logger.error("Fail to add dictionary: name=%s, user=%s" % ("root", username))
-                        message = "注册失败，内部错误"
+                        message = u"注册失败，内部错误"
                 else:
                     logger.error("Fail to register: username=%s" % username)
-                    message = "注册失败，请重试"
+                    message = u"注册失败，请重试"
             else:
-                message = "验证码错误"
-    return render_template('login.html', message=message)
+                message = u"验证码错误"
+    return render_template('login.html', message=message, vcode_url=vcode_url, vcode=vcode)
+
+
+# 用户登出
+@app.route('/logout', methods=['GET'])
+def logout():
+    if 'username' in session:
+        session.pop('username', None)
+    return redirect(url_for('home'))
 
 
 # 个人主页，展示16张随机作品
 @app.route('/mypage', methods=['GET', 'POST'])
-def mypage(message):
+def mypage():
+    message = None
     if 'username' in session:
         username = session['username']
         # 检查到这个用户曾经登陆过
@@ -162,23 +163,28 @@ def mypage(message):
             # 这是一个注册了的用户，给你看自己的个人主页
             if request.method == 'GET':
                 # 从数据库获取这个用户的个人作品，传入模板
-                filelist = db.get_files_by_user(username)
+                file_list = db.get_files_by_user(username)
                 entity = None
-                if filelist:
-                    length = len(filelist)
-                    if 16 > length > 0:
-                        # 填充至16
-                        filelist = (filelist * (16 / length + 1))[:16]
-                    # 选16并构造url
-                    entity = map(lambda fid: [url_for('static', filename=db.get_file_path(fid))],
-                                 random.sample(filelist, 16))
+                if file_list is not None:
+                    length = len(file_list)
+                    if length > 0:
+                        if length < 16:
+                            # 填充至16
+                            file_list = (file_list * (16 / length + 1))[:16]
+                        # 选16并构造url
+                        entity = map(lambda fid: [url_for('static', filename=db.get_file_path(fid))],
+                                     random.sample(file_list, 16))
+                    else:
+                        # length == 0
+                        # TODO: 填充默认图像
+                        pass
                 else:
-                    message = "获取作品信息失败"
+                    message = u"获取作品信息失败"
                 return render_template('mypage.html', entity=entity, username=username, message=message)
             elif request.method == 'POST':
                 # TODO: 获得表单内容，检查并存入数据库，更新用户设置
-                message = "用户设置已更新"
-                return redirect(url_for(mypage, message=message))
+                message = u"用户设置已更新"
+                return redirect(url_for('mypage'))
         else:
             # 未注册过的假冒用户，踢掉踢掉
             session.pop('username', None)
@@ -201,11 +207,11 @@ def portfolio(message):
                     tree = db.generate_tree(root_id)
                 except Exception as ex:
                     logger.error("Failure in constructing directory tree: " + ex.message)
-                    message = "获取目录信息失败"
+                    message = u"获取目录信息失败"
                     tree = {}
                 return render_template('portfolio.html', tree=tree, username=username, message=message)
             elif request.method == 'POST':
-                message = "未知上传类型"
+                message = u"未知上传类型"
                 if request.form['type'] == 'Photo' and 'photo' in request.files:
                     # 获取表单内容
                     pid = request.form['parentID']
@@ -224,13 +230,14 @@ def portfolio(message):
                         # 为文件添加数字水印
                         if add_watermark(add_data_path_prefix(file_path_old),
                                          add_data_path_prefix(file_path), config.GLOBAL['WM_PATH']):
-                            message = "上传成功"
+                            message = u"上传成功"
                         else:
-                            # TODO: 添加水印失败，回滚数据库操作
-                            # db.del_file(fileID)
-                            message = "内部错误"
+                            # 添加水印失败，回滚数据库操作
+                            if db.del_file(fid):
+                                message = u"上传失败"
+                            message = u"内部错误"
                     else:
-                        message = "上传失败"
+                        message = u"上传失败"
                 elif request.form['type'] == 'Attribute':
                     # 获取表单内容
                     fid = request.form['fileID']
@@ -247,23 +254,23 @@ def portfolio(message):
                             # 移动文件
                             shutil.move(add_data_path_prefix(file_path_old),
                                         add_data_path_prefix(file_path))
-                        message = "修改成功"
+                        message = u"修改成功"
                     else:
-                        message = "修改失败"
+                        message = u"修改失败"
                 elif request.form['type'] == 'Directory':
                     # 获取表单内容
-                    dname = request.form['name']
-                    dtype = request.form['type']
+                    name = request.form['name']
+                    rtype = request.form['type']
                     pid = request.form['parentID']
                     # 存入数据库
-                    did = db.add_directory(dname, dtype, pid, username)
+                    did = db.add_directory(name, rtype, pid, username)
                     if did:
                         # 新增目录
-                        parentpath = db.gen_parent_path(dir_id=pid)
-                        make_user_sub_dir(username, parentpath, dname)
-                        message = "增加目录成功"
+                        parent_path = db.gen_parent_path(dir_id=pid)
+                        make_user_sub_dir(username, parent_path, name)
+                        message = u"增加目录成功"
                     else:
-                        message = "增加目录失败"
+                        message = u"增加目录失败"
                 redirect(url_for(portfolio, message=message))
         else:
             # 未注册过的假冒用户，踢掉踢掉
@@ -280,19 +287,19 @@ def download():
         db = get_db()
         if db.check_username(username):
             # 这是一个注册了的用户，给你下载
-            if 'fileid' in request.args:
+            if 'fid' in request.args:
                 # 获得file id
-                fileid = request.args['fileid']
+                fid = request.args['fid']
                 # 构造指向该文件的下载链接
-                filepath = os.path.join('data', db.get_file_path(fileid))
-                return app.send_static_file(filepath)
-            elif 'directoryid' in request.args:
+                file_path = os.path.join('data', db.get_file_path(fid))
+                return app.send_static_file(file_path)
+            elif 'did' in request.args:
                 # 获得directory id
-                directoryid = request.args['directoryid']
+                did = request.args['did']
                 # 构造目录路径
-                directory_name = db.get_name(directoryid, 1)
-                parentpath = db.gen_parent_path(dir_id=directoryid)
-                directory_path = add_data_path_prefix(os.path.join(username, parentpath, directory_name))
+                directory_name = db.get_name(did, 1)
+                parent_path = db.gen_parent_path(dir_id=did)
+                directory_path = add_data_path_prefix(os.path.join(username, parent_path, directory_name))
                 # 生成压缩包
                 zip_name = username + ".zip"
                 zip_path = make_zip(directory_path, zip_name)
@@ -308,23 +315,25 @@ def download():
 # 查询接口
 @app.route('/query', methods=['GET'])
 def query():
-    if 'fileid' in request.args:
+    if 'fid' in request.args:
         # 获得file id
-        fileid = request.args['fileid']
+        fid = request.args['fid']
         db = get_db()
         # 获得该文件的相关信息
-        fileinfo = db.get_file_info(fileid)
-        # fileinfo['status']代表获取状态
-        # if fileinfo is None:
-        #     fileinfo = {"status": "Failed"}
+        file_info = db.get_file_info(fid)
         # 返回文件信息
-        return json.dumps(fileinfo), [('Content-Type', 'application/json;charset=utf-8')]
+        return json.dumps(file_info), [('Content-Type', 'application/json;charset=utf-8')]
 
 
 # 删除接口
 @app.route('/delete', methods=['POST'])
 def delete():
     # TODO: 从数据库和文件系统中删除文件或目录及其相关信息
+    if 'fid' in request.args:
+        # 删除文件
+        pass
+    elif 'did' in request.args:
+        pass
     status = ['success']
     return json.dumps(status), [('Content-Type', 'application/json;charset=utf-8')]
 

@@ -267,7 +267,7 @@ class DbConnect:
         """
         sql = "SELECT ROWID FROM File WHERE user = '%s'" % username
         results = self._query(sql)
-        if results:
+        if results is not None:
             results = map(lambda tp: tp[0], results)
             return results
         return None
@@ -361,6 +361,18 @@ class DbConnect:
                     node[nid][1] = dict(node[nid][1], **self.generate_tree(cid))
         return node
 
+    # Function 18: Delete file
+    def del_file(self, fid):
+        """
+        删除文件条目
+        :param fid: 文件ID
+        :return: 成功则返回1，否则返回0
+        """
+        sql = "DELETE FROM File WHERE id = %d" % fid
+        if self._execute(sql):
+            return 1
+        return 0
+
 
 if __name__ == '__main__':
     db = DbConnect()
@@ -439,3 +451,5 @@ if __name__ == '__main__':
         print db.gen_parent_path(dir_id=7)
         # F17
         print db.generate_tree(1)
+        # F18
+        print db.del_file(1)

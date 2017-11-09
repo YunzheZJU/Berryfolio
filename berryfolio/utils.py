@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import os
+import shutil
 import config
 from PIL import Image, ImageDraw, ImageFont, ImageFilter
 import random
@@ -34,7 +35,7 @@ def make_dirs(paths, clean=0):
     for path in paths:
         if clean:
             if os.path.exists(path):
-                os.removedirs(path)
+                shutil.rmtree(path)
         if not os.path.exists(path):
             os.mkdir(path)
 
@@ -104,8 +105,6 @@ def generate_verify_code(width=240, height=40, font_family='Arial.ttf', font_siz
         char.append(rnd_char())
         draw.text((width / 4 * t + 10, 0), char[-1], font=font, fill=rnd_color2())
     # 模糊:
-    print char
-    print "".join(char)
     image = image.filter(ImageFilter.BLUR)
     image_path = os.path.join('images', 'generate', 'vcode.jpg')
     image.save(os.path.join(config.GLOBAL['STATIC_PATH'], image_path))

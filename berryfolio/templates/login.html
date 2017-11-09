@@ -8,7 +8,7 @@
 	<meta name="keywords" content="free html5, free template, free bootstrap, html5, css3, mobile first, responsive" />
 
 
-	<title>Bootstrap blog template</title>
+	<title>Login and Register</title>
 	<link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700,300' rel='stylesheet' type='text/css'>
 	<link rel="stylesheet" href={{ url_for('static', filename="include/bootstrap.min.css") }}>
 	<link type="text/css" rel="stylesheet" href={{ url_for('static', filename="css/style.css") }}>
@@ -19,8 +19,10 @@
 	<script type="text/javascript" charset="utf-8" src={{ url_for('static', filename="include/canvas2image.js") }}></script>
 </head>
 <body onload="draw()">
-
-	<div class="container">
+    {% if message %}
+        <h1>{{ message }}</h1>
+	{% endif %}
+    <div class="container">
 		<div class="row">
 			<div class="col-md-4 col-md-offset-4">
   			</div>
@@ -42,16 +44,16 @@
 					<h2>Log In</h2>
 					<div class="form-group">
 						<label for="username" class="sr-only">Username</label>
-						<input type="text" class="form-control" id="username" placeholder="用户名" autocomplete="off" name="username">
+						<input type="text" class="form-control" id="username" placeholder="用户名" autocomplete="off" name="username" required>
 					</div>
 					<div class="form-group">
 						<label for="password" class="sr-only">Password</label>
-						<input type="password" class="form-control" id="password" placeholder="密码" autocomplete="off" name="password">
+						<input type="password" class="form-control" id="password" placeholder="密码" autocomplete="off" name="password" required>
 					</div>
 					<div class="form-group">
 						<label for="check" class="sr-only">验证码</label>
-                        <input title="vcode" name="code" value="{{ verifycode }}" hidden>
-						<input type="text" class="form-control" id="check" placeholder="验证码" autocomplete="off" name="vcode">
+                        <input title="vcode" name="code" value="{{ vcode }}" hidden>
+						<input type="text" class="form-control" id="check" placeholder="验证码" autocomplete="off" name="vcode" required>
 					</div>
 					<div class="form-group">
 						<label for="remember"><input type="checkbox" id="remember"> Remember Me</label>
@@ -61,8 +63,9 @@
 						<p>Not registered? <a >Sign Up</a> | <a>Forgot Password?</a></p>
 					</div>
 					<div class="form-group ">
-						<input type="submit" class="btn-primary" name="btn" value="Login">
-						<!--<input type="submit" value=" " class="btn-primary">-->
+                        <!--button标签会强制提交表单，使required字段失效-->
+                        <input type="submit" title="Login" class = "btn-primary" name="btn" value="Login">
+                        <input type="submit" title="Register" class = "btn-primary" name="btn" value="Register">
 					</div>
 				</form>
 					<!-- END Sign In Form -->
@@ -98,7 +101,7 @@
                 ctx.drawImage(img1,0,0,300,540);
             };
     		var img2 = new Image;
-    		img2.src = "{{ verifyurl }}";
+    		img2.src = "{{ vcode_url }}";
     		img2.onload=function(){
                 ctx.drawImage(img2,0,0,240,60);
             };
