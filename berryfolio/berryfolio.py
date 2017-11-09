@@ -99,13 +99,18 @@ def login():
     if request.method == 'GET':
         (verifycode, filename) = generate_verify_code()
         verifyurl = url_for('static', filename=filename)
-        return render_template('login.html', message=message, varifyurl=verifyurl, verifycode=verifycode)
+        print verifyurl
+        print verifyurl.decode('utf-8')
+        return render_template('login.html', message=message, verifyurl=verifyurl.decode('utf-8'), verifycode=verifycode)
     elif request.method == 'POST':
-        if request.form['type'] == 'Login':
+        print 0
+        print request.form
+        if request.form['btn'] == u'Login':
+            print 1
             # 验证表单里的用户名密码
             username = request.form['username']
             password = request.form['password']
-            code = request.form['verifycode']
+            code = request.form['vcode']
             if code == request.form['code']:
                 db = get_db()
                 if db.match_user_pw(username, password):
@@ -117,7 +122,8 @@ def login():
                     message = "登录失败，请重试"
             else:
                 message = "验证码错误"
-        elif request.form['type'] == 'Register':
+        elif request.form['btn'] == u'Register':
+            print 2
             # 获得表单内容，检查并存入数据库，初始化目录并存入数据库
             # 未做SQL注入的防范
             username = request.form['username']
@@ -142,7 +148,6 @@ def login():
                     message = "注册失败，请重试"
             else:
                 message = "验证码错误"
-        logger.info("GET POST")
     return render_template('login.html', message=message)
 
 

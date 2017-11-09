@@ -102,12 +102,14 @@ def generate_verify_code(width=240, height=40, font_family='Arial.ttf', font_siz
     # 输出文字:
     for t in range(4):
         char.append(rnd_char())
-        draw.text((width / 4 * t + 10, 10), char[-1], font=font, fill=rnd_color2())
+        draw.text((width / 4 * t + 10, 0), char[-1], font=font, fill=rnd_color2())
     # 模糊:
+    print char
+    print "".join(char)
     image = image.filter(ImageFilter.BLUR)
     image_path = os.path.join('images', 'generate', 'vcode.jpg')
     image.save(os.path.join(config.GLOBAL['STATIC_PATH'], image_path))
-    return char, image_path
+    return "".join(char), image_path.replace("\\", "/")
 
 
 def generate_global(root_path):
