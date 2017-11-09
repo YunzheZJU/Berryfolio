@@ -97,7 +97,7 @@ def home():
 def login():
     message = None
     if request.method == 'GET':
-        (verifycode, filename) = generate_verify_code(app.root_path)
+        (verifycode, filename) = generate_verify_code()
         verifyurl = url_for('static', filename=filename)
         return render_template('login.html', message=message, varifyurl=verifyurl, verifycode=verifycode)
     elif request.method == 'POST':
@@ -142,6 +142,7 @@ def login():
                     message = "注册失败，请重试"
             else:
                 message = "验证码错误"
+        logger.info("GET POST")
     return render_template('login.html', message=message)
 
 
@@ -164,7 +165,7 @@ def mypage(message):
                         # 填充至16
                         filelist = (filelist * (16 / length + 1))[:16]
                     # 选16并构造url
-                    entity = map(lambda fileID: [url_for('static', filename=db.get_file_path(fileID))],
+                    entity = map(lambda fid: [url_for('static', filename=db.get_file_path(fid))],
                                  random.sample(filelist, 16))
                 else:
                     message = "获取作品信息失败"
@@ -202,22 +203,22 @@ def portfolio(message):
                 message = "未知上传类型"
                 if request.form['type'] == 'Photo' and 'photo' in request.files:
                     # 获取表单内容
-                    parentID = request.form['parentID']
+                    pid = request.form['parentID']
                     input_name = request.form['filename']
                     description = request.form['description']
-                    dir_name = db.get_name(parentID, 1)
+                    dir_name = db.get_name(pid, 1)
                     dir_path = os.path.join(config.GLOBAL['DATA_PATH'], username,
-                                            db.gen_parent_path(dir_id=parentID), dir_name)
+                                            db.gen_parent_path(dir_id=pid), dir_name)
                     # 保存文件至临时目录
                     filename = photos.save(request.files['photo'])
                     file_path_old = os.path.join(config.GLOBAL['TEMP_PATH'], filename)
                     file_path = os.path.join(dir_path, filename)
                     # 文件信息存入数据库
-                    fileID = db.add_file(parentID, input_name, description, file_path, username)
-                    if fileID:
+                    fid = db.add_file(pid, input_name, description, file_path, username)
+                    if fid:
                         # 为文件添加数字水印
                         if add_watermark(add_data_path_prefix(file_path_old),
-                                         add_data_path_prefix(file_path)):
+                                         add_data_path_prefix(file_path), config.GLOBAL['WM_PATH']):
                             message = "上传成功"
                         else:
                             # TODO: 添加水印失败，回滚数据库操作
@@ -227,15 +228,15 @@ def portfolio(message):
                         message = "上传失败"
                 elif request.form['type'] == 'Attribute':
                     # 获取表单内容
-                    fileID = request.form['fileID']
-                    parentID = request.form['parentID']
+                    fid = request.form['fileID']
+                    pid = request.form['parentID']
                     filename = request.form['filename']
                     description = request.form['description']
-                    file_path_old = db.get_file_path(fileID)
-                    file_path = os.path.join(username, db.gen_parent_path(dir_id=parentID),
+                    file_path_old = db.get_file_path(fid)
+                    file_path = os.path.join(username, db.gen_parent_path(dir_id=pid),
                                              file_path_old.split('\\')[-1])
                     # 存入数据库
-                    if db.update_file_info(fileID, parentID, filename, description, file_path):
+                    if db.update_file_info(fid, pid, filename, description, file_path):
                         # 比对文件位置
                         if file_path != file_path_old:
                             # 移动文件
@@ -248,12 +249,12 @@ def portfolio(message):
                     # 获取表单内容
                     dname = request.form['name']
                     dtype = request.form['type']
-                    parentID = request.form['parentID']
+                    pid = request.form['parentID']
                     # 存入数据库
-                    dirID = db.add_directory(dname, dtype, parentID, username)
-                    if dirID:
+                    did = db.add_directory(dname, dtype, pid, username)
+                    if did:
                         # 新增目录
-                        parentpath = db.gen_parent_path(dir_id=parentID)
+                        parentpath = db.gen_parent_path(dir_id=pid)
                         make_user_sub_dir(username, parentpath, dname)
                         message = "增加目录成功"
                     else:

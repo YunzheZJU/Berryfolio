@@ -163,7 +163,7 @@ def make_zip(folder, zipname):
         return None
 
 
-def add_watermark(src, dst, wm=config.GLOBAL['WM_PATH']):
+def add_watermark(src, dst, wm):
     try:
         filename = src.split("\\")[-1].split(".")[0]
         path_png = os.path.join(config.GLOBAL['TEMP_PATH'], filename + "_converted.png")
