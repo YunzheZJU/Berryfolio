@@ -1,10 +1,31 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
 <head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
+	<meta charset="UTF-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
 
+    <title>{% block title %}{% endblock %}</title>
+
+	<link type="text/css" href="https://fonts.googleapis.com/css?family=Open+Sans:400,700,300" rel="stylesheet">
+	<link type="text/css" href="{{ url_for('static', filename="include/bootstrap.min.css") }}" rel="stylesheet">
+	<link type="text/css" href="{{ url_for('static', filename="css/style.css") }}" rel="stylesheet">
+	<!-- Modernizr JS -->
+	<script type="text/javascript" src="{{ url_for('static', filename="include/modernizr-2.6.2.min.js") }}"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename="include/canvas2image.js") }}"></script>
+    {%- block head %}{% endblock %}
+</head>
+{%- block style %}{% endblock %}
+<body{% block body_onclick %}{% endblock %}>
+    {%- block body %}{%- endblock %}
+    <footer>
+        <div class="row">
+            <div class="text-center"><p><small>&copy; Copyright DAM</small></p></div>
+        </div>
+    </footer>
+    {%- block scripts_before_jq %}{%- endblock %}
+	<script src="{{ url_for('static', filename="include/jquery.min.js") }}"></script>
+	<script src="{{ url_for('static', filename="include/bootstrap.min.js") }}"></script>
+    {%- block scripts_after_jq %}{%- endblock %}
 </body>
 </html>

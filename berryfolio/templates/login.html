@@ -8,108 +8,122 @@
 	<meta name="keywords" content="free html5, free template, free bootstrap, html5, css3, mobile first, responsive" />
 
 
-	<title>Login and Register</title>
+	<title>Bootstrap blog template</title>
 	<link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700,300' rel='stylesheet' type='text/css'>
-	<link rel="stylesheet" href={{ url_for('static', filename="include/bootstrap.min.css") }}>
-	<link type="text/css" rel="stylesheet" href={{ url_for('static', filename="css/style.css") }}>
-	<link rel="stylesheet" href={{ url_for('static', filename="include/animate.css") }}>
+	<link rel="stylesheet" href="asset/bootstrap/css/bootstrap.min.css">
+	<link rel="stylesheet" href="asset/css/style.css" type="text/css">
+	<link rel="stylesheet" href="asset/css/animate.css" >
 	<!-- Modernizr JS -->
-	<script src={{ url_for('static', filename="include/modernizr-2.6.2.min.js") }}></script>
-
-	<script type="text/javascript" charset="utf-8" src={{ url_for('static', filename="include/canvas2image.js") }}></script>
+	<script src="asset/js/modernizr-2.6.2.min.js"></script>
+	<!-- FOR IE9 below -->
+	<!--[if lt IE 9]>
+	<script src="asset/js/respond.min.js"></script>
+	<![endif]-->
+	<script src="asset/js/canvas2image.js" type="text/javascript" charset="utf-8"></script>
 </head>
-<body onload="draw()">
-    {% if message %}
-        <h1>{{ message }}</h1>
-	{% endif %}
-    <div class="container">
+<body class="colorGreen" onload="draw()">
+	<div class="container" >
 		<div class="row">
-			<div class="col-md-4 col-md-offset-4">
-  			</div>
-  		</div>
-		<div class="row">
-			<div class="col-md-4 col-md-offset-4 ">
-				<p class="center">
-					<img class="title" src={{ url_for('static', filename="images/login.png") }}>
-  				</p>
-  			</div>
+			<div class="col-md-9">
+				<h1 style="margin: 20px 0px 0px 0px; font-family: Special;color: #000000">BERRYFPOLIO</h1>
+				<h4 style="font-family: time;color: #29a1af">注册新账号，加入树莓田！</h4>
+			</div>
+			<a id="ind_a" href="index_logout.html" style="display: none;">index</a>
+			<a id="log_a" href="login.html" style="display: none;">login</a>
+			<a id="reg_a" href="register.html" style="display: none;">register</a>
+			<div class="col-md-1">
+       			 <div class="imgbutton indexbutton" style="margin: 15px 0px 0px 0px;" onclick="ind_a.click()"></div>
+      		</div>
+			<div class="col-md-1">
+				<div class="imgbutton logbutton" style="margin: 15px 0px 0px 0px;" onclick="log_a.click()"></div>
+			</div>
+			<div class="col-md-1">
+				<div class="imgbutton signbutton" style="margin: 15px 0px 0px 0px;" onclick="reg_a.click()"></div>
+			</div>
 		</div>
+	</div>
+
+	<div class="container">
 		<div class="row">
 			<div class="col-md-4 ">
-					<img class="meo" src={{ url_for('static', filename="images/DAMeo.png") }}>
+					<img width="324" height="450" src="asset/image/idol.png">
 			</div>
 			<div class="col-md-4 .col-md-offset-4">
 					<!-- Start Sign In Form -->
-				<form class="fh5co-form animate-box" data-animate-effect="fadeIn" method="post" action={{ url_for('login') }}>
+				<form action="index_login.html" class="fh5co-form animate-box" data-animate-effect="fadeIn">
 					<h2>Log In</h2>
 					<div class="form-group">
 						<label for="username" class="sr-only">Username</label>
-						<input type="text" class="form-control" id="username" placeholder="用户名" autocomplete="off" name="username" required>
+						<input type="text" class="form-control" id="username" style="font-family: Time;" placeholder="用户名" autocomplete="off">
 					</div>
 					<div class="form-group">
 						<label for="password" class="sr-only">Password</label>
-						<input type="password" class="form-control" id="password" placeholder="密码" autocomplete="off" name="password" required>
+						<input type="password" class="form-control" id="password" style="font-family: Time;"  placeholder="密码" autocomplete="off">
 					</div>
 					<div class="form-group">
 						<label for="check" class="sr-only">验证码</label>
-                        <input title="vcode" name="code" value="{{ vcode }}" hidden>
-						<input type="text" class="form-control" id="check" placeholder="验证码" autocomplete="off" name="vcode" required>
+						<input type="password" class="form-control" id="check" style="font-family: Time;"  placeholder="验证码" autocomplete="off">
 					</div>
-					<div class="form-group">
+					<div class="form-group" style="font-family: Time;">
 						<label for="remember"><input type="checkbox" id="remember"> Remember Me</label>
 					</div>
-
-					<div class="form-group">
-						<p>Not registered? <a >Sign Up</a> | <a>Forgot Password?</a></p>
+					
+					<div class="form-group" style="font-family: Time;">
+						<p>还没注册过？ <a href="register.html">注册</a> | <a>忘记密码?</a></p>
 					</div>
 					<div class="form-group ">
-                        <!--button标签会强制提交表单，使required字段失效-->
-                        <input type="submit" title="Login" class = "btn-primary" name="btn" value="Login">
-                        <input type="submit" title="Register" class = "btn-primary" name="btn" value="Register">
+						<button  style="margin: 0px 0px 0px 250px" onclick="form.submit();" class = "btn-primary"></button>
+						<!--<input type="submit" value=" " class="btn-primary">-->
 					</div>
 				</form>
 					<!-- END Sign In Form -->
 			</div>
 			<div class="col-md-4">
-                <canvas id="myCanvas" width="300" height="540"> </canvas>
+					<canvas id="myCanvas" width="324" height="450">
 			</div>
 		</div>
 	</div>
+	<footer>
+		<div class="row">
+			<div class="text-center"><p><small>&copy; Copyright DAM</small></p></div>
+		</div>
+	</footer>
+	
 
-
-	<script type="text/javascript" src={{ url_for('static', filename="include/jquery.min.js") }}></script>
-	<script type="text/javascript" src={{ url_for('static', filename="include/bootstrap.min.js") }}></script>
+	<script src="asset/js/jquery.min.js"></script>
+	<script src="asset/bootstrap/js/bootstrap.min.js"></script>
 	<!-- Placeholder -->
-	<script type="text/javascript" src={{ url_for('static', filename="include/jquery.placeholder.min.js") }}></script>
+	<script src="asset/js/jquery.placeholder.min.js"></script>
 	<!-- Waypoints -->
-	<script type="text/javascript" src={{ url_for('static', filename="include/jquery.waypoints.min.js") }}></script>
+	<script src="asset/js/jquery.waypoints.min.js"></script>
 	<!-- Main JS -->
-	<script type="text/javascript" src={{ url_for('static', filename="scripts/main.js") }}></script>
+	<script src="asset/js/main.js"></script>
 
 	<script>
 		function draw(){
   			var c=document.getElementById("myCanvas"),
        			ctx=c.getContext('2d');
-   			c.width=500;
-    		c.height=900;
+   			c.width=324;
+    		c.height=450;
     		ctx.rect(0,0,c.width,c.height);
     		ctx.fillStyle='transparent';//画布填充颜色
     		ctx.fill();
+
+
     		var img1 = new Image;
-    		img1.src = "static/images/checkDAMeo.png";
+    		img1.src = "asset/image/idol.png";
     		img1.onload=function(){
-                ctx.drawImage(img1,0,0,300,540);
-            };
-    		var img2 = new Image;
-    		img2.src = "{{ vcode_url }}";
-    		img2.onload=function(){
-                ctx.drawImage(img2,0,0,240,60);
-            };
-            ctx.font = "30px Qing";
-            ctx.fillStyle = "red";
-            ctx.fillText("动态生成的验证码", 90, 230);
+                ctx.drawImage(img1,0,0,324,450);
+            }
+
+      		ctx.font = "20px Special";
+            ctx.fillStyle = "#da7256";
+            var txt="Q3TY"
+            ctx.globalCompositeOperation="source-over";
+            ctx.fillText(txt, 140, 310);
+
 		}
 	</script>
-
+ 
 </body>
 </html>

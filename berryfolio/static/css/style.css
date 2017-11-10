@@ -1,19 +1,37 @@
 /* =======================================================
 *
-* 	Template Style 
-*	Edit this section
+* TheFatRat的歌很好听
 *
 * ======================================================= */
 @font-face{
   font-family: Qing;
   src:url("../fonts/Qing.ttf");
 }
+@font-face{
+  font-family: Cute;
+  src:url("../fonts/cute.ttf");
+}
+@font-face{
+  font-family: Time;
+  src:url("../fonts/time.ttf");
+}
+@font-face{
+  font-family: Special;
+  src:url("../fonts/special.ttf");
+}
 body {
-  font-family: Qing;
+  font-family: Special;
   line-height: 1.5;
   font-size: 16px;
   color: #848484;
-  background-color: #f0f0f0;
+  background-color: #F9ECF1;
+}
+body.colorGreen{
+  font-family: Special;
+  line-height: 1.5;
+  font-size: 16px;
+  color: #848484;
+  background-color: #e0efea;
 }
 img.circle{
   width: 50px;
@@ -27,6 +45,63 @@ img.title{
 img.meo{
   width: 300px;
   height: 540px;
+}
+/*这是按钮们的样式*/
+.imgbutton{
+  width: 90px;
+  height: 80px;
+}
+.logbutton{
+  display:block;
+  background-size: 90px 80px;
+  background-image:url('../images/logbutton_up.png');
+    transition: background-image .25s;
+    -moz-transition: background-image .25s;	/* Firefox 4 */
+    -webkit-transition: background-image .25s;	/* Safari 和 Chrome */
+    -o-transition: background-image .25s;	/* Opera */
+}
+.logbutton:hover{
+  background-image:url('../images/logbutton_down.png');
+}
+.signbutton{
+  display:block;
+  background-size: 90px 80px;
+  background-image:url('../images/signbutton_up.png');
+}
+.signbutton:hover{
+  background-image:url('../images/signbutton_down.png');
+}
+.portbutton{
+  display:block;
+  background-size: 90px 80px;
+  background-image:url('../images/porbutton_up.png');
+}
+.portbutton:hover{
+  background-image:url('../images/porbutton_down.png');
+}
+.setbutton{
+  display:block;
+  background-size: 90px 80px;
+  background-image:url('../images/setbutton_up.png');
+}
+.setbutton:hover{
+  background-image:url('../images/setbutton_down.png');
+}
+.exitbutton{
+  display:block;
+  background-size: 90px 80px;
+  background-image:url('../images/exitbutton_up.png');
+}
+.exitbutton:hover{
+  background-image:url('../images/exitbutton_down.png');
+}
+.indexbutton{
+  display:block;
+  background-size: 90px 80px;
+  background-image:url('../images/exitbutton_up.png');
+}
+.indexbutton:hover{
+  background-image:url('../images/exitbutton_down.png');
 }
 p.center{
   text-align: center;
@@ -182,7 +257,23 @@ a:hover {
   background-image: url(../images/okbutton_down.png)
  
 }
+.btn-exit {
+  width: 30px;
+  height:30px;
+  background-size:45px 45px;
+  background-position:center;
+  border-radius: 3pt;
+  border:0pt;
+  background-image: url(../images/notbutton_up.png)
 
+}
+.btn-exit:hover, .btn-exit:focus, .btn-exit:active {
+  /*color: #ffffff;
+  background: #47d1d1 !important;*/
+
+  background-image: url(../images/notbutton_down.png)
+ 
+}
 input, textarea {
   color: #000000;
 }

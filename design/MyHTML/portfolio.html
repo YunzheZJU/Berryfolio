@@ -6,11 +6,36 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<title>Bootstrap blog template</title>
 	<link rel="stylesheet" href="asset/bootstrap/css/bootstrap.min.css">
-	<link rel="stylesheet" href="asset/css/style.css" type="text/css">
-	<script src="http://cdn.static.runoob.com/libs/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+  <script src="asset/bootstrap/js/jquery.min.js"></script>
+  <script src="asset/bootstrap/js/bootstrap.min.js"></script>
+
+	<link rel="stylesheet" href="asset/css/style_port.css" type="text/css">
 </head>
-<body onload="loadCata();">
-	<nav class="navbar navbar-inverse navbar-fixed-top">
+<body onload="loadCata();" style="background-color: #f3eedc">
+  <div style="background-color: #867f75; filter:alpha(opacity=50);">
+  <div class="container"  >
+    <div class="row">
+      <div class="col-md-9">
+        <h1 style="margin: 20px 0px 0px 0px; font-family: time;color: #000000">KenBoNely的作品集</h1>
+        <h4 style="font-family: time;color: #feeac5">最近很喜欢传火ww</h4>
+      </div>
+      <a id="ind_a" href="index_login.html" style="display: none;">index</a>
+      <a id="set_a" href="setting.html" style="display: none;">setting</a>
+      <a id="exit_a" href="index_logout.html" style="display: none;">exit</a>
+      <div class="col-md-1">
+        <div class="imgbutton indexbutton" style="margin: 15px 0px 0px 0px;" onclick="ind_a.click()"></div>
+      </div>
+      <div class="col-md-1">
+        <div class="imgbutton setbutton" style="margin: 15px 0px 0px 0px;" onclick="set_a.click()"></div>
+      </div>
+      <div class="col-md-1">
+        <div class="imgbutton exitbutton" style="margin: 15px 0px 0px 0px;" onclick="exit_a.click()"></div>
+      </div>
+    </div>
+  </div>
+  <br>
+</div>
+	<!-- <nav class="navbar navbar-inverse navbar-fixed-top">
       <div class="container-fluid">
         <div class="navbar-header">
          	<button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
@@ -30,41 +55,192 @@
           </ul>
         </div>
       </div>
-    </nav>
+    </nav> -->
 
-	<div class="container-fluid">
-      <div class="row">
-        <div class="col-sm-3 col-md-2 sidebar">
-          <ul class="nav nav-sidebar">
-            <li class="active"><a href="#">Overview <span class="sr-only">(current)</span></a></li>
-            <li><a href="#">Reports</a></li>
-            <li><a href="#">Analytics</a></li>
-            <li><a href="#">Export</a></li>
-          </ul>
-          <ul class="nav nav-sidebar">
-            <li><a href="">Nav item</a></li>
-            <li><a href="">Nav item again</a></li>
-            <li><a href="">One more nav</a></li>
-            <li><a href="">Another nav item</a></li>
-            <li><a href="">More navigation</a></li>
-          </ul>
-          <ul class="nav nav-sidebar">
-            <li><a href="">Nav item again</a></li>
-            <li><a href="">One more nav</a></li>
-            <li><a href="">Another nav item</a></li>
-          </ul>
-          <img onclick="addList.click()" src="asset/image/add.png"/>
+
+        <div class="col-sm-3 col-md-2 sidebar" style="background-color:#a39b8f;">
+          <!-- <img onclick="addList.click()" src="asset/image/add.png"/> -->
+          <hr>
+          <div class="row">
+          <div class="col-md-2">
+            <button type="button" class="btn-primary changeB" ></button>
+          </div>
+          <div class="col-md-2">
+            <button type="button" class="btn-primary addB" onclick="addModal();"></button>
+          </div>
+          <div class="col-md-2">
+            <button type="button" class="btn-primary upB" onclick="upModal();"></button>
+          </div>
+          <div class="col-md-2">
+            <button type="button"  class="btn-primary downB" onclick="downModal();"></button>
+          </div>
+          <div class="col-md-2" style="color: #feeac5; font-size: 20px">
+           ^_^
+          </div>
+          
+          </div>
+          <div class="downB" ddata-toggle="modal" data-target="#myModal"></div>
           <a href="add.html" id="addList" style="display: none;">a</a>
+          <hr>
+          <ul class="nav nav-sidebar">
+            <li><a id="folder1" onclick="fold(1,3,0)">▲ DAM </a></li>
+            <li><a id="folder11" onclick="">&nbsp;&nbsp;■ A1</a></li>
+            <li><a id="folder12" onclick="">&nbsp;&nbsp;■ A2</a></li>
+            <li><a id="folder13" onclick="">&nbsp;&nbsp;■ A3</a></li>
+          </ul>
+          <ul class="nav nav-sidebar">
+            <li><a id="folder2" onclick="fold(2,2,0)">▲ 数字摄影 </a></li>
+            <li><a id="folder21" onclick="fold(21,2,2)">&nbsp;&nbsp;▲ 秋学期</a></li>
+            <li><a id="folder211" onclick="">&nbsp;&nbsp;&nbsp;&nbsp;■ 玉泉</a></li>
+            <li><a id="folder212" onclick="">&nbsp;&nbsp;&nbsp;&nbsp;■ 紫金港</a></li>
+            <li><a id="folder22" onclick="">&nbsp;&nbsp;■ 冬学期</a></li>
+          </ul>
+          <ul class="nav nav-sidebar">
+            <li><a id="folder3" onclick="fold(3,2,0)">▲ 计算机动画 </a></li>
+            <li><a id="folder31" onclick="">&nbsp;&nbsp;■ P1</a></li>
+            <li><a id="folder32" onclick="">&nbsp;&nbsp;■ P2</a></li>
+          </ul>
           <!-- Button trigger modal -->
+          <br>
+          <br>
+          <br>
+          <br>
+          <br>
+          <br>
+          <br>
+          <br>
+          <br>
+          <br>
+          <br>
+          <br>
+          <br>
+          <br>
+          <br>
 		</div>
+    <!-- 右边的展示区 -->
+    <div class="container">
+      <div class="row">
+        <div class="row">
+          <div class="col-md-10"><h4>当前目录：DAM<h4></div>
+            <div class="col-md-10" ">
+              <div class="row">
+                <div class="col-md-4">
+                    <button id="pic1" data-toggle="modal" data-target="#picModal" style="display: none;"></button>
+                    <div class="product-type-container">
+                        <div class="product-type-overlay" onclick="pic1.click();">
+                            <div class="product-type-info">
+                                <h3  class="text-uppercase" style="color:#000">作品名</h3>
+                                <p class="text-uppercase" style="color:#281a0d">作品介绍</p>
+                            </div>
+                        </div>
+                        <img  src="asset/source/1.jpg" alt="Men fashion 1" class="product-type-img img-collection gold-border">
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="product-type-container">
+                        <div class="product-type-overlay">
+                            <div class="product-type-info">
+                                <h3  class="text-uppercase" style="color:#000">作品名</h3>
+                                <p class="text-uppercase" style="color:#281a0d">作品介绍</p>
+                            </div>
+                        </div>
+                        <img  src="asset/source/1.jpg" alt="Men fashion 1" class="product-type-img img-collection gold-border">
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="product-type-container">
+                        <div class="product-type-overlay">
+                            <div class="product-type-info">
+                                <h3  class="text-uppercase" style="color:#000">作品名</h3>
+                                <p class="text-uppercase" style="color:#281a0d">作品介绍</p>
+                            </div>
+                        </div>
+                        <img  src="asset/source/1.jpg" alt="Men fashion 1" class="product-type-img img-collection gold-border">
+                    </div>
+                </div>    
+              </div>
+              <div class="row">
+                <div class="col-md-4">
+                    <div class="product-type-container">
+                        <div class="product-type-overlay">
+                            <div class="product-type-info">
+                                <h3  class="text-uppercase" style="color:#000">作品名</h3>
+                                <p class="text-uppercase" style="color:#281a0d">作品介绍</p>
+                            </div>
+                        </div>
+                        <img  src="asset/source/3.jpeg" alt="Men fashion 1" class="product-type-img img-collection gold-border">
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="product-type-container">
+                        <div class="product-type-overlay">
+                            <div class="product-type-info">
+                                <h3  class="text-uppercase" style="color:#000">作品名</h3>
+                                <p class="text-uppercase" style="color:#281a0d">作品介绍</p>
+                            </div>
+                        </div>
+                        <img  src="asset/source/1.jpg" alt="Men fashion 1" class="product-type-img img-collection gold-border">
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="product-type-container">
+                        <div class="product-type-overlay">
+                            <div class="product-type-info">
+                                <h3  class="text-uppercase" style="color:#000">作品名</h3>
+                                <p class="text-uppercase" style="color:#281a0d">作品介绍</p>
+                            </div>
+                        </div>
+                        <img  src="asset/source/4.jpg" alt="Men fashion 1" class="product-type-img img-collection gold-border">
+                    </div>
+                </div>    
+              </div>
+                            <div class="row">
+                <div class="col-md-4">
+                    <div class="product-type-container">
+                        <div class="product-type-overlay">
+                            <div class="product-type-info">
+                                <h3  class="text-uppercase" style="color:#000">作品名</h3>
+                                <p class="text-uppercase" style="color:#281a0d">作品介绍</p>
+                            </div>
+                        </div>
+                        <img  src="asset/source/1.jpg" alt="Men fashion 1" class="product-type-img img-collection gold-border">
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="product-type-container">
+                        <div class="product-type-overlay">
+                            <div class="product-type-info">
+                                <h3  class="text-uppercase" style="color:#000">作品名</h3>
+                                <p class="text-uppercase" style="color:#281a0d">作品介绍</p>
+                            </div>
+                        </div>
+                        <img  src="asset/source/1.jpg" alt="Men fashion 1" class="product-type-img img-collection gold-border">
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="product-type-container">
+                        <div class="product-type-overlay">
+                            <div class="product-type-info">
+                                <h3  class="text-uppercase" style="color:#000">作品名</h3>
+                                <p class="text-uppercase" style="color:#281a0d">作品介绍</p>
+                            </div>
+                        </div>
+                        <img  src="asset/source/1.jpg" alt="Men fashion 1" class="product-type-img img-collection gold-border">
+                    </div>
+                </div>    
+              </div>
+            </div>
+        </div>
+      </div>
     </div>
+
+
+    
 <!-- 按钮触发模态框 -->
 <!-- Button trigger modal -->
-<button type="button" class="btn btn-primary btn-lg" data-toggle="modal" data-target="#myModal">
-  Launch demo modal
-</button>
 <!-- Modal -->
-<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+<!-- 下载用模态框 -->
+<div class="modal fade" id="downModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
   <div class="modal-dialog" role="document">
     <div class="modal-content">
       <div class="modal-header">
@@ -73,52 +249,150 @@
       </div>
       <div class="modal-body">
         <div class="form-group">
-			<label for="list_l" class="col-sm-1 control-label">下载</label>
-   			<div class="input-group col-md-9">
-    			<input id="Cata_now" type="text" class="form-control " placeholder="DAM">
-     				<div class="input-group-btn">
-     					<button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">目录选择 <span class="caret"></span></button>
-        				<ul id = "cata" class="dropdown-menu dropdown-menu-right">
-        							<!--这里会动态添加目录-->
-        				</ul>
-  					</div><!-- /btn-group -->
-      
-    		</div><!-- /input-group -->
-		<div>
+      <label for="list_l" class="col-sm-1 control-label">下载</label>
+        <div class="input-group col-md-9">
+          <input id="Cata_now" type="text" class="form-control " placeholder="DAM">
+            <div class="input-group-btn">
+              <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">目录选择 <span class="caret"></span></button>
+                <ul id = "cata" class="dropdown-menu dropdown-menu-right">
+                      <!--这里会动态添加目录-->
+                </ul>
+            </div><!-- /btn-group -->
+        </div><!-- /input-group -->
+    <div>
       </div>
       <div class="modal-footer">
-      	<button type="button" class="btn btn-primary">download</button>
+        <button type="button" class="btn btn-primary">download</button>
         <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
       </div>
     </div>
   </div>
 </div>
+<!-- 更改图片信息 -->
+<div class="modal fade" id="imgModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="myModalLabel">下载文件夹</h4>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+      <label for="list_l" class="col-sm-1 control-label">下载</label>
+        <div class="input-group col-md-9">
+          <input id="Cata_now" type="text" class="form-control " placeholder="DAM">
+            <div class="input-group-btn">
+              <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">目录选择 <span class="caret"></span></button>
+                <ul id = "cata" class="dropdown-menu dropdown-menu-right">
+                      <!--这里会动态添加目录-->
+                </ul>
+            </div><!-- /btn-group -->
+      
+        </div><!-- /input-group -->
+    <div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary">download</button>
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- 上传用 -->
+<div class="modal fade" id="upModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="myModalLabel">下载文件夹</h4>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+      <label for="list_l" class="col-sm-1 control-label">下载</label>
+        <div class="input-group col-md-9">
+          <input id="Cata_now" type="text" class="form-control " placeholder="DAM">
+            <div class="input-group-btn">
+              <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">目录选择 <span class="caret"></span></button>
+                <ul id = "cata" class="dropdown-menu dropdown-menu-right">
+                      <!--这里会动态添加目录-->
+                </ul>
+            </div><!-- /btn-group -->
+      
+        </div><!-- /input-group -->
+    <div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary">download</button>
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+<!-- 增加目录用 -->
+<div class="modal fade" id="addModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="myModalLabel">下载文件夹</h4>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+      <label for="list_l" class="col-sm-1 control-label">下载</label>
+        <div class="input-group col-md-9">
+          <input id="Cata_now" type="text" class="form-control " placeholder="DAM">
+            <div class="input-group-btn">
+              <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">目录选择 <span class="caret"></span></button>
+                <ul id = "cata" class="dropdown-menu dropdown-menu-right">
+                      <!--这里会动态添加目录-->
+                </ul>
+            </div><!-- /btn-group -->
+      
+        </div><!-- /input-group -->
+    <div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary">download</button>
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
 
-	<script src="asset/bootstrap/js/jquery.min.js"></script>
-	<script src="asset/bootstrap/js/bootstrap.min.js"></script>
-<script type="text/javascript">
-	function browseFolder(path) {
-    	try {
-        	var Message = "\u8bf7\u9009\u62e9\u6587\u4ef6\u5939"; //选择框提示信息
-        	var Shell = new ActiveXObject("Shell.Application");
-        	var Folder = Shell.BrowseForFolder(0, Message, 64, 17); //起始目录为：我的电脑
-        	//var Folder = Shell.BrowseForFolder(0, Message, 0); //起始目录为：桌面
-        	if (Folder != null) {
-            	Folder = Folder.items(); // 返回 FolderItems 对象
-            	Folder = Folder.item(); // 返回 Folderitem 对象
-            	Folder = Folder.Path; // 返回路径
-            	if (Folder.charAt(Folder.length - 1) != "\\") {
-                	Folder = Folder + "\\";
-            	}
-            	document.getElementById(path).value = Folder;
-            	return Folder;
-        	}
-    	}
-    	catch (e) {
-        	alert(e.message);
-    	}
-	}
-</script>
+  <script>
+    function imgModal(){
+      $("#imgModal").modal("toggle");
+    }
+    function downModal(){
+      $("#downModal").modal("toggle");
+    }
+    function upModal(){
+      $("#upModal").modal("toggle");
+    }
+    function addModal(){
+      $("#addModal").modal("toggle");
+    }
+    function unfold(folderNum,count,blank){
+      var str= $("#folder"+folderNum).text();
+      var finalStr = str.substring(0,blank)+ "▲" + str.substring(1+blank);
+      $("#folder"+folderNum).text(finalStr);
+      $("#folder"+folderNum).attr( 'onclick', "fold("+folderNum+','+count+','+blank+");");
+      for(var i = 1; i <= count;i++){
+        $("#folder"+folderNum+i).show();
+      }
+    }
+    function fold(folderNum,count,blank){
+      var str= $("#folder"+folderNum).text();
+      $("#folder1.1").text("hei");
+      var finalStr = str.substring(0,blank)+"▼" + str.substring(1+blank);
+      $("#folder"+folderNum).text(finalStr);
+      $("#folder"+folderNum).attr( 'onclick', "unfold("+folderNum+','+count+','+blank+");");
+      for(var i = 1; i <= count;i++){
+        if($("#folder"+folderNum+i).attr("onclick").substring(0,4)!="unfo"){
+          $("#folder"+folderNum+i).click();
+        }
+        $("#folder"+folderNum+i).hide();
+      }
+    }
+  </script>
 	<script>
 		function loadCata()//动态生成下拉菜单中的目录选项
 		{
@@ -150,3 +424,6 @@
 		</script>
 </body>
 </html>
+<!-- 写这个HTML遇到的难点 -->
+<!-- 1.按钮排版很难弄，最后决定把所有按钮都放在一起，排版稍微好了一点 -->
+<!-- 2.文件夹的展开和收起：主要问题在于（1）需要解决空白（在html里需要用特殊的符号&nbsp;代替，但是在jquery里写这个符号就会被转化成字符串不乏识别）的问题，让文件夹之间有关系序列。（2）如果子文件夹还有子文件夹，会出现收起该文件夹没有收起来其子文件夹的问题……-->

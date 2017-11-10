@@ -88,7 +88,13 @@ def home():
             else:
                 # 未注册过的假冒用户，踢掉踢掉
                 session.pop('username', None)
-    return render_template('home.html')
+    return render_template('index_logout.html')
+
+
+# 用户注册页
+@app.route('/register', methods=['GET', 'POST'])
+def register():
+    pass
 
 
 # 用户登录页
