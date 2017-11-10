@@ -7,6 +7,7 @@
 
     <title>{% block title %}{% endblock %}</title>
 
+    <link rel="icon" href="{{ url_for('static', filename='icons/favicon.ico') }}" type="image/x-icon">
 	<link type="text/css" href="https://fonts.googleapis.com/css?family=Open+Sans:400,700,300" rel="stylesheet">
 	<link type="text/css" href="{{ url_for('static', filename="include/bootstrap.min.css") }}" rel="stylesheet">
 	<link type="text/css" href="{{ url_for('static', filename="css/style.css") }}" rel="stylesheet">
@@ -16,8 +17,8 @@
     {%- block head %}{% endblock %}
 </head>
 {%- block style %}{% endblock %}
-<body{% block body_onclick %}{% endblock %}>
-    {%- block body %}{%- endblock %}
+<body{% block body_property %}{% endblock %}>
+    {%- block content %}{%- endblock %}
     <footer>
         <div class="row">
             <div class="text-center"><p><small>&copy; Copyright DAM</small></p></div>

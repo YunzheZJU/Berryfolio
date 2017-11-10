@@ -94,7 +94,36 @@ def home():
 # 用户注册页
 @app.route('/register', methods=['GET', 'POST'])
 def register():
-    pass
+    message = None
+    (vcode, filename) = generate_verify_code()
+    vcode_url = url_for('static', filename=filename).decode('utf-8')
+    if request.method == 'POST':
+        # 获得表单内容，检查并存入数据库，初始化目录并存入数据库
+        # 未做SQL注入的防范
+        username = request.form['username']
+        password = request.form['password']
+        code = request.form['vcode']
+        if code == request.form['code']:
+            db = get_db()
+            if db.add_user(username, password):
+                # 创建用户目录
+                make_user_dir(username)
+                # 在数据库中新增目录信息
+                if db.add_directory("root", 1, None, username):
+                    # 创建用户目录下的根目录
+                    make_user_sub_dir(username, None, "root")
+                    # 注册成功，登录一下
+                    message = u"注册成功，请登录"
+                    return redirect(url_for('login'))
+                else:
+                    logger.error("Fail to add dictionary: name=%s, user=%s" % ("root", username))
+                    message = u"注册失败，内部错误"
+            else:
+                logger.error("Fail to register: username=%s" % username)
+                message = u"注册失败，请重试"
+        else:
+            message = u"验证码错误"
+    return render_template('register.html', message=message, vcode=vcode)
 
 
 # 用户登录页
@@ -104,49 +133,23 @@ def login():
     (vcode, filename) = generate_verify_code()
     vcode_url = url_for('static', filename=filename).decode('utf-8')
     if request.method == 'POST':
-        if request.form['btn'] == u'Login':
-            # 验证表单里的用户名密码
-            username = request.form['username']
-            password = request.form['password']
-            code = request.form['vcode']
-            if code == request.form['code']:
-                db = get_db()
-                if db.match_user_pw(username, password):
-                    # 登录成功，去mypage
-                    session['username'] = username
-                    message = u"登陆成功"
-                    return redirect(url_for('mypage'))
-                else:
-                    # 登录失败，滚回login
-                    message = u"登录失败，请重试"
+        # 验证表单里的用户名密码
+        username = request.form['username']
+        password = request.form['password']
+        code = request.form['vcode']
+        if code == request.form['code']:
+            db = get_db()
+            if db.match_user_pw(username, password):
+                # 登录成功，去mypage
+                session['username'] = username
+                message = u"登陆成功"
+                return redirect(url_for('mypage'))
             else:
-                message = u"验证码错误"
-        elif request.form['btn'] == u'Register':
-            # 获得表单内容，检查并存入数据库，初始化目录并存入数据库
-            # 未做SQL注入的防范
-            username = request.form['username']
-            password = request.form['password']
-            code = request.form['vcode']
-            if code == request.form['code']:
-                db = get_db()
-                if db.add_user(username, password):
-                    # 创建用户目录
-                    make_user_dir(username)
-                    # 在数据库中新增目录信息
-                    if db.add_directory("root", 1, None, username):
-                        # 创建用户目录下的根目录
-                        make_user_sub_dir(username, None, "root")
-                        # 注册成功，登录一下
-                        message = u"注册成功，请登录"
-                    else:
-                        logger.error("Fail to add dictionary: name=%s, user=%s" % ("root", username))
-                        message = u"注册失败，内部错误"
-                else:
-                    logger.error("Fail to register: username=%s" % username)
-                    message = u"注册失败，请重试"
-            else:
-                message = u"验证码错误"
-    return render_template('login.html', message=message, vcode_url=vcode_url, vcode=vcode)
+                # 登录失败，滚回login
+                message = u"登录失败，请重试"
+        else:
+            message = u"验证码错误"
+    return render_template('login.html', message=message, vcode=vcode)
 
 
 # 用户登出
@@ -157,8 +160,14 @@ def logout():
     return redirect(url_for('home'))
 
 
+# 条款
+@app.route('/contract', methods=['GET'])
+def contract():
+    return render_template('contract.html')
+
+
 # 个人主页，展示16张随机作品
-@app.route('/mypage', methods=['GET', 'POST'])
+@app.route('/mypage', methods=['GET'])
 def mypage():
     message = None
     if 'username' in session:
@@ -167,39 +176,46 @@ def mypage():
         db = get_db()
         if db.check_username(username):
             # 这是一个注册了的用户，给你看自己的个人主页
-            if request.method == 'GET':
-                # 从数据库获取这个用户的个人作品，传入模板
-                file_list = db.get_files_by_user(username)
-                entity = None
-                if file_list is not None:
-                    length = len(file_list)
-                    if length > 0:
-                        if length < 16:
-                            # 填充至16
-                            file_list = (file_list * (16 / length + 1))[:16]
-                        # 选16并构造url
-                        entity = map(lambda fid: [url_for('static', filename=db.get_file_path(fid))],
-                                     random.sample(file_list, 16))
-                    else:
-                        # length == 0
-                        # TODO: 填充默认图像
-                        pass
+            # 从数据库获取这个用户的个人作品，传入模板
+            file_list = db.get_files_by_user(username)
+            entity = []
+            if file_list is not None:
+                # 获取成功
+                length = len(file_list)
+                if length > 0:
+                    if length < 16:
+                        # 填充至16
+                        file_list = (file_list * (16 / length + 1))[:16]
+                    # 选16并构造url
+                    for fid in random.sample(file_list, 16):
+                        file_info = db.get_file_info(fid)
+                        entity.append(get_file_info(file_info))
                 else:
-                    message = u"获取作品信息失败"
-                return render_template('mypage.html', entity=entity, username=username, message=message)
-            elif request.method == 'POST':
-                # TODO: 获得表单内容，检查并存入数据库，更新用户设置
-                message = u"用户设置已更新"
-                return redirect(url_for('mypage'))
+                    # length == 0
+                    # 填充缺省图像
+                    entity = [get_file_info({'status': 'failed'})] * 16
+            else:
+                # 获取失败
+                message = u"获取作品信息失败"
+            return render_template('index_login.html', entity_0=entity[0:4], entity_1=entity[4:6],
+                                   entity_2=entity[6:16], username=username, message=message,
+                                   avatar_url='/static/images/wm.jpg')
         else:
             # 未注册过的假冒用户，踢掉踢掉
             session.pop('username', None)
     return redirect(url_for('home'))
 
 
+# 设置页面
+@app.route('/settings', methods=['GET', 'POST'])
+def setting():
+    pass
+
+
 # 个人管理页面
 @app.route('/portfolio', methods=['GET', 'POST'])
-def portfolio(message):
+def portfolio():
+    message = None
     if 'username' in session:
         username = session['username']
         # 检查到这个用户曾经登陆过

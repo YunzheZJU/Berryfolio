@@ -129,8 +129,8 @@ def generate_global(root_path):
 def extract_file_info(file_info):
     """
     从传入的文件信息元组中提取必要信息：文件名（可能为unicode）、描述（可能为空）、存储路径
-    :param file_info: 存储文件信息的元组，形如(1, u'photo1.jpg', u'hahahah', 3, u'Yunzhe/root/folder/sub', u'Yunzhe')
-    :return: 存储文件关键信息的字典，形如{'filename': 'photo1.jpg', 'description': 'hahahah', 'path': 'Yunzhe/root/folder/sub'}
+    :param file_info: 存储文件信息的元组，形如(1, u'123', u'hahahah', 3, u'Yunzhe/root/folder/sub/photo1.jpg', u'Yunzhe')
+    :return: 存储文件关键信息的字典，形如{'filename': '123', 'description': 'hahahah', 'path': 'Yunzhe/root/folder/sub/photo1.jpg'}
     """
     # 将可能存在的unicode元素转换为str
     converted = map(lambda tp: tp.encode('utf-8') if isinstance(tp, unicode) else tp, file_info)
@@ -203,3 +203,11 @@ def add_watermark(src, dst, wm):
     except StandardError as ex:
         logger.error("Error occurred during watermarking: " + ex.message)
         return None
+
+
+def get_file_info(file_info):
+    if file_info['status'] == 'success':
+        return file_info['filename'].decode('utf-8'), file_info['description'].decode('utf-8'), \
+               ('/static/' + file_info['path']).decode('utf-8')
+    # 否则返回缺省图片
+    return "foo".decode('utf-8'), "No description".decode('utf-8'), '/static/images/wm.jpg'.decode('utf-8')

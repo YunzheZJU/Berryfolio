@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}Welcome to Berryfolio{% endblock %}
+{% block title %}欢迎使用Berryfolio{% endblock %}
 {% block style %}
 <style type="text/css">
     *{ margin:0; padding:0; list-style:none;}
@@ -13,7 +13,7 @@
     .next1{ position:absolute; top:220px; right:20px; width:28px; height:51px;z-index:9;cursor:pointer;}
 </style>
 {% endblock %}
-{% block body %}
+{% block content %}
     <div class="container" >
 		<div class="row">
 			<div class="col-md-9">
@@ -49,7 +49,7 @@
 {% endblock %}
 {% block scripts_after_jq %}
     <script src="{{ url_for('static', filename="include/pic_tab.js") }}"></script>
-    <script type="text/javascript">
+    <script>
         jq('#demo1').banqh({
             box:"#demo1",//总框架
             pic:"#ban_pic1",//大图框架
@@ -76,6 +76,3 @@
         })
     </script>
 {% endblock %}
-
-</body>
-</html>

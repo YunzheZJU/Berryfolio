@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+{% block title %}欢迎进入Berryfolio{% endblock %}
+{% block head %}
+    <link type="text/css" rel="stylesheet" href={{ url_for('static', filename="include/component.css") }}>
+{% endblock %}
+{% block body_property %} class="no-js"{% endblock %}
+{% block content %}
+    {% if message %}
+        <h5>{{ message }}</h5>
+	{% endif %}
+    <div class="container" >
+		<div class="row">
+			<div class="col-md-1">
+				<div class="avatar-circle" >
+					<img style="margin:10px 0px 0px 0px;" class="circle" src={{ avatar_url }}/>
+				</div>
+			</div>
+			<div class="col-md-8">
+			<div style="margin:25px 0px 0px 0px; font-family: Time" >
+				<p>我的名字是{{ username }}！</p>
+			</div>
+			</div>
+			<a id="port_a" href="{{ url_for('portfolio') }}" style="display: none;">作品集</a>
+			<a id="set_a" href="{{ url_for('setting') }}" style="display: none;">设置</a>
+			<a id="exit_a" href="{{ url_for('logout') }}" style="display: none;">退出</a>
+
+			<div class="col-md-1">
+				<div class="imgbutton portbutton" id="portfolio" style="margin: 0px 0px 0px 0px;" onclick="port_a.click()"></div>
+			</div>
+			<div class="col-md-1">
+				<div class="imgbutton setbutton" id="setting" style="margin: 0px 0px 0px 0px;" onclick="set_a.click()"></div>
+			</div>
+			<div class="col-md-1">
+				<div class="imgbutton exitbutton" id="exit" style="margin: 0px 0px 0px 0px;" onclick="exit_a.click()"></div>
+			</div>
+		</div>
+	</div>
+	<!-- 下面是动态的图片展示栏-->
+	<br>
+	<div class="container" >
+		<section id="photostack-1" class="photostack photostack-start">
+			<div>
+                {% for e in entity_0 %}
+				<figure>
+					<a class="photostack-img">
+                        <img width="240" height="240" src="{{ e[2] }}" alt="{{ e[0] }}"/>
+                    </a>
+					<figcaption>
+						<a href="#" ><h2 class="photostack-title">{{ e[0] }}</h2></a>
+						<div class="photostack-back">
+							<p>{{ e[1] }}</p>
+						</div>
+					</figcaption>
+				</figure>
+                {% endfor %}
+                {% for e in entity_1 %}
+				<figure>
+					<a href="#" class="photostack-img">
+                        <img width="240" height="240" src="{{ e[2] }}" alt="{{ e[0] }}"/>
+                    </a>
+					<figcaption>
+						<h2 class="photostack-title">{{ e[0] }}</h2>
+					</figcaption>
+				</figure>
+                {% endfor %}
+                {% for e in entity_2 %}
+				<figure data-dummy>
+					<a href="#" class="photostack-img">
+                        <img width="240" height="240" src="{{ e[2] }}" alt="{{ e[0] }}"/>
+                    </a>
+					<figcaption>
+						<h2 class="photostack-title">{{ e[0] }}</h2>
+					</figcaption>
+				</figure>
+                {% endfor %}
+			</div>
+			<!-- 这里出现了一个nav……emmm -->
+		</section>
+	</div>
+	<br>
+{% endblock %}
+{% block scripts_before_jq %}
+    <script src={{ url_for('static', filename="include/classie.js") }}></script>
+    <script src={{ url_for('static', filename="include/photostack.js") }}></script>
+    <script>
+        // [].slice.call( document.querySelectorAll( '.photostack' ) ).forEach( function( el ) { new Photostack( el ); } );
+        new Photostack( document.getElementById( 'photostack-1' ), {
+            callback : function( item ) {
+                //console.log(item)
+            }
+        } );
+    </script>
+{% endblock %}
+<body >

@@ -1,0 +1,390 @@
+/* =======================================================
+*
+* TheFatRat的歌很好听
+*
+* ======================================================= */
+@font-face{
+  font-family: Qing;
+  src:url("../fonts/Qing.ttf");
+}
+@font-face{
+  font-family: Cute;
+  src:url("../fonts/cute.ttf");
+}
+@font-face{
+  font-family: Time;
+  src:url("../fonts/time.ttf");
+}
+@font-face{
+  font-family: Special;
+  src:url("../fonts/special.ttf");
+}
+body {
+  font-family: time;
+  line-height: 1.5;
+  font-size: 16px;
+  color: #848484;
+  background-color: #F9ECF1;
+}
+
+/*这是按钮们的样式*/
+.imgbutton{
+  width: 90px;
+  height: 80px;
+}
+.logbutton{
+  display:block;
+  background-size: 90px 80px;
+  background-image:url('../images/logbutton_up.png');
+}
+.logbutton:hover{
+  background-image:url('../images/logbutton_down.png');
+}
+.signbutton{
+  display:block;
+  background-size: 90px 80px;
+  background-image:url('../images/signbutton_up.png');
+}
+.signbutton:hover{
+  background-image:url('../images/signbutton_down.png');
+}
+.portbutton{
+  display:block;
+  background-size: 90px 80px;
+  background-image:url('../images/porbutton_up.png');
+}
+.portbutton:hover{
+  background-image:url('../images/porbutton_down.png');
+}
+.setbutton{
+  display:block;
+  background-size: 90px 80px;
+  background-image:url('../images/setbutton_up.png');
+}
+.setbutton:hover{
+  background-image:url('../images/setbutton_down.png');
+}
+.exitbutton{
+  display:block;
+  background-size: 90px 80px;
+  background-image:url('../images/exitbutton_up.png');
+}
+.exitbutton:hover{
+  background-image:url('../images/exitbutton_down.png');
+}
+.indexbutton{
+  display:block;
+  background-size: 90px 80px;
+  background-image:url('../images/exitbutton_up.png');
+}
+.indexbutton:hover{
+  background-image:url('../images/exitbutton_down.png');
+}
+
+/*这里是文件夹的格式*/
+.downB{
+  display: block;
+  background-size: 30px 30px;
+  background-image:url('../images/downbutton_up.png');
+}
+.downB:hover{
+   background-image:url('../images/downbutton_down.png');
+}
+.addB{
+  display: block;
+  background-size: 30px 30px;
+  background-image:url('../images/addbutton_up.png');
+}
+.addB:hover{
+   background-image:url('../images/addbutton_down.png');
+}
+.changeB{
+  display: block;
+  background-size: 30px 30px;
+  background-image:url('../images/changebutton_up.png');
+}
+.changeB:hover{
+   background-image:url('../images/changebutton_down.png');
+}
+.upB{
+  display: block;
+  background-size: 30px 30px;
+  background-image:url('../images/upbutton_up.png');
+}
+.upB:hover{
+   background-image:url('../images/upbutton_down.png');
+}
+hr {
+  color:#feeac5;
+}
+a {
+  color: #feeac5;
+  font-family: time;
+  -moz-transition: all 0.3s ease;
+  -o-transition: all 0.3s ease;
+  -webkit-transition: all 0.3s ease;
+  -ms-transition: all 0.3s ease;
+  transition: all 0.3s ease;
+}
+a:hover {
+  color: #a39b8f;
+}
+
+.showroom{
+  display: block;
+
+  height:1100px ;
+  padding:20px 0px 10px 0px;
+  border: medium solid; 
+  border-color:#867f75 ;
+  -moz-border-radius: 15px; 
+  -webkit-border-radius: 15px; 
+  border-radius: 15px; 
+}
+.showroom img{
+  width:auto;
+  height:auto;
+  max-width:280px;
+  
+}
+
+/* Product Type */
+.product-type-container {
+  display: inline-block;
+  position: relative;
+  margin:20px 15px 20px 15px;
+  max-width: 100%;
+}
+.product-type-overlay {
+  cursor: pointer;
+  position: absolute;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-align-items: center;
+      -ms-flex-align: center;
+          align-items: center;
+  -webkit-justify-content: center;
+      -ms-flex-pack: center;
+          justify-content: center;
+  width: 100%;
+  height: 100%;
+  background: rgba(208, 131, 81, 0.15);
+  z-index: 1000;
+  opacity: 0;
+  transition: all 0.3s ease;
+}
+.product-type-container:hover .product-type-img {
+  -webkit-filter: blur(3px);
+  -moz-filter: blur(3px);
+  -o-filter: blur(3px);
+  -ms-filter: blur(3px);
+  filter: blur(3px);
+}
+.product-type-container:hover .product-type-overlay {
+  opacity: 1;
+}
+.product-type-info {
+  border: 1px solid #D0AF51;
+  text-align: center;
+  width: 80%;
+  height: 80%;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-align-items: center;
+      -ms-flex-align: center;
+          align-items: center;
+  -webkit-justify-content: center;
+      -ms-flex-pack: center;
+          justify-content: center;
+  -webkit-flex-direction: column;
+      -ms-flex-direction: column;
+          flex-direction: column;
+}
+.product-type-info h3 {
+  font-size: 1.1em;
+}
+.product-type-info .fa {
+  border: 2px solid #D0AF51;
+  border-radius: 50%;
+  width: 50px;
+  height: 50px;
+  padding-top: 9px;
+}
+.product-type-info .fa.white-border {
+  border-color: #fff;
+}
+.product-type-message {
+  background: #fff;
+  border: 1px solid #D0AF51;
+  padding: 50px;
+}
+.gold-border {
+  border: 1px solid #D0AF51;
+  padding: 10px;
+}
+.product-type-message p {
+  line-height: 1.8;
+  margin-top: 20px;
+  margin-bottom: 15px;
+}
+.product-type-message-title {
+  margin-top: 0;
+}
+
+.img-collection {
+  max-width: 230px;
+  max-height: 300px;
+}
+
+.menu {
+  padding: 0;
+  margin: 30px 0 0 0;
+}
+.menu li {
+  list-style: none;
+  margin-bottom: 10px;
+  display: -moz-inline-stack;
+  display: inline-block;
+  zoom: 1;
+  *display: inline;
+}
+.menu li a {
+  padding: 5px;
+}
+.menu li.active a {
+  color: #b3b3b3;
+}
+
+.fh5co-form {
+  padding: 30px;
+  margin-top: 1em;
+  -webkit-box-shadow: -4px 7px 46px 2px rgba(0, 0, 0, 0.1);
+  -moz-box-shadow: -4px 7px 46px 2px rgba(0, 0, 0, 0.1);
+  -o-box-shadow: -4px 7px 46px 2px rgba(0, 0, 0, 0.1);
+  box-shadow: -4px 7px 46px 2px rgba(0, 0, 0, 0.1);
+  background: #ffffff;
+}
+.style-2 .fh5co-form {
+  -webkit-box-shadow: -4px 7px 46px 2px rgba(0, 0, 0, 0.1);
+  -moz-box-shadow: -4px 7px 46px 2px rgba(0, 0, 0, 0.1);
+  -o-box-shadow: -4px 7px 46px 2px rgba(0, 0, 0, 0.1);
+  box-shadow: -4px 7px 46px 2px rgba(0, 0, 0, 0.1);
+}
+@media screen and (max-width: 768px) {
+  .fh5co-form {
+    padding: 15px;
+  }
+}
+.fh5co-form h2 {
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  font-size: 20px;
+  margin: 0 0 30px 0;
+  color: #000000;
+}
+.fh5co-form .form-group {
+  margin-bottom: 30px;
+}
+.fh5co-form .form-group p {
+  font-size: 14px;
+  color: #9f9f9f;
+  font-weight: 300;
+}
+.fh5co-form .form-group p a {
+  color: #000000;
+}
+.fh5co-form label {
+  font-weight: 300;
+  font-size: 14px;
+  font-weight: 300;
+}
+.fh5co-form .form-control {
+  font-size: 16px;
+  font-weight: 300;
+  height: 50px;
+  padding-left: 0;
+  padding-right: 0;
+  border: none;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+  -webkit-box-shadow: none;
+  -moz-box-shadow: none;
+  -o-box-shadow: none;
+  box-shadow: none;
+  -webkit-border-radius: 0px;
+  -moz-border-radius: 0px;
+  -ms-border-radius: 0px;
+  border-radius: 0px;
+  -moz-transition: all 0.3s ease;
+  -o-transition: all 0.3s ease;
+  -webkit-transition: all 0.3s ease;
+  -ms-transition: all 0.3s ease;
+  transition: all 0.3s ease;
+}
+.fh5co-form .form-control::-webkit-input-placeholder {
+  color: rgba(0, 0, 0, 0.3);
+  text-transform: uppercase;
+}
+.fh5co-form .form-control::-moz-placeholder {
+  color: rgba(0, 0, 0, 0.3);
+  text-transform: uppercase;
+}
+.fh5co-form .form-control:-ms-input-placeholder {
+  color: rgba(0, 0, 0, 0.3);
+  text-transform: uppercase;
+}
+.copyrights{
+	text-indent:-9999px;
+	height:0;
+	line-height:0;
+	font-size:0;
+	overflow:hidden;
+}
+.fh5co-form .form-control:-moz-placeholder {
+  color: rgba(0, 0, 0, 0.3);
+  text-transform: uppercase;
+}
+.fh5co-form .form-control:focus, .fh5co-form .form-control:active {
+  border-bottom: 1px solid rgba(0, 0, 0, 0.4);
+}
+
+.btn-primary {
+  /*height: 50px;
+  padding-right: 20px;
+  padding-left: 20px;
+  border: none;
+  background: #33cccc;
+  color: #ffffff;
+  -webkit-box-shadow: -2px 10px 20px -1px rgba(51, 204, 204, 0.4);
+  -moz-box-shadow: -2px 10px 20px -1px rgba(51, 204, 204, 0.4);
+  -o-box-shadow: -2px 10px 20px -1px rgba(51, 204, 204, 0.4);
+  box-shadow: -2px 10px 20px -1px rgba(51, 204, 204, 0.4);
+  */
+  width: 30px;
+  height:30px;
+  background-size:45px 45px;
+  background-position:center;
+  border-radius: 3pt;
+  border:0pt;
+
+}
+.btn-primary:hover, .btn-primary:focus, .btn-primary:active {
+  /*color: #ffffff;
+  background: #47d1d1 !important;*/
+ 
+}
+
+input, textarea {
+  color: #000000;
+}
+
+.placeholder {
+  color: #aaa;
+}
+
+.js .animate-box {
+  opacity: 0;
+}
+
+/*# sourceMappingURL=style.css.map */
