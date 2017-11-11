@@ -211,3 +211,11 @@ def get_file_info(file_info):
                ('/static/' + file_info['path']).decode('utf-8')
     # 否则返回缺省图片
     return "foo".decode('utf-8'), "No description".decode('utf-8'), '/static/images/wm.jpg'.decode('utf-8')
+
+
+def resize_avatar(src, dst):
+    img = Image.open(os.path.join(config.GLOBAL['STATIC_PATH'], src))
+    # TODO: 设置尺寸为150*150
+
+    img.save(os.path.join(config.GLOBAL['STATIC_PATH'], dst))
+    img.close()

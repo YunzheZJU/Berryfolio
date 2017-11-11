@@ -5,7 +5,8 @@ import shutil
 from utils import *
 from logger import logger
 from dbOperation import DbConnect
-from flask import Flask, render_template, g, make_response, json, request, session, redirect, url_for, send_from_directory
+from flask import Flask, render_template, g, make_response, json, request, session, redirect, url_for, \
+    send_from_directory, abort
 from flask_uploads import UploadSet, configure_uploads, IMAGES, patch_request_class
 from flask_wtf import FlaskForm
 from flask_wtf.file import FileField, FileRequired, FileAllowed
@@ -105,11 +106,12 @@ def register():
         code = request.form['vcode']
         if code == request.form['code']:
             db = get_db()
-            if db.add_user(username, password):
+            if db.add_user(username, password, 'images/avatar.jpg',
+                           u'这个人很懒', u'我的作品集', u'这是我的作品集'):
                 # 创建用户目录
                 make_user_dir(username)
                 # 在数据库中新增目录信息
-                if db.add_directory("root", 1, None, username):
+                if db.add_directory(u"root", 1, None, username):
                     # 创建用户目录下的根目录
                     make_user_sub_dir(username, None, "root")
                     # 注册成功，登录一下
@@ -209,7 +211,40 @@ def mypage():
 # 设置页面
 @app.route('/settings', methods=['GET', 'POST'])
 def setting():
-    pass
+    message = None
+    if 'username' in session:
+        username = session['username']
+        # 检查到这个用户曾经登陆过
+        db = get_db()
+        if db.check_username(username):
+            # 这是一个注册了的用户，允许你更改设置
+            if request.method == 'GET':
+                results = db.get_user_info(username)
+                if results:
+                    return render_template('setting.html', username=username,
+                                           avatar=url_for('static', filename=results[0]), introduction=results[1],
+                                           name=results[2], description=results[3])
+                abort(401)
+            elif request.method == 'POST':
+                # 获得上传的文件和信息，改变头像大小并保存，数据入库
+                if request.form['type'] == 'Photo' and 'photo' in request.files:
+                    # 获取表单内容
+                    introduction = request.form['introduction']
+                    input_name = request.form['name']
+                    description = request.form['description']
+                    # 保存文件至临时目录
+                    filename = photos.save(request.files['photo'])
+                    file_path_old = os.path.join(config.GLOBAL['TEMP_PATH'], filename)
+                    file_path = os.path.join("images/avatar", filename)
+                    # 文件信息存入数据库
+                    if db.update_user_info(username, file_path, introduction, input_name, description):
+                        # 设置头像尺寸
+                        resize_avatar(file_path_old, file_path)
+                    return redirect(url_for('setting'))
+        else:
+            # 未注册过的假冒用户，踢掉踢掉
+            session.pop('username', None)
+    return redirect(url_for('home'))
 
 
 # 个人管理页面
@@ -337,14 +372,44 @@ def download():
 # 查询接口
 @app.route('/query', methods=['GET'])
 def query():
+    """
+    查询接口
+    :return: 请求fid时，返回文件信息，形如
+    :return: 请求username和type时，返回该用户的类型为type的文件夹(id: name)，形如
+    :return: 请求did时，返回目录下子目录或文件(id: name)，'type'键存储该父目录的类型，形如
+    """
     if 'fid' in request.args:
         # 获得file id
-        fid = request.args['fid']
+        fid = int(request.args['fid'])
         db = get_db()
+        db.add_file(3, u"照片1", u"描述1", "E:\\Projects\\DAMS\\data/1/root/456/photo1.jpg", 1)
         # 获得该文件的相关信息
         file_info = db.get_file_info(fid)
+        # file_info = {"description": "描述1", "filename": u"我的照片1",
+        #              "path": "E:\\\\Projects\\\\DAMS\\\\data/1/root/456/photo1.jpg",
+        #              "status": "\u6211\u7684\u7167\u7247"}
         # 返回文件信息
         return json.dumps(file_info), [('Content-Type', 'application/json;charset=utf-8')]
+    if 'username' in request.args and 'type' in request.args:
+        username = request.args['username']
+        rtype = int(request.args['type'])
+        db = get_db()
+        did_list = db.get_dirs_by_user(username, rtype)
+        result = {}
+        for did in did_list:
+            result[did] = db.get_name(did, 1)
+        return json.dumps(result), [('Content-Type', 'application/json;charset=utf-8')]
+    if 'did' in request.args:
+        did = int(request.args['did'])
+        db = get_db()
+        children = db.get_dir_children(did)
+        if children:
+            d_type = children[0]
+            children = children[1:]
+            result = {'type': d_type}
+            for cid in children:
+                result[cid] = db.get_name(cid, d_type)
+            return json.dumps(result), [('Content-Type', 'application/json;charset=utf-8')]
 
 
 # 删除接口

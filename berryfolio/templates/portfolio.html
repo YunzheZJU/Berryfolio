@@ -55,9 +55,41 @@
         <hr>
         <ul class="nav nav-sidebar">
             <li><a id="folder1" onclick="fold(1,3,0)">▲ DAM </a></li>
-            <li><a id="folder11" onclick="">&nbsp;&nbsp;■ A1</a></li>
+            <li><a id="folder11" onclick="">　■ A1</a></li>
             <li><a id="folder12" onclick="">&nbsp;&nbsp;■ A2</a></li>
             <li><a id="folder13" onclick="">&nbsp;&nbsp;■ A3</a></li>
+        </ul>
+        <ul class="nav nav-sidebar">
+            <li data-toggle="collapse" href="#collapseExample" aria-expanded="false" aria-controls="collapseExample">
+                <a>▲ DAM</a>
+            </li>
+            <li>
+                <ul style="list-style: none;" class="collapse" id="collapseExample">
+                    <li>
+                        <ul style="list-style: none;">
+                            <li data-toggle="collapse" href="#collapseExample2" aria-expanded="false" aria-controls="collapseExample">
+                                <a>　■ A1</a>
+                            </li>
+                            <li>
+                                <ul style="list-style: none;" class="collapse" id="collapseExample2">
+                                    <li>
+                                        <a>　■ A2</a>
+                                    </li>
+                                    <li>
+                                        <a>　■ A3</a>
+                                    </li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </li>
+                    <li>
+                        <a>　■ A2</a>
+                    </li>
+                    <li>
+                        <a>　■ A3</a>
+                    </li>
+                </ul>
+            </li>
         </ul>
         <ul class="nav nav-sidebar">
             <li><a id="folder2" onclick="fold(2,2,0)">▲ 数字摄影 </a></li>
@@ -72,19 +104,6 @@
             <li><a id="folder32" onclick="">&nbsp;&nbsp;■ P2</a></li>
         </ul>
         <!-- Button trigger modal -->
-        <br>
-        <br>
-        <br>
-        <br>
-        <br>
-        <br>
-        <br>
-        <br>
-        <br>
-        <br>
-        <br>
-        <br>
-        <br>
         <br>
         <br>
     </div>
@@ -129,10 +148,10 @@
                     <div class="form-group">
                         <label for="list_l" class="col-sm-1 control-label">下载</label>
                         <div class="input-group col-md-9">
-                            <input id="Cata_now" type="text" class="form-control " placeholder="DAM">
+                            <input id="Cata_now_1" type="text" class="form-control " placeholder="DAM">
                             <div class="input-group-btn">
                                 <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">目录选择 <span class="caret"></span></button>
-                                <ul id = "cata" class="dropdown-menu dropdown-menu-right">
+                                <ul id = "cata_1" class="dropdown-menu dropdown-menu-right">
                                 <!--这里会动态添加目录-->
                                 </ul>
                             </div><!-- /btn-group -->
@@ -160,10 +179,10 @@
                     <div class="form-group">
                         <label for="list_l" class="col-sm-1 control-label">下载</label>
                         <div class="input-group col-md-9">
-                            <input id="Cata_now" type="text" class="form-control " placeholder="DAM">
+                            <input id="Cata_now_2" type="text" class="form-control " placeholder="DAM">
                             <div class="input-group-btn">
                                 <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">目录选择 <span class="caret"></span></button>
-                                <ul id = "cata" class="dropdown-menu dropdown-menu-right">
+                                <ul id="cata_2" class="dropdown-menu dropdown-menu-right">
                                 <!--这里会动态添加目录-->
                                 </ul>
                             </div><!-- /btn-group -->
@@ -191,10 +210,10 @@
                     <div class="form-group">
                         <label for="list_l" class="col-sm-1 control-label">下载</label>
                         <div class="input-group col-md-9">
-                            <input id="Cata_now" type="text" class="form-control " placeholder="DAM">
+                            <input id="Cata_now_3" type="text" class="form-control " placeholder="DAM">
                             <div class="input-group-btn">
                                 <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">目录选择 <span class="caret"></span></button>
-                                <ul id = "cata" class="dropdown-menu dropdown-menu-right">
+                                <ul id="cata_3" class="dropdown-menu dropdown-menu-right">
                                 <!--这里会动态添加目录-->
                                 </ul>
                             </div><!-- /btn-group -->
@@ -222,10 +241,10 @@
                     <div class="form-group">
                         <label for="list_l" class="col-sm-1 control-label">下载</label>
                         <div class="input-group col-md-9">
-                            <input id="Cata_now" type="text" class="form-control " placeholder="DAM">
+                            <input id="Cata_now_4" type="text" class="form-control " placeholder="DAM">
                             <div class="input-group-btn">
                                 <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">目录选择 <span class="caret"></span></button>
-                                <ul id = "cata" class="dropdown-menu dropdown-menu-right">
+                                <ul id = "cata_4" class="dropdown-menu dropdown-menu-right">
                                 <!--这里会动态添加目录-->
                                 </ul>
                             </div><!-- /btn-group -->
@@ -262,7 +281,7 @@
             $("#folder"+folderNum).text(finalStr);
             $("#folder"+folderNum).attr( 'onclick', "fold("+folderNum+','+count+','+blank+");");
             for(var i = 1; i <= count;i++){
-            $("#folder"+folderNum+i).show();
+                $("#folder"+folderNum+i).show();
             }
         }
         function fold(folderNum,count,blank){
@@ -300,12 +319,18 @@
                     node.setAttribute( 'role', "separator");
                 }
                 node.appendChild(Cata_a);
-                document.getElementById("cata").appendChild(node);
+{#                node只能同时出现在一个地方，重复append只会把node移来移去，直到不再append#}
+                $('#cata_4').append('<li><a onclick="changeCata(this.innerHTML)">' + Cata[i] + '</span></a>');
+                $('#cata_3').append('<li><a onclick="changeCata(this.innerHTML)">' + Cata[i] + '</span></a>');
+                $('#cata_2').append('<li><a onclick="changeCata(this.innerHTML)">' + Cata[i] + '</span></a>');
+                $('#cata_1').append('<li><a onclick="changeCata(this.innerHTML)">' + Cata[i] + '</span></a>');
+{#                document.getElementById("cata_4").appendChild(node);#}
+{#                document.getElementById("cata_3").appendChild(node);#}
+{#                document.getElementById("cata_1").appendChild(node);#}
             }
-
         }
         function changeCata(name){
-            document.getElementById("Cata_now").setAttribute('placeholder',name);
+            document.getElementById("Cata_now_4").setAttribute('placeholder',name);
         }
     </script>
 {% endblock %}

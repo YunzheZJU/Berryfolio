@@ -80,14 +80,20 @@ class DbConnect:
             return 0
 
     # Function 1: Registration
-    def add_user(self, username, password):
+    def add_user(self, username, password, avatar, introduction, name, description):
         """
         用户注册
         :param username: 用户名（唯一）
         :param password: 密码
+        :param avatar: 头像文件保存路径（相对static路径）
+        :param introduction: 个人介绍
+        :param name: 作品集名称
+        :param description: 作品集描述
         :return: 成功则返回username，否则返回None
         """
-        sql = "INSERT INTO User (username, password) VALUES ('%s', '%s')" % (username, password)
+        sql = "INSERT INTO User (username, password, avatar, introduction, name, description) " \
+              "VALUES ('%s', '%s', '%s', '%s', '%s', '%s')" \
+              % (username, password, avatar, introduction, name, description)
         if self._execute(sql):
             return username
         return None
@@ -116,6 +122,50 @@ class DbConnect:
         sql = "SELECT * FROM User WHERE username = '%s'" % username
         results = self._query(sql)
         if results:
+            return 1
+        return 0
+
+    # Function 21: Get user avatar
+    def get_user_avatar(self, username):
+        """
+        获得用户头像文件路径
+        :param username: 用户名
+        :return: 成功则返回文件路径，否则返回None
+        """
+        sql = "SELECT avatar FROM User WHERE username = '%s'" % username
+        result = self._query(sql)
+        if result:
+            return result[0][0]
+        return None
+
+    # Function 20: Get user info
+    def get_user_info(self, username):
+        """
+        获得用户信息
+        :param username: 用户名
+        :return: 成功则返回保存用户信息的list，否则返回None
+        """
+        sql = "SELECT avatar, introduction, name, description FROM User WHERE username = '%s'" % username
+        result = self._query(sql)
+        if result:
+            return result[0][0]
+        return None
+
+    # Function 19: Update user info
+    def update_user_info(self, username, avatar, introduction, name, description):
+        """
+        更新用户信息
+        :param username: 用户名
+        :param avatar: 头像文件路径
+        :param introduction: 个人介绍
+        :param name: 作品集名称
+        :param description: 作品集描述
+        :return: 成功则返回1，否则返回0
+        """
+        sql = "UPDATE User SET avatar = '%s', introduction = '%s', name = '%s', description = '%s' " \
+              "WHERE username = '%s'" \
+              % (avatar, introduction, name, description, username)
+        if self._execute(sql):
             return 1
         return 0
 
