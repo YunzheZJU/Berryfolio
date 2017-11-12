@@ -54,8 +54,5 @@ venv/
 # Data folder:
 berryfolio/data/
 
-# Temp folder:
-berryfolio/temp/
-
 # Database file:
 *.db
