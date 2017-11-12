@@ -133,10 +133,9 @@ def home():
 def register():
     message = None
     (vcode, filename) = generate_verify_code()
-    vcode_url = url_for('static', filename=filename).decode('utf-8')
+    # vcode_url = url_for('static', filename=filename).decode('utf-8')
     if request.method == 'POST':
-        # 获得表单内容，检查并存入数据库，初始化目录并存入数据库
-        # 未做SQL注入的防范
+        # 获得表单内容，检查并存入数据库，初始化目录并存入数据库（）未做SQL注入的防范）
         username = request.form['username']
         password = request.form['password']
         code = request.form['vcode']
@@ -147,9 +146,10 @@ def register():
                 # 创建用户目录
                 if make_user_dir(uid):
                     # 在数据库中新增目录信息
-                    if db.add_directory(u"root", 1, None, uid):
+                    did = db.add_directory(u"root", 1, None, uid)
+                    if did:
                         # 创建用户目录下的根目录
-                        make_user_sub_dir(uid, None, "root")
+                        make_user_sub_dir(uid, None, did)
                         # 注册成功，登录一下
                         return redirect(url_for('login'))
                     else:
@@ -170,7 +170,7 @@ def register():
 def login():
     message = None
     (vcode, filename) = generate_verify_code()
-    vcode_url = url_for('static', filename=filename).decode('utf-8')
+    # vcode_url = url_for('static', filename=filename).decode('utf-8')
     if request.method == 'POST':
         # 验证表单里的用户名密码
         username = request.form['username']
@@ -247,7 +247,7 @@ def mypage():
 
 
 # 设置页面
-@app.route('/settings', methods=['GET', 'POST'])
+@app.route('/setting', methods=['GET', 'POST'])
 def setting():
     message = None
     if 'uid' in session:
@@ -257,29 +257,26 @@ def setting():
         username = db.get_name(uid, 0)
         if username:
             # 这是一个注册了的用户，允许你更改设置
-            if request.method == 'GET':
-                results = db.get_user_info(username)
-                if results:
-                    return render_template('setting.html', username=username,
-                                           avatar=url_for('static', filename=results[0]), introduction=results[1],
-                                           name=results[2], description=results[3])
-                abort(401)
-            elif request.method == 'POST':
+            if request.method == 'POST' and 'avatar' in request.files:
                 # 获得上传的文件和信息，改变头像大小并保存，数据入库
-                if request.form['type'] == 'Photo' and 'photo' in request.files:
-                    # 获取表单内容
-                    introduction = request.form['introduction']
-                    input_name = request.form['name']
-                    description = request.form['description']
-                    # 保存文件至临时目录
-                    filename = photos.save(request.files['photo'])
-                    file_path_old = os.path.join(config.GLOBAL['TEMP_PATH'], filename)
-                    file_path = os.path.join("images/avatar", filename)
-                    # 文件信息存入数据库
-                    if db.update_user_info(username, file_path, introduction, input_name, description):
-                        # 设置头像尺寸
-                        resize_avatar(file_path_old, file_path)
-                    return redirect(url_for('setting'))
+                # 获取表单内容
+                introduction = request.form['introduction']
+                input_name = request.form['name']
+                description = request.form['description']
+                # 保存文件至临时目录
+                m = hashlib.md5()
+                m.update(str(time.time()))
+                filename = photos.save(request.files['avatar'], name=m.hexdigest() + ".")
+                file_path = os.path.join("images/avatar", filename)
+                # 文件信息存入数据库
+                if db.update_user_info(uid, file_path, introduction, input_name, description):
+                    # 设置头像尺寸并保存
+                    resize_avatar(filename, file_path)
+                    message = u"更新设置成功"
+            results = db.get_user_info(uid)
+            return render_template('setting.html', message=message, username=username,
+                                   avatar=url_for('static', filename=results[0]), introduction=results[1],
+                                   name=results[2], description=results[3])
         else:
             # 未注册过的假冒用户，踢掉踢掉
             session.pop('username', None)
@@ -319,9 +316,9 @@ def portfolio():
                     # 保存文件至临时目录
                     m = hashlib.md5()
                     m.update(str(time.time()))
-                    title = photos.save(request.files['photo'], name=m.hexdigest())
-                    file_path_old = os.path.join(config.GLOBAL['TEMP_PATH'], title)
-                    file_path = os.path.join(dir_path, title)
+                    filename = photos.save(request.files['photo'], name=m.hexdigest() + ".")
+                    file_path_old = os.path.join(config.GLOBAL['TEMP_PATH'], filename)
+                    file_path = os.path.join(dir_path, filename)
                     # 为文件添加数字水印
                     (fm, width, height) = add_watermark(add_data_path_prefix(file_path_old),
                                                         add_data_path_prefix(file_path), config.GLOBAL['WM_PATH'])
@@ -377,7 +374,7 @@ def portfolio():
 # 下载接口
 @app.route('/download', methods=['GET'])
 def download():
-    message = None
+    # message = None
     if 'uid' in session:
         uid = int(session['uid'])
         # 检查到这个用户曾经登陆过
@@ -387,13 +384,13 @@ def download():
             # 这是一个注册了的用户，给你下载
             if 'fid' in request.args:
                 # 获得file id
-                fid = request.args['fid']
+                fid = int(request.args['fid'])
                 # 构造指向该文件的下载链接
-                file_path = os.path.join('data', db.get_file_path(fid))
-                return app.send_static_file(file_path)
+                file_path = remove_data_path_prefix(db.get_file_path(fid)).replace(os.path.sep, "/")
+                return redirect(url_for('data', filename=file_path, _external=True))
             elif 'did' in request.args:
                 # 获得directory id
-                did = request.args['did']
+                did = int(request.args['did'])
                 # 构造目录路径
                 directory_name = db.get_name(did, 1)
                 parent_path = db.gen_parent_path(did)  # FIXME

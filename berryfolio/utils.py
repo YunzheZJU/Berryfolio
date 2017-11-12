@@ -49,13 +49,13 @@ def add_data_path_prefix(path):
     return os.path.join(config.GLOBAL['DATA_PATH'], path)
 
 
-def remove_root_path(path):
+def remove_data_path_prefix(path):
     """
     为路径去掉前缀路径，前缀到data/为止
     :param path: 用户目录物理路径，应以用户名开头，形如"e:\projects\pycharm\dams\berryfolio\data\1\1\3\source1.jpg"
     :return: 结果路径，形如"1\1\3\source1.jpg
     """
-    return path.replace(config.GLOBAL['ROOT_PATH'], "")
+    return path.replace(config.GLOBAL['DATA_PATH'] + os.path.sep, "")
 
 
 def make_user_dir(uid):
@@ -220,13 +220,14 @@ def add_watermark(src, dst, wm):
 
 def get_file_info(file_info):
     if file_info['status'] == 'success':
-        return file_info['title'], file_info['description'], remove_root_path(file_info['path']).decode('utf-8')
+        return file_info['title'], file_info['description'], \
+               os.path.join("", "data", remove_data_path_prefix(file_info['path'])).decode('utf-8')
     # 否则返回缺省图片
     return u"foo", u"No description", u'/static/images/wm.jpg'
 
 
 def resize_avatar(src, dst):
-    img = Image.open(os.path.join(config.GLOBAL['STATIC_PATH'], src))
+    img = Image.open(os.path.join(config.GLOBAL['TEMP_PATH'], src))
     size = 150, 150
     img.thumbnail(size)
     img.save(os.path.join(config.GLOBAL['STATIC_PATH'], dst))

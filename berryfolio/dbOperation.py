@@ -160,7 +160,7 @@ class DbConnect:
         """
         更新用户信息
         :param uid: 用户ID
-        :param avatar: 头像文件路径
+        :param avatar: 头像文件路径（相对static/）
         :param introduction: 个人介绍
         :param name: 作品集名称
         :param description: 作品集描述
@@ -295,7 +295,7 @@ class DbConnect:
         sql = "SELECT path FROM File WHERE ROWID = %d" % fid
         results = self._query(sql)
         if results:
-            return results[0][0].encode('utf-8')
+            return results[0][0]
         return None
 
     # Function 11: Get details a file
