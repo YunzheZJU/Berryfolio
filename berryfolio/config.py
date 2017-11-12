@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
 GLOBAL = {
-    'DB_PATH': "berryfolio.db",
-    'LOG_PATH': "log.log"
+    'DB_PATH': "e:\\projects\\pycharm\\dams\\berryfolio.db",
+    'LOG_PATH': "e:\\projects\\pycharm\\dams\\log.log"
 }

@@ -49,6 +49,15 @@ def add_data_path_prefix(path):
     return os.path.join(config.GLOBAL['DATA_PATH'], path)
 
 
+def remove_root_path(path):
+    """
+    为路径去掉前缀路径，前缀到data/为止
+    :param path: 用户目录物理路径，应以用户名开头，形如"e:\projects\pycharm\dams\berryfolio\data\1\1\3\source1.jpg"
+    :return: 结果路径，形如"1\1\3\source1.jpg
+    """
+    return path.replace(config.GLOBAL['ROOT_PATH'], "")
+
+
 def make_user_dir(uid):
     """
     在data/目录下建立用户文件夹
@@ -126,19 +135,22 @@ def generate_global(root_path):
     return 1
 
 
-def extract_file_info(file_info):
+def make_dict(file_info):
     """
-    从传入的文件信息元组中提取必要信息：文件名（可能为unicode）、描述（可能为空）、存储路径
-    :param file_info: 存储文件信息的元组，形如(1, u'123', u'hahahah', 3, u'Yunzhe/root/folder/sub/photo1.jpg', u'Yunzhe')
-    :return: 存储文件关键信息的字典，形如{'filename': '123', 'description': 'hahahah', 'path': 'Yunzhe/root/folder/sub/photo1.jpg'}
+    将传入的文件信息元组转换为字典：文件名（可能为unicode）、描述（可能为空）、存储路径等
+    :param file_info: 存储文件信息的元组，形如(1, u'123', u'hahahah', 3,
+        u'e:\projects\pycharm\dams\berryfolio\data\1\1\3\source1.jpg', 1, "JPEG", 750, 445)
+    :return: 存储文件关键信息的字典，形如{'status': 'success', 'fid': 1, 'title': u'123', 'description': u'hahahah',
+        'pid': 3, 'path': u'e:\projects\pycharm\dams\berryfolio\data\1\1\3\source1.jpg', 'uid': 1, 'format': 'JPEG',
+        'width': 750, 'height': 445}
     """
-    # 将可能存在的unicode元素转换为str
-    converted = map(lambda tp: tp.encode('utf-8') if isinstance(tp, unicode) else tp, file_info)
-    return {'status': 'success', 'title': converted[1], 'description': converted[2] if converted[2] else '',
-            'path': converted[4]}
+    return {'status': 'success', 'fid': file_info[0], 'title': file_info[1],
+            'description': file_info[2] if file_info[2] else '', 'pid': file_info[3],
+            'path': file_info[4], 'uid': file_info[5], 'format': file_info[6],
+            'width': file_info[7], 'height': file_info[8]}
 
 
-def make_zip(folder, zipname):
+def make_zip(folder, zipname):  # FIXME
     """
     对folder下的目录和文件压缩
     :param folder: 输入的folder，相对路径或绝对路径
@@ -208,15 +220,13 @@ def add_watermark(src, dst, wm):
 
 def get_file_info(file_info):
     if file_info['status'] == 'success':
-        return file_info['title'].decode('utf-8'), file_info['description'].decode('utf-8'), \
-               ('/static/' + file_info['path']).decode('utf-8')
+        return file_info['title'], file_info['description'], remove_root_path(file_info['path']).decode('utf-8')
     # 否则返回缺省图片
-    return "foo".decode('utf-8'), "No description".decode('utf-8'), '/static/images/wm.jpg'.decode('utf-8')
+    return u"foo", u"No description", u'/static/images/wm.jpg'
 
 
 def resize_avatar(src, dst):
     img = Image.open(os.path.join(config.GLOBAL['STATIC_PATH'], src))
-    # TODO: 设置尺寸为150*150
     size = 150, 150
     img.thumbnail(size)
     img.save(os.path.join(config.GLOBAL['STATIC_PATH'], dst))

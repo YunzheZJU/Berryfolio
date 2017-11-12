@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
 # 为方便阅读，使用中文注释
 import os
+import time
 import shutil
+import hashlib
 from utils import *
 from logger import logger
 from dbOperation import DbConnect
@@ -59,7 +61,9 @@ def init_db():
     did_1_4 = db.add_directory(u"sub3", 1, did_1_1, uid_1)
     make_user_sub_dir(uid_1, str(did_1_1), did_1_4)
     did_1_5 = db.add_directory(u"folder1", 1, did_1_3, uid_1)
-    make_user_sub_dir(uid_1, str(did_1_1) + "/" + str(did_1_3), did_1_5)
+    make_user_sub_dir(uid_1, db.gen_parent_path(did_1_3), did_1_5)
+    did_1_6 = db.add_directory(u"folder2", 2, did_1_5, uid_1)
+    make_user_sub_dir(uid_1, db.gen_parent_path(did_1_5), did_1_6)
     # 上传一些文件
     # 第一个
     file_path_old = os.path.join(config.GLOBAL['TEMP_PATH'], "source.jpg")
@@ -293,29 +297,31 @@ def portfolio():
         username = db.get_name(uid, 0)
         if username:
             # 这是一个注册了的用户，给你管理自己的作品集
-            if request.method == 'GET':
-                # 从数据库获取这个用户的目录信息，传入模板
-                root_id = db.get_dir_root(uid)
-                try:
-                    tree = db.generate_tree(root_id)
-                except Exception as ex:
-                    logger.error("Failure in constructing directory tree: " + ex.message)
-                    message = u"获取目录信息失败"
-                    tree = {}
-                return render_template('portfolio.html', tree=tree, username=username, message=message)
-            elif request.method == 'POST':
+            # if request.method == 'GET':
+                # # 从数据库获取这个用户的目录信息，传入模板
+                # root_id = db.get_dir_root(uid)
+                # try:
+                #     tree = db.generate_tree(root_id)
+                # except Exception as ex:
+                #     logger.error("Failure in constructing directory tree: " + ex.message)
+                #     message = u"获取目录信息失败"
+                #     tree = {}
+                # return render_template('portfolio.html', username=username, message=message)
+            if request.method == 'POST':
                 message = u"未知上传类型"
-                if request.form['type'] == 'Photo' and 'photo' in request.files:
+                if request.form['type'] == u'Photo' and 'photo' in request.files:
                     # 获取表单内容
-                    pid = int(request.form['parentID'])
-                    input_name = request.form['filename']
+                    pid = int(request.form['pid'])
+                    input_name = request.form['title']
                     description = request.form['description']
                     dir_path = os.path.join(config.GLOBAL['DATA_PATH'], str(uid),
                                             db.gen_parent_path(pid))
                     # 保存文件至临时目录
-                    filename = photos.save(request.files['photo'])
-                    file_path_old = os.path.join(config.GLOBAL['TEMP_PATH'], filename)
-                    file_path = os.path.join(dir_path, filename)
+                    m = hashlib.md5()
+                    m.update(str(time.time()))
+                    title = photos.save(request.files['photo'], name=m.hexdigest())
+                    file_path_old = os.path.join(config.GLOBAL['TEMP_PATH'], title)
+                    file_path = os.path.join(dir_path, title)
                     # 为文件添加数字水印
                     (fm, width, height) = add_watermark(add_data_path_prefix(file_path_old),
                                                         add_data_path_prefix(file_path), config.GLOBAL['WM_PATH'])
@@ -328,17 +334,17 @@ def portfolio():
                             message = u"上传失败"
                     else:
                         message = u"读取错误"
-                elif request.form['type'] == 'Attribute':
+                elif request.form['type'] == u'Attribute':
                     # 获取表单内容
-                    fid = int(request.form['fileID'])
-                    pid = int(request.form['parentID'])
-                    filename = request.form['filename']
+                    fid = int(request.form['fid'])
+                    pid = int(request.form['pid'])
+                    title = request.form['title']
                     description = request.form['description']
                     file_path_old = db.get_file_path(fid)
                     file_path = os.path.join(config.GLOBAL['DATA_PATH'], str(uid), db.gen_parent_path(pid),
                                              file_path_old.split('\\')[-1])
                     # 存入数据库
-                    if db.update_file_info(fid, pid, filename, description, file_path):
+                    if db.update_file_info(fid, pid, title, description, file_path):
                         # 比对文件位置
                         if file_path != file_path_old:
                             # 移动文件
@@ -347,11 +353,11 @@ def portfolio():
                         message = u"修改成功"
                     else:
                         message = u"修改失败"
-                elif request.form['type'] == 'Directory':
+                elif request.form['type'] == u'Directory':
                     # 获取表单内容
                     name = request.form['name']
-                    rtype = int(request.form['type'])
-                    pid = int(request.form['parentID'])
+                    rtype = int(request.form['rtype'])
+                    pid = int(request.form['pid'])
                     # 存入数据库
                     did = db.add_directory(name, rtype, pid, uid)
                     if did:
@@ -361,7 +367,7 @@ def portfolio():
                         message = u"增加目录成功"
                     else:
                         message = u"增加目录失败"
-                redirect(url_for(portfolio, message=message))
+            return render_template('portfolio.html', username=username, message=message)
         else:
             # 未注册过的假冒用户，踢掉踢掉
             session.pop('username', None)
@@ -470,6 +476,12 @@ def delete():
         pass
     status = ['success']
     return json.dumps(status), [('Content-Type', 'application/json;charset=utf-8')]
+
+
+# /data路由
+@app.route('/data/<path:filename>', methods=['GET'])
+def data(filename):
+    return send_from_directory(config.GLOBAL['DATA_PATH'], filename, as_attachment=True)
 
 
 if __name__ == '__main__':

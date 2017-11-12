@@ -25,7 +25,6 @@ class BerryfolioTestCase(unittest.TestCase):
 
     def register(self, username, password, vcode):
         return self.app.post('/register', data=dict(
-            btn=u"Register",
             username=username,
             password=password,
             vcode=vcode,
@@ -34,7 +33,6 @@ class BerryfolioTestCase(unittest.TestCase):
 
     def login(self, username, password, vcode):
         return self.app.post('/login', data=dict(
-            btn=u"Login",
             username=username,
             password=password,
             vcode=vcode,
@@ -61,7 +59,6 @@ class BerryfolioTestCase(unittest.TestCase):
         rv = self.login(u'admin', u'default', u'1111')
         assert "验证码错误" in rv.data
         rv = self.login(u'admin', u'default', u'1234')
-        print rv.data
         assert "欢迎进入Berryfolio" in rv.data
         # 登出
         rv = self.logout()
@@ -84,14 +81,50 @@ class BerryfolioTestCase(unittest.TestCase):
     def upload(self):
         pass
 
-    def modify(self):
-        pass
+    def modify(self, fid, pid, title, description):
+        return self.app.post('/portfolio', data=dict(
+            type=u"Attribute",
+            fid=fid,
+            pid=pid,
+            title=title,
+            description=description
+        ), follow_redirects=True)
 
-    def directory(self):
-        pass
+    def directory(self, name, rtype, pid):
+        return self.app.post('/portfolio', data=dict(
+            type=u"Directory",
+            name=name,
+            pid=pid,
+            rtype=rtype
+        ), follow_redirects=True)
+
+    def query_fid(self, fid):
+        return self.app.get('/query?fid=%d' % fid)
+
+    def query_uid(self, uid, rtype):
+        return self.app.get('/query?uid=%d&type=%d' % (uid, rtype))
+
+    def query_did(self, did):
+        return self.app.get('/query?did=%d' % did)
 
     def test_upload_modify_directory(self):
-        pass
+        # 登录
+        rv = self.login(u'Yunzhe', u'123', u'1234')
+        assert "欢迎进入Berryfolio" in rv.data
+        # 上传文件
+
+        # 修改属性
+        data_1 = self.query_fid(1).data
+        rv = self.modify(u"1", u"7", u"我的新照片", u"修改过的描述")
+        assert "修改成功" in rv.data
+        data_2 = self.query_fid(1).data
+        assert data_1 != data_2
+        # 增加目录
+        data_1 = self.query_did(1).data
+        rv = self.directory(u"New Folder", u"1", u"1")
+        assert "增加目录成功" in rv.data
+        data_2 = self.query_did(1).data
+        assert data_1 != data_2
 
     def download(self):
         pass

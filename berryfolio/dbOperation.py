@@ -4,7 +4,7 @@ import sqlite3
 from os.path import join
 import config
 from logger import logger
-from utils import extract_file_info
+from utils import make_dict
 
 
 class DbConnect:
@@ -308,7 +308,7 @@ class DbConnect:
         sql = "SELECT * FROM File WHERE ROWID = %d" % fid
         results = self._query(sql)
         if results:
-            results = extract_file_info(results[0])
+            results = make_dict(results[0])
             return results
         return {'status': 'failed'}
 

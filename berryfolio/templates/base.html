@@ -18,6 +18,9 @@
 </head>
 {%- block style %}{% endblock %}
 <body{% block body_property %}{% endblock %}>
+    {% if message %}
+        <h1>{{ message }}</h1>
+	{% endif %}
     {%- block content %}{%- endblock %}
     <footer>
         <div class="row">
