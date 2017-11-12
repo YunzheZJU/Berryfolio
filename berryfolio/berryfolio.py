@@ -40,6 +40,39 @@ def init_db():
     db = get_db()
     with app.open_resource('schema.sql', mode='r') as f:
         db.execute_scripts(f.readlines())
+    # 假装注册了几个新用户
+    # 第一个
+    uid_1 = db.add_user(u"Yunzhe", u"123", 'images/avatar.jpg', u'这个人很懒', u'我的作品集', u'这是我的作品集')
+    make_user_dir(uid_1)
+    did_1_1 = db.add_directory(u"root", 1, None, uid_1)
+    make_user_sub_dir(uid_1, None, did_1_1)
+    # 第二个
+    uid_2 = db.add_user(u"一个用户", u"password", 'images/avatar.jpg', u'sdgdg', u'egweag', u'ewgere')
+    make_user_dir(uid_2)
+    did_2_1 = db.add_directory(u"新文件夹", 1, None, uid_2)
+    make_user_sub_dir(uid_2, None, did_2_1)
+    # 假装新建了很多文件夹
+    did_1_2 = db.add_directory(u"sub1", 2, did_1_1, uid_1)
+    make_user_sub_dir(uid_1, str(did_1_1), did_1_2)
+    did_1_3 = db.add_directory(u"sub2", 1, did_1_1, uid_1)
+    make_user_sub_dir(uid_1, str(did_1_1), did_1_3)
+    did_1_4 = db.add_directory(u"sub3", 1, did_1_1, uid_1)
+    make_user_sub_dir(uid_1, str(did_1_1), did_1_4)
+    did_1_5 = db.add_directory(u"folder1", 1, did_1_3, uid_1)
+    make_user_sub_dir(uid_1, str(did_1_1) + "/" + str(did_1_3), did_1_5)
+    # 上传一些文件
+    # 第一个
+    file_path_old = os.path.join(config.GLOBAL['TEMP_PATH'], "source.jpg")
+    file_path = os.path.join(config.GLOBAL['DATA_PATH'], str(uid_1), db.gen_parent_path(did_1_2), "source1.jpg")
+    (fm, w, h) = add_watermark(add_data_path_prefix(file_path_old),
+                               add_data_path_prefix(file_path), config.GLOBAL['WM_PATH'])
+    fid_1_1 = db.add_file(did_1_2, u"我的照片1", u"对它的描述1", file_path, uid_1, fm, w, h)
+    # 第二个
+    file_path_old = os.path.join(config.GLOBAL['TEMP_PATH'], "source.jpg")
+    file_path = os.path.join(config.GLOBAL['DATA_PATH'], str(uid_1), db.gen_parent_path(did_1_2), "source2.jpg")
+    (fm, w, h) = add_watermark(add_data_path_prefix(file_path_old),
+                               add_data_path_prefix(file_path), config.GLOBAL['WM_PATH'])
+    fid_1_2 = db.add_file(did_1_2, u"我的照片2", u"对它的描述2", file_path, uid_1, fm, w, h)
 
 
 @app.cli.command('initdb')
@@ -78,17 +111,16 @@ def upload_file():
 # 这是通往网站首页的大门
 @app.route('/home', methods=['GET'])
 def home():
-    if request.method == 'GET':
-        if 'username' in session:
-            username = session['username']
-            # 检查到这个用户曾经登陆过
-            db = get_db()
-            if db.check_username(username):
-                # 这是一个注册了的用户并且已经登录过，去个人主页
-                return redirect(url_for('mypage'))
-            else:
-                # 未注册过的假冒用户，踢掉踢掉
-                session.pop('username', None)
+    if 'uid' in session:
+        uid = session['uid']
+        # 检查到这个用户曾经登陆过
+        db = get_db()
+        if db.check_username(uid):
+            # 这是一个注册了的用户并且已经登录过，去个人主页
+            return redirect(url_for('mypage'))
+        else:
+            # 未注册过的假冒用户，踢掉踢掉
+            session.pop('uid', None)
     return render_template('index_logout.html')
 
 
@@ -106,20 +138,21 @@ def register():
         code = request.form['vcode']
         if code == request.form['code']:
             db = get_db()
-            if db.add_user(username, password, 'images/avatar.jpg',
-                           u'这个人很懒', u'我的作品集', u'这是我的作品集'):
+            uid = db.add_user(username, password, 'images/avatar.jpg', u'这个人很懒', u'我的作品集', u'这是我的作品集')
+            if uid:
                 # 创建用户目录
-                make_user_dir(username)
-                # 在数据库中新增目录信息
-                if db.add_directory(u"root", 1, None, username):
-                    # 创建用户目录下的根目录
-                    make_user_sub_dir(username, None, "root")
-                    # 注册成功，登录一下
-                    message = u"注册成功，请登录"
-                    return redirect(url_for('login'))
+                if make_user_dir(uid):
+                    # 在数据库中新增目录信息
+                    if db.add_directory(u"root", 1, None, uid):
+                        # 创建用户目录下的根目录
+                        make_user_sub_dir(uid, None, "root")
+                        # 注册成功，登录一下
+                        return redirect(url_for('login'))
+                    else:
+                        logger.error("Fail to add dictionary: name=%s, user=%s" % ("root", username))
+                        message = u"注册失败，内部错误"
                 else:
-                    logger.error("Fail to add dictionary: name=%s, user=%s" % ("root", username))
-                    message = u"注册失败，内部错误"
+                    message = u"注册失败，读写错误"
             else:
                 logger.error("Fail to register: username=%s" % username)
                 message = u"注册失败，请重试"
@@ -141,10 +174,10 @@ def login():
         code = request.form['vcode']
         if code == request.form['code']:
             db = get_db()
-            if db.match_user_pw(username, password):
+            uid = db.match_user_pw(username, password)
+            if uid:
                 # 登录成功，去mypage
-                session['username'] = username
-                message = u"登陆成功"
+                session['uid'] = uid
                 return redirect(url_for('mypage'))
             else:
                 # 登录失败，滚回login
@@ -157,8 +190,8 @@ def login():
 # 用户登出
 @app.route('/logout', methods=['GET'])
 def logout():
-    if 'username' in session:
-        session.pop('username', None)
+    if 'uid' in session:
+        session.pop('uid', None)
     return redirect(url_for('home'))
 
 
@@ -172,14 +205,15 @@ def contract():
 @app.route('/mypage', methods=['GET'])
 def mypage():
     message = None
-    if 'username' in session:
-        username = session['username']
+    if 'uid' in session:
+        uid = int(session['uid'])
         # 检查到这个用户曾经登陆过
         db = get_db()
-        if db.check_username(username):
+        username = db.get_name(uid, 0)
+        if username:
             # 这是一个注册了的用户，给你看自己的个人主页
             # 从数据库获取这个用户的个人作品，传入模板
-            file_list = db.get_files_by_user(username)
+            file_list = db.get_files_by_user(uid)
             entity = []
             if file_list is not None:
                 # 获取成功
@@ -204,7 +238,7 @@ def mypage():
                                    avatar_url='/static/images/wm.jpg')
         else:
             # 未注册过的假冒用户，踢掉踢掉
-            session.pop('username', None)
+            session.pop('uid', None)
     return redirect(url_for('home'))
 
 
@@ -212,11 +246,12 @@ def mypage():
 @app.route('/settings', methods=['GET', 'POST'])
 def setting():
     message = None
-    if 'username' in session:
-        username = session['username']
+    if 'uid' in session:
+        uid = int(session['uid'])
         # 检查到这个用户曾经登陆过
         db = get_db()
-        if db.check_username(username):
+        username = db.get_name(uid, 0)
+        if username:
             # 这是一个注册了的用户，允许你更改设置
             if request.method == 'GET':
                 results = db.get_user_info(username)
@@ -251,15 +286,16 @@ def setting():
 @app.route('/portfolio', methods=['GET', 'POST'])
 def portfolio():
     message = None
-    if 'username' in session:
-        username = session['username']
+    if 'uid' in session:
+        uid = int(session['uid'])
         # 检查到这个用户曾经登陆过
         db = get_db()
-        if db.check_username(username):
+        username = db.get_name(uid, 0)
+        if username:
             # 这是一个注册了的用户，给你管理自己的作品集
             if request.method == 'GET':
                 # 从数据库获取这个用户的目录信息，传入模板
-                root_id = db.get_dir_root(username)
+                root_id = db.get_dir_root(uid)
                 try:
                     tree = db.generate_tree(root_id)
                 except Exception as ex:
@@ -271,38 +307,35 @@ def portfolio():
                 message = u"未知上传类型"
                 if request.form['type'] == 'Photo' and 'photo' in request.files:
                     # 获取表单内容
-                    pid = request.form['parentID']
+                    pid = int(request.form['parentID'])
                     input_name = request.form['filename']
                     description = request.form['description']
-                    dir_name = db.get_name(pid, 1)
-                    dir_path = os.path.join(config.GLOBAL['DATA_PATH'], username,
-                                            db.gen_parent_path(dir_id=pid), dir_name)
+                    dir_path = os.path.join(config.GLOBAL['DATA_PATH'], str(uid),
+                                            db.gen_parent_path(pid))
                     # 保存文件至临时目录
                     filename = photos.save(request.files['photo'])
                     file_path_old = os.path.join(config.GLOBAL['TEMP_PATH'], filename)
                     file_path = os.path.join(dir_path, filename)
-                    # 文件信息存入数据库
-                    fid = db.add_file(pid, input_name, description, file_path, username)
-                    if fid:
-                        # 为文件添加数字水印
-                        if add_watermark(add_data_path_prefix(file_path_old),
-                                         add_data_path_prefix(file_path), config.GLOBAL['WM_PATH']):
+                    # 为文件添加数字水印
+                    (fm, width, height) = add_watermark(add_data_path_prefix(file_path_old),
+                                                        add_data_path_prefix(file_path), config.GLOBAL['WM_PATH'])
+                    if fm:
+                        # 文件信息存入数据库
+                        fid = db.add_file(pid, input_name, description, file_path, uid, fm, width, height)
+                        if fid:
                             message = u"上传成功"
                         else:
-                            # 添加水印失败，回滚数据库操作
-                            if db.del_file(fid):
-                                message = u"上传失败"
-                            message = u"内部错误"
+                            message = u"上传失败"
                     else:
-                        message = u"上传失败"
+                        message = u"读取错误"
                 elif request.form['type'] == 'Attribute':
                     # 获取表单内容
-                    fid = request.form['fileID']
-                    pid = request.form['parentID']
+                    fid = int(request.form['fileID'])
+                    pid = int(request.form['parentID'])
                     filename = request.form['filename']
                     description = request.form['description']
                     file_path_old = db.get_file_path(fid)
-                    file_path = os.path.join(username, db.gen_parent_path(dir_id=pid),
+                    file_path = os.path.join(config.GLOBAL['DATA_PATH'], str(uid), db.gen_parent_path(pid),
                                              file_path_old.split('\\')[-1])
                     # 存入数据库
                     if db.update_file_info(fid, pid, filename, description, file_path):
@@ -317,14 +350,14 @@ def portfolio():
                 elif request.form['type'] == 'Directory':
                     # 获取表单内容
                     name = request.form['name']
-                    rtype = request.form['type']
-                    pid = request.form['parentID']
+                    rtype = int(request.form['type'])
+                    pid = int(request.form['parentID'])
                     # 存入数据库
-                    did = db.add_directory(name, rtype, pid, username)
+                    did = db.add_directory(name, rtype, pid, uid)
                     if did:
                         # 新增目录
-                        parent_path = db.gen_parent_path(dir_id=pid)
-                        make_user_sub_dir(username, parent_path, name)
+                        parent_path = db.gen_parent_path(pid)
+                        make_user_sub_dir(uid, parent_path, did)
                         message = u"增加目录成功"
                     else:
                         message = u"增加目录失败"
@@ -338,11 +371,13 @@ def portfolio():
 # 下载接口
 @app.route('/download', methods=['GET'])
 def download():
-    if 'username' in session:
-        username = session['username']
+    message = None
+    if 'uid' in session:
+        uid = int(session['uid'])
         # 检查到这个用户曾经登陆过
         db = get_db()
-        if db.check_username(username):
+        username = db.get_name(uid, 0)
+        if username:
             # 这是一个注册了的用户，给你下载
             if 'fid' in request.args:
                 # 获得file id
@@ -355,7 +390,7 @@ def download():
                 did = request.args['did']
                 # 构造目录路径
                 directory_name = db.get_name(did, 1)
-                parent_path = db.gen_parent_path(dir_id=did)
+                parent_path = db.gen_parent_path(did)  # FIXME
                 directory_path = add_data_path_prefix(os.path.join(username, parent_path, directory_name))
                 # 生成压缩包
                 zip_name = username + ".zip"
@@ -375,26 +410,36 @@ def query():
     """
     查询接口
     :return: 请求fid时，返回文件信息，形如
-    :return: 请求username和type时，返回该用户的类型为type的文件夹(id: name)，形如
-    :return: 请求did时，返回目录下子目录或文件(id: name)，'type'键存储该父目录的类型，形如
+        {"description": "\u5bf9\u5b83\u7684\u63cf\u8ff01", "filename": "\u6211\u7684\u7167\u72471", "status": "success"}
+        >   $.get("query", {'fid':1}, function(data){console.log(data)})
+            {description: "对它的描述1", status: "success", title: "我的照片1"}
+    :return: 请求uid和type时，返回该用户的类型为type的文件夹(id: name)，形如
+        >   $.get("query", {'uid':1, 'type':1}, function(data){console.log(data)})
+            {1: "root", 4: "sub2", 5: "sub3", 6: "folder1"}
+        >   $.get("query", {'uid':1, 'type':2}, function(data){console.log(data)})
+            {3: "sub1"}
+    :return: 请求did时，返回该目录下子目录或文件的id组成的list和名字组成的list，
+        'type'键存储该父目录的类型，同时也表示子元素的类型，形如
+        >   $.get("query", {'did':1}, function(data){console.log(data)})
+            {list: [3, 4, 5], type: 1}
+            可以这样获取值：data['list'][1]（值为4）
+        >   $.get("query", {'did':3}, function(data){console.log(data)})
+            {list: [1, 2], type: 2}
     """
     if 'fid' in request.args:
         # 获得file id
         fid = int(request.args['fid'])
         db = get_db()
-        db.add_file(3, u"照片1", u"描述1", "E:\\Projects\\DAMS\\data/1/root/456/photo1.jpg", 1)
         # 获得该文件的相关信息
         file_info = db.get_file_info(fid)
-        # file_info = {"description": "描述1", "filename": u"我的照片1",
-        #              "path": "E:\\\\Projects\\\\DAMS\\\\data/1/root/456/photo1.jpg",
-        #              "status": "\u6211\u7684\u7167\u7247"}
+        file_info.pop("path")
         # 返回文件信息
         return json.dumps(file_info), [('Content-Type', 'application/json;charset=utf-8')]
-    if 'username' in request.args and 'type' in request.args:
-        username = request.args['username']
+    if 'uid' in request.args and 'type' in request.args:
+        uid = int(request.args['uid'])
         rtype = int(request.args['type'])
         db = get_db()
-        did_list = db.get_dirs_by_user(username, rtype)
+        did_list = db.get_dirs_by_user(uid, rtype)
         result = {}
         for did in did_list:
             result[did] = db.get_name(did, 1)
@@ -406,10 +451,12 @@ def query():
         if children:
             d_type = children[0]
             children = children[1:]
-            result = {'type': d_type}
+            result = {'type': [d_type] * len(children), 'List': children, 'dName': []}
             for cid in children:
-                result[cid] = db.get_name(cid, d_type)
-            return json.dumps(result), [('Content-Type', 'application/json;charset=utf-8')]
+                result['dName'].append(db.get_name(cid, d_type))
+        else:
+            result = {}
+        return json.dumps(result), [('Content-Type', 'application/json;charset=utf-8')]
 
 
 # 删除接口

@@ -49,31 +49,31 @@ def add_data_path_prefix(path):
     return os.path.join(config.GLOBAL['DATA_PATH'], path)
 
 
-def make_user_dir(username):
+def make_user_dir(uid):
     """
     在data/目录下建立用户文件夹
-    :param username: 用户名
+    :param uid: 用户名
     :return: 成功则返回用户文件夹的绝对路径，否则返回None
     """
     try:
-        user_dir = add_data_path_prefix(username)
+        user_dir = add_data_path_prefix(str(uid))
         make_dirs([user_dir], clean=1)
         return user_dir
     except IOError:
         return None
 
 
-def make_user_sub_dir(username, parent, name):
+def make_user_sub_dir(uid, parent, did):
     """
     在parent文件夹下创建子文件夹
-    :param username: 用户名
+    :param uid: 用户ID
     :param parent: 父目录路径，相对用户文件夹的路径
-    :param name: 新文件夹名
+    :param did: 新目录ID
     :return: 成功则返回子目录的绝对路径，否则返回None
     """
     try:
-        path = os.path.join(username, parent) if parent else username
-        sub_dir = os.path.join(add_data_path_prefix(path), name)
+        path = os.path.join(str(uid), parent) if parent else str(uid)
+        sub_dir = os.path.join(add_data_path_prefix(path), str(did))
         make_dirs([sub_dir])
         return sub_dir
     except IOError:
@@ -134,7 +134,7 @@ def extract_file_info(file_info):
     """
     # 将可能存在的unicode元素转换为str
     converted = map(lambda tp: tp.encode('utf-8') if isinstance(tp, unicode) else tp, file_info)
-    return {'status': 'success', 'filename': converted[1], 'description': converted[2] if converted[2] else '',
+    return {'status': 'success', 'title': converted[1], 'description': converted[2] if converted[2] else '',
             'path': converted[4]}
 
 
@@ -170,6 +170,7 @@ def add_watermark(src, dst, wm):
         path_png = os.path.join(config.GLOBAL['TEMP_PATH'], filename + "_converted.png")
         # Convert the source image to PNG RGBA and save it
         s_img = Image.open(src)
+        fm = s_img.format
         s_img.save(path_png)
         s_img.close()
         # Open the converted png image and load pixel info
@@ -198,16 +199,16 @@ def add_watermark(src, dst, wm):
         # Close the files.
         s_img.close()
         w_img.close()
-        d_img.close()
-        return dst
+        # d_img.close()
+        return fm, w, h
     except StandardError as ex:
         logger.error("Error occurred during watermarking: " + ex.message)
-        return None
+        return None, None, None
 
 
 def get_file_info(file_info):
     if file_info['status'] == 'success':
-        return file_info['filename'].decode('utf-8'), file_info['description'].decode('utf-8'), \
+        return file_info['title'].decode('utf-8'), file_info['description'].decode('utf-8'), \
                ('/static/' + file_info['path']).decode('utf-8')
     # 否则返回缺省图片
     return "foo".decode('utf-8'), "No description".decode('utf-8'), '/static/images/wm.jpg'.decode('utf-8')
@@ -216,6 +217,6 @@ def get_file_info(file_info):
 def resize_avatar(src, dst):
     img = Image.open(os.path.join(config.GLOBAL['STATIC_PATH'], src))
     # TODO: 设置尺寸为150*150
-
+    size = 150, 150
+    img.thumbnail(size)
     img.save(os.path.join(config.GLOBAL['STATIC_PATH'], dst))
-    img.close()

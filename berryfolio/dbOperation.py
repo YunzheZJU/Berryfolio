@@ -89,13 +89,17 @@ class DbConnect:
         :param introduction: 个人介绍
         :param name: 作品集名称
         :param description: 作品集描述
-        :return: 成功则返回username，否则返回None
+        :return: 成功则返回uid，否则返回None
         """
         sql = "INSERT INTO User (username, password, avatar, introduction, name, description) " \
               "VALUES ('%s', '%s', '%s', '%s', '%s', '%s')" \
               % (username, password, avatar, introduction, name, description)
         if self._execute(sql):
-            return username
+            sql = "SELECT last_insert_ROWID() FROM User"
+            results = self._query(sql)
+            if results:
+                rowid = results[0][0]
+                return rowid
         return None
 
     # Function 2: Log in
@@ -104,12 +108,12 @@ class DbConnect:
         用户登录
         :param username: 用户名
         :param password: 密码
-        :return: 匹配则返回1，否则返回0
+        :return: 匹配则返回uid，否则返回0
         """
-        sql = "SELECT * FROM User WHERE username = '%s' AND password = '%s'" % (username, password)
-        results = self._query(sql)
-        if results:
-            return 1
+        sql = "SELECT ROWID FROM User WHERE username = '%s' AND password = '%s'" % (username, password)
+        result = self._query(sql)
+        if result:
+            return result[0][0]
         return 0
 
     # Function 3: Check username
@@ -126,36 +130,36 @@ class DbConnect:
         return 0
 
     # Function 21: Get user avatar
-    def get_user_avatar(self, username):
+    def get_user_avatar(self, uid):
         """
         获得用户头像文件路径
-        :param username: 用户名
+        :param uid: 用户ID
         :return: 成功则返回文件路径，否则返回None
         """
-        sql = "SELECT avatar FROM User WHERE username = '%s'" % username
+        sql = "SELECT avatar FROM User WHERE ROWID = %s" % uid
         result = self._query(sql)
         if result:
             return result[0][0]
         return None
 
     # Function 20: Get user info
-    def get_user_info(self, username):
+    def get_user_info(self, uid):
         """
         获得用户信息
-        :param username: 用户名
+        :param uid: 用户ID
         :return: 成功则返回保存用户信息的list，否则返回None
         """
-        sql = "SELECT avatar, introduction, name, description FROM User WHERE username = '%s'" % username
+        sql = "SELECT avatar, introduction, name, description FROM User WHERE ROWID = %s" % uid
         result = self._query(sql)
         if result:
             return result[0][0]
         return None
 
     # Function 19: Update user info
-    def update_user_info(self, username, avatar, introduction, name, description):
+    def update_user_info(self, uid, avatar, introduction, name, description):
         """
         更新用户信息
-        :param username: 用户名
+        :param uid: 用户ID
         :param avatar: 头像文件路径
         :param introduction: 个人介绍
         :param name: 作品集名称
@@ -163,24 +167,24 @@ class DbConnect:
         :return: 成功则返回1，否则返回0
         """
         sql = "UPDATE User SET avatar = '%s', introduction = '%s', name = '%s', description = '%s' " \
-              "WHERE username = '%s'" \
-              % (avatar, introduction, name, description, username)
+              "WHERE ROWID = %d" \
+              % (avatar, introduction, name, description, uid)
         if self._execute(sql):
             return 1
         return 0
 
     # Function 4: Add dictionary
-    def add_directory(self, name, dir_type, pid, user):
+    def add_directory(self, name, dir_type, pid, uid):
         """
         添加一条目录信息，目录ID自增
         :param name: 目录的显示名
         :param dir_type: 目录的类型（具有子目录，为1；或不具有子目录，为2）
         :param pid: 父目录的ID（根目录时为None）
-        :param user: 目录所属用户名
+        :param uid: 目录所属用户ID
         :return: 成功则返回目录ID，否则返回None
         """
-        sql = "INSERT INTO Directory (name, type, user) VALUES ('%s', %d, '%s')" \
-              % (name, dir_type, user)
+        sql = "INSERT INTO Directory (name, type, user) VALUES ('%s', %d, %d)" \
+              % (name, dir_type, uid)
         if self._execute(sql):
             sql = "SELECT last_insert_ROWID() FROM Directory"
             results = self._query(sql)
@@ -195,18 +199,18 @@ class DbConnect:
         return 0
 
     # Function 5: Add file
-    def add_file(self, pid, filename, description, file_path, username):
+    def add_file(self, pid, filename, description, file_path, uid, fm, w, h):
         """
         添加一条文件信息，文件ID自增
         :param pid: 存放文件的目录的ID
         :param filename: 文件名
         :param description: 描述
         :param file_path: 文件存放路径
-        :param username: 文件所属用户
+        :param uid: 文件所属用户ID
         :return: 成功则返回文件ID，否则返回None
         """
-        sql = "INSERT INTO File (name, parentID, path, user) VALUES ('%s', %d, '%s', '%s')" \
-              % (filename, pid, file_path, username)
+        sql = "INSERT INTO File (title, parentID, path, user, format, width, height) " \
+              "VALUES ('%s', %d, '%s', %d, '%s', %d, %d)" % (filename, pid, file_path, uid, fm, w, h)
         if self._execute(sql):
             sql = "SELECT last_insert_ROWID() FROM File"
             results = self._query(sql)
@@ -241,13 +245,13 @@ class DbConnect:
         return None
 
     # Function 7: Get root directory
-    def get_dir_root(self, username):
+    def get_dir_root(self, uid):
         """
         根据用户名获得用户的根目录ID
-        :param username: 用户名
+        :param uid: 用户ID
         :return: 成功则返回目录ID，否则返回None
         """
-        sql = "SELECT ROWID FROM Directory WHERE user = '%s' AND parentID ISNULL " % username
+        sql = "SELECT ROWID FROM Directory WHERE user = %d AND parentID ISNULL " % uid
         results = self._query(sql)
         if results:
             return results[0][0]
@@ -267,14 +271,14 @@ class DbConnect:
         return 0
 
     # Function 9: Get directory ID where type == 1
-    def get_dirs_by_user(self, username, rtype=1):
+    def get_dirs_by_user(self, uid, rtype=1):
         """
         获取某用户的所有指定类型的目录ID，
-        :param username: 用户名
+        :param uid: 用户ID
         :param rtype: 目录类型，1或2，默认为1
         :return: 成功则返回list，存储所有目录ID，否则返回None
         """
-        sql = "SELECT ROWID FROM Directory WHERE user = '%s' AND type = %d " % (username, rtype)
+        sql = "SELECT ROWID FROM Directory WHERE user = %d AND type = %d " % (uid, rtype)
         results = self._query(sql)
         if results:
             results = map(lambda tp: tp[0], results)
@@ -309,13 +313,13 @@ class DbConnect:
         return {'status': 'failed'}
 
     # Function 12: Get all files of a user
-    def get_files_by_user(self, username):
+    def get_files_by_user(self, uid):
         """
         获取用户上传的所有文件
-        :param username: 用户名
+        :param uid: 用户ID
         :return: 成功则返回list，存储所有文件ID，否则返回None
         """
-        sql = "SELECT ROWID FROM File WHERE user = '%s'" % username
+        sql = "SELECT ROWID FROM File WHERE user = %d" % uid
         results = self._query(sql)
         if results is not None:
             results = map(lambda tp: tp[0], results)
@@ -333,7 +337,7 @@ class DbConnect:
         :param file_path: 文件存储路径，形如"Yunzhe/root/folder/1.jpg"
         :return: 成功则返回1，否则返回0
         """
-        sql = "UPDATE File SET parentID = %d, name = '%s', path = '%s' WHERE ROWID = %d" \
+        sql = "UPDATE File SET parentID = %d, title = '%s', path = '%s' WHERE ROWID = %d" \
               % (pid, filename, file_path, fid)
         if self._execute(sql):
             if description:
@@ -374,29 +378,31 @@ class DbConnect:
         if rtype == 1:
             sql = "SELECT name FROM Directory WHERE ROWID = %d" % rid
         elif rtype == 2:
-            sql = "SELECT name FROM File WHERE ROWID = %d" % rid
+            sql = "SELECT title FROM File WHERE ROWID = %d" % rid
+        elif rtype == 0:
+            sql = "SELECT username FROM User WHERE ROWID = %d" % rid
         results = self._query(sql)
         if results:
             return results[0][0].encode('utf-8')
         return None
 
     # Function 16: Generate parent path of dir
-    def gen_parent_path(self, current_path=None, dir_id=None):
+    def gen_parent_path(self, did, current_path=None):
         """
-        获得请求的目录ID的路径（不包含自身）
+        获得请求的目录ID的路径（包含自身）
         :param current_path: 递归时时用到的当前路径
-        :param dir_id: 请求的目录ID
-        :return: 从根目录到该目录的路径（不包含该目录），形如"root\\folder\\sub"
+        :param did: 请求的目录ID
+        :return: 从根目录到该目录的路径（包含该目录），形如"1\\4\\6"
         """
-        pid = self.get_parent_id(dir_id, 1)
+        pid = self.get_parent_id(did, 1)
+        current_path = join(str(did), current_path) if current_path else str(did)
         if pid:
-            parentname = self.get_name(pid, 1)
-            current_path = join(parentname, current_path) if current_path else parentname
-            current_path = self.gen_parent_path(current_path, pid)
-        return current_path
+            return self.gen_parent_path(pid, current_path)
+        else:
+            return current_path
 
     # Function 17: Generate directory tree
-    def generate_tree(self, nid):
+    def generate_tree(self, nid):  # FIXME
         """
         递归构造节点树，囊括所有目录
         :param nid: 节点ID
@@ -426,11 +432,11 @@ class DbConnect:
 
 if __name__ == '__main__':
     db = DbConnect()
-    with open('schema.sql', mode='r') as f:
-        db.execute_scripts(f.readlines())
     if 0:
+        with open('schema.sql', mode='r') as f:
+            db.execute_scripts(f.readlines())
         # F1
-        print db.add_user("Yunzhe", "123456")
+        print db.add_user("Yunzhe", "123456", 'images/avatar.jpg', u'这个人很懒', u'我的作品集', u'这是我的作品集')
         # F2
         print db.match_user_pw("Yunzhe", "123456")
         print db.match_user_pw("Yunzhe", "12345")
@@ -498,7 +504,7 @@ if __name__ == '__main__':
         print db.get_name(3, 2)
         print db.get_name(6, 3)
         # F16
-        print db.gen_parent_path(dir_id=7)
+        print db.gen_parent_path(6)
         # F17
         print db.generate_tree(1)
         # F18
