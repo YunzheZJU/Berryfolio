@@ -152,7 +152,7 @@ class DbConnect:
         sql = "SELECT avatar, introduction, name, description FROM User WHERE ROWID = %s" % uid
         result = self._query(sql)
         if result:
-            return result[0][0]
+            return result[0]
         return None
 
     # Function 19: Update user info
@@ -251,14 +251,14 @@ class DbConnect:
             return results
         return None
 
-    # Function 7: Get rootg directory
+    # Function 7: Get root directory
     def get_dir_root(self, uid):
         """
         根据用户名获得用户的根目录ID
         :param uid: 用户ID
         :return: 成功则返回目录ID，否则返回None
         """
-        sql = "SELECT ROWID FROM Directory WHERE user = %d AND parentID ISNULL " % uid
+        sql = "SELECT ROWID FROM Directory WHERE user = %d AND parentID IS NULL " % uid
         results = self._query(sql)
         if results:
             return results[0][0]
@@ -468,6 +468,19 @@ class DbConnect:
         if result:
             return result[0][0]
         return None
+
+    # Function 23: Get avatar of a user
+    def get_avatar(self, uid):
+        """
+        获得用户头像路径
+        :param uid: 用户id
+        :return: 成功则返回用户头像路径，否则返回默认头像路径
+        """
+        sql = "SELECT avatar FROM User WHERE ROWID = %d" % uid
+        result = self._query(sql)
+        if result:
+            return result[0][0]
+        return "/static/images/wm.jpg"
 
 
 if __name__ == '__main__':

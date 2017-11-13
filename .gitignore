@@ -56,3 +56,4 @@ berryfolio/data/
 
 # Database file:
 *.db
+.DS_Store

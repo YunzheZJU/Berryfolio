@@ -240,7 +240,7 @@ def mypage():
                 message = u"获取作品信息失败"
             return render_template('index_login.html', entity_0=entity[0:4], entity_1=entity[4:6],
                                    entity_2=entity[6:16], username=username, message=message,
-                                   avatar_url='/static/images/wm.jpg')
+                                   avatar_url=url_for('static', filename=db.get_avatar(uid)))
         else:
             # 未注册过的假冒用户，踢掉踢掉
             session.pop('uid', None)
@@ -258,23 +258,28 @@ def setting():
         username = db.get_name(uid, 0)
         if username:
             # 这是一个注册了的用户，允许你更改设置
-            if request.method == 'POST' and 'avatar' in request.files:
+            results = db.get_user_info(uid)
+            if request.method == 'POST':
                 # 获得上传的文件和信息，改变头像大小并保存，数据入库
                 # 获取表单内容
                 introduction = request.form['introduction']
                 input_name = request.form['name']
                 description = request.form['description']
-                # 保存文件至临时目录
-                m = hashlib.md5()
-                m.update(str(time.time()))
-                filename = photos.save(request.files['avatar'], name=m.hexdigest() + ".")
-                file_path = os.path.join("images/avatar", filename)
-                # 文件信息存入数据库
-                if db.update_user_info(uid, file_path, introduction, input_name, description):
+                file_path = results[0]
+                if 'avatar' in request.files and request.files['avatar']:
+                    # 保存文件至临时目录
+                    m = hashlib.md5()
+                    m.update(str(time.time()))
+                    filename = photos.save(request.files['avatar'], name=m.hexdigest() + ".")
+                    file_path = "images/avatar" + "/" + filename
                     # 设置头像尺寸并保存
                     resize_avatar(filename, file_path)
+                # 文件信息存入数据库
+                if db.update_user_info(uid, file_path, introduction, input_name, description):
                     message = u"更新设置成功"
-            results = db.get_user_info(uid)
+                    results = db.get_user_info(uid)
+                else:
+                    message = u"更新设置失败"
             return render_template('setting.html', message=message, username=username,
                                    avatar=url_for('static', filename=results[0]), introduction=results[1],
                                    name=results[2], description=results[3])
@@ -373,14 +378,15 @@ def portfolio():
                         message = u"增加目录成功"
                     else:
                         message = u"增加目录失败"
-            return render_template('portfolio.html', username=username, message=message)
+            return render_template('portfolio.html', username=username, introduction=db.get_user_info(uid)[1],
+                                   message=message, root_id=db.get_dir_root(uid))
         else:
             # 未注册过的假冒用户，踢掉踢掉
             session.pop('username', None)
     return redirect(url_for('home'))
 
 
-@app.route('/search', methods=['GET', 'POST'])
+@app.route('/search', methods=['POST'])
 def search():
     # message = None
     if 'uid' in session:
@@ -480,9 +486,10 @@ def query():
         if children:
             d_type = children[0]
             children = children[1:]
-            result = {'type': [d_type] * len(children), 'List': children, 'dName': []}
+            result = {'type': [], 'List': children, 'dName': []}
             for cid in children:
                 result['dName'].append(db.get_name(cid, d_type))
+                result['type'].append(db.get_dir_type(cid))
         else:
             result = {}
         return json.dumps(result), [('Content-Type', 'application/json;charset=utf-8')]

@@ -387,4 +387,15 @@ input, textarea {
   opacity: 0;
 }
 
-/*# sourceMappingURL=style.css.map */
+.f-nav {
+  padding: 10px 15px;
+}
+
+.f-nav:hover {
+    background-color: #efefee;
+}
+
+.f-nav-a {
+    text-decoration: none;
+    cursor: default;
+}

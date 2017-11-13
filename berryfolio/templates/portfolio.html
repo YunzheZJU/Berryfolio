@@ -3,37 +3,39 @@
 {% block head %}
     <link rel="stylesheet" href="{{ url_for('static', filename="css/style_port.css") }}">
 {% endblock %}
-{% block body_property %} onload="loadCata();" style="background-color: #f3eedc"{% endblock %}
+{% block body_property %} onload="init_f();" onhashchange="show_init();" style="background-color: #f3eedc"{% endblock %}
 {% block content %}
     <div style="background-color: #867f75; filter:alpha(opacity=50);">
-        <div class="container"  >
+        <div class="container">
             <div class="row">
                 <div class="col-md-9">
-                    <h1 style="margin: 20px 0px 0px 0px; font-family: time;color: #000000">{{ username }}的作品集</h1>
-                    <h4 style="font-family: time;color: #feeac5">最近很喜欢传火ww</h4>
+                    <h1 style="margin: 20px 0 0 0; font-family: time,serif;color: #000000">{{ username }}的作品集</h1>
+                    <h4 style="font-family: time,serif;color: #feeac5">{{ introduction }}</h4>
+
                 </div>
-                <a id="ind_a" style="display: none;" href={{ url_for('login') }}>index</a>
-                <a id="set_a" style="display: none;" href={{ url_for('setting') }}>setting</a>
-                <a id="exit_a" style="display: none;" href={{ url_for('logout') }}>exit</a>
+                <a id="ind_a" href="{{ url_for('login') }}" style="display: none;">index</a>
+                <a id="set_a" href="{{ url_for('setting') }}" style="display: none;">setting</a>
+                <a id="exit_a" href="{{ url_for('logout') }}" style="display: none;">exit</a>
                 <div class="col-md-1">
-                    <div class="imgbutton indexbutton" style="margin: 15px 0px 0px 0px;" onclick="ind_a.click()"></div>
-                </div>
-                <div class="col-md-1">
-                    <div class="imgbutton setbutton" style="margin: 15px 0px 0px 0px;" onclick="set_a.click()"></div>
+                    <div class="imgbutton indexbutton" style="margin: 15px 0 0 0;" onclick="ind_a.click()"></div>
                 </div>
                 <div class="col-md-1">
-                    <div class="imgbutton exitbutton" style="margin: 15px 0px 0px 0px;" onclick="exit_a.click()"></div>
+                    <div class="imgbutton setbutton" style="margin: 15px 0 0 0;" onclick="set_a.click()"></div>
+                </div>
+                <div class="col-md-1">
+                    <div class="imgbutton exitbutton" style="margin: 15px 0 0 0;" onclick="exit_a.click()"></div>
                 </div>
             </div>
         </div>
         <br>
     </div>
-    <div class="col-sm-3 col-md-2 sidebar" style="background-color:#a39b8f;">
+
+    <div class="col-sm-3 col-md-2 " style="background-color:#a39b8f;">
         <!-- <img onclick="addList.click()" src="asset/image/add.png"/> -->
         <hr>
         <div class="row">
             <div class="col-md-2">
-                <button type="button" class="btn-primary changeB" ></button>
+                <button type="button" class="btn-primary changeB"></button>
             </div>
             <div class="col-md-2">
                 <button type="button" class="btn-primary addB" onclick="addModal();"></button>
@@ -42,220 +44,289 @@
                 <button type="button" class="btn-primary upB" onclick="upModal();"></button>
             </div>
             <div class="col-md-2">
-                <button type="button"  class="btn-primary downB" onclick="downModal();"></button>
+                <button type="button" class="btn-primary downB" onclick="downModal();"></button>
             </div>
             <div class="col-md-2" style="color: #feeac5; font-size: 20px">
                 ^_^
             </div>
         </div>
-        <div class="downB" data-toggle="modal" data-target="#myModal">
-
-        </div>
-{#        <a href="add.html" id="addList" style="display: none;">a</a>#}
         <hr>
-        <ul class="nav nav-sidebar">
-            <li><a id="folder1" onclick="fold(1,3,0)">▲ DAM </a></li>
-            <li><a id="folder11" onclick="">　■ A1</a></li>
-            <li><a id="folder12" onclick="">&nbsp;&nbsp;■ A2</a></li>
-            <li><a id="folder13" onclick="">&nbsp;&nbsp;■ A3</a></li>
+        <!-- 一开始空格有问题是因为ul和li嵌套混乱 -->
+        <!--*最上层文件夹为li， collapse展开的是一个ul（对应id目前为该文件的名字，可改），ul下套都是li -->
+        <!--如果还有子文件夹，在子文件夹外套ul，class=collapse -->
+        <!-- 父文件夹前为▲，a中有changeFolder()函数用于改变三角符号 -->
+        <!-- 子文件夹前为■，点击跳转到对应文件夹下的内容 -->
+        <!-- 最上层文件夹没有class，其他都是class"aWhite" -->
+        <ul id="myNav" class="nav nav-sidebar">
+
         </ul>
-        <ul class="nav nav-sidebar">
-            <li data-toggle="collapse" href="#collapseExample" aria-expanded="false" aria-controls="collapseExample">
-                <a>▲ DAM</a>
-            </li>
-            <li>
-                <ul style="list-style: none;" class="collapse" id="collapseExample">
-                    <li>
-                        <ul style="list-style: none;">
-                            <li data-toggle="collapse" href="#collapseExample2" aria-expanded="false" aria-controls="collapseExample">
-                                <a>　■ A1</a>
-                            </li>
-                            <li>
-                                <ul style="list-style: none;" class="collapse" id="collapseExample2">
-                                    <li>
-                                        <a>　■ A2</a>
-                                    </li>
-                                    <li>
-                                        <a>　■ A3</a>
-                                    </li>
-                                </ul>
-                            </li>
-                        </ul>
-                    </li>
-                    <li>
-                        <a>　■ A2</a>
-                    </li>
-                    <li>
-                        <a>　■ A3</a>
-                    </li>
-                </ul>
-            </li>
-        </ul>
-        <ul class="nav nav-sidebar">
-            <li><a id="folder2" onclick="fold(2,2,0)">▲ 数字摄影 </a></li>
-            <li><a id="folder21" onclick="fold(21,2,2)">&nbsp;&nbsp;▲ 秋学期</a></li>
-            <li><a id="folder211" onclick="">&nbsp;&nbsp;&nbsp;&nbsp;■ 玉泉</a></li>
-            <li><a id="folder212" onclick="">&nbsp;&nbsp;&nbsp;&nbsp;■ 紫金港</a></li>
-            <li><a id="folder22" onclick="">&nbsp;&nbsp;■ 冬学期</a></li>
-        </ul>
-        <ul class="nav nav-sidebar">
-            <li><a id="folder3" onclick="fold(3,2,0)">▲ 计算机动画 </a></li>
-            <li><a id="folder31" onclick="">&nbsp;&nbsp;■ P1</a></li>
-            <li><a id="folder32" onclick="">&nbsp;&nbsp;■ P2</a></li>
-        </ul>
-        <!-- Button trigger modal -->
-        <br>
-        <br>
+        <!-- 边栏结束 -->
     </div>
     <!-- 右边的展示区 -->
-    <div class="container">
+    <div class="col-md-10">
         <div class="row">
-            <div class="row">
-                <div class="col-md-10">
-                    <h4>当前目录：DAM</h4>
-                </div>
-                <div class="col-md-10">
-                    <div class="row">
-                        <div class="col-md-4">
-                            <button id="pic1" data-toggle="modal" data-target="#picModal" style="display: none;"></button>
-                            <div class="product-type-container">
-                                <div class="product-type-overlay" onclick="pic1.click();">
-                                    <div class="product-type-info">
-                                        <h3 class="text-uppercase" style="color:#000">作品名</h3>
-                                        <p class="text-uppercase" style="color:#281a0d">作品介绍</p>
-                                    </div>
-                                </div>
-                                <img alt="Men fashion 1" class="product-type-img img-collection gold-border" src={{ url_for('static', filename="images/source.jpg") }}>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+            <div class="col-md-6"><h4>当前目录：作品集首页</h4></div>
+            <div class="col-md-3">
+                <form class="form-horizontal" method="post" action="{{ url_for('search') }}">
+                    <div class="input-group" style="margin-top:5px;margin-right: -80px;margin-left: 60px; ">
+                        <input title="type" type="text" name="type" value="" hidden>
+                        <input type="text" id="search" class="form-control" placeholder="Search for...">
+                        <span class="input-group-btn">
+              <button class="btn btn-default" type="submit"><span class="glyphicon glyphicon-search"
+                                                                  aria-hidden="true"></span></button>
+            </span>
+                    </div><!-- /input-group -->
+                </form>
             </div>
+            <div class="col-md-6"><h4><a href="#" class="pull-right" style="color: #f08769">返回首页</a></h4></div>
+        </div>
+        <hr>
+        <div class="row col-md-12" id="show">
+            <!-- 试图在这里面塞下图片们 -->
         </div>
     </div>
+
+
+
+
     <!-- 按钮触发模态框 -->
     <!-- Button trigger modal -->
     <!-- Modal -->
     <!-- 下载用模态框 -->
-    <div class="modal fade" id="downModal" tabindex="-1" role="dialog" aria-labelledby="downModalLabel">
-        <div class="modal-dialog" role="document">
+    <div class="modal fade" tabindex="-1" role="dialog" id="downModal">
+        <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                    <h4 class="modal-title" id="downModalLabel">下载文件夹</h4>
+                    <!--            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>-->
+                    <h4 class="modal-title">下载文件夹</h4>
                 </div>
                 <div class="modal-body">
-                    <div class="form-group">
-                        <label for="list_l" class="col-sm-1 control-label">下载</label>
-                        <div class="input-group col-md-9">
-                            <input id="Cata_now_1" type="text" class="form-control " placeholder="DAM">
-                            <div class="input-group-btn">
-                                <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">目录选择 <span class="caret"></span></button>
-                                <ul id = "cata_1" class="dropdown-menu dropdown-menu-right">
-                                <!--这里会动态添加目录-->
-                                </ul>
-                            </div><!-- /btn-group -->
-                        </div><!-- /input-group -->
-                        <div>
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-primary">download</button>
-                            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                        </div>
+                    <div class="row">
+                        <div class="col-xs-offset-4 col-xs-4"><h2 class="text-center">下载</h2></div>
                     </div>
+                    <form class="form-horizontal">
+                        <div class="form-group">
+                            <label for="Cata_now" class="col-xs-2 control-label">文件夹</label>
+                            <div class="col-xs-9">
+                                <div class="input-group">
+                                    <input id="Cata_now" type="text" readonly="readonly" class="form-control "
+                                           placeholder="DAM">
+                                    <div class="input-group-btn">
+                                        <button type="button" class="btn btn-default dropdown-toggle"
+                                                data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">目录选择
+                                            <span class="caret"></span></button>
+                                        <ul id="cata" class="dropdown-menu dropdown-menu-right">
+                                            <!--这里会动态添加目录-->
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <div class="col-xs-offset-2 col-xs-10">
+                                <input type="submit" class="btn btn-default" id="submit_btn" value="下载">
+                                <button type="button" data-dismiss="modal" class="btn btn-default" id="close">关闭
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+
+                </div>
+                <div class="modal-footer">
+                    <footer class="footer">选择你要下载的文件夹，会打包下载哦！</footer>
                 </div>
             </div>
         </div>
     </div>
     <!-- 更改图片信息 -->
-    <div class="modal fade" id="imgModal" tabindex="-1" role="dialog" aria-labelledby="imgModalLabel">
-        <div class="modal-dialog" role="document">
+    <div class="modal fade" tabindex="-1" role="dialog" id="imgModal">
+        <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                    <h4 class="modal-title" id="imgModalLabel">下载文件夹</h4>
+                    <!--            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>-->
+                    <h4 class="modal-title">更改图片信息</h4>
                 </div>
                 <div class="modal-body">
-                    <div class="form-group">
-                        <label for="list_l" class="col-sm-1 control-label">下载</label>
-                        <div class="input-group col-md-9">
-                            <input id="Cata_now_2" type="text" class="form-control " placeholder="DAM">
-                            <div class="input-group-btn">
-                                <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">目录选择 <span class="caret"></span></button>
-                                <ul id="cata_2" class="dropdown-menu dropdown-menu-right">
-                                <!--这里会动态添加目录-->
-                                </ul>
-                            </div><!-- /btn-group -->
-                        </div><!-- /input-group -->
-                        <div>
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-primary">download</button>
-                            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                        </div>
+                    <div class="row">
+                        <div class="col-xs-offset-4 col-xs-4"><h2 class="text-center">更新</h2></div>
                     </div>
+                    <form class="form-horizontal" method="post">
+                        <input type="hidden" class="form-control" id="pid" name="pid" value="0">
+                        <input type="hidden" class="form-control" id="fid" name="fid" value="0">
+                        <div class="form-group">
+                            <label for="picName" class="col-xs-2 control-label">图片名</label>
+                            <div class="col-xs-10">
+                                <input type="text" class="form-control" id="picName" name="title" placeholder="我的图片">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="picDes" class="col-xs-2 control-label">介绍</label>
+                            <div class="col-xs-10">
+                                <input maxlength="25" class="form-control" id="picDes" name="description" placeholder="0-25字">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="tag" class="col-xs-2 control-label">标签</label>
+                            <div class="col-xs-3">
+                                <input maxlength="4" class="form-control" id="tag_1" name="tag_1" placeholder="标签1">
+                            </div>
+                            <div class="col-xs-3">
+                                <input maxlength="4" class="form-control" id="tag_2" name="tag_2" placeholder="标签2">
+                            </div>
+                            <div class="col-xs-3">
+                                <input maxlength="4" class="form-control" id="tag_3" name="tag_3" placeholder="标签3">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-xs-offset-2 col-xs-10">
+                                <input title="type" type="text" name="type" value="Attribute" hidden>
+                                <input type="submit" class="btn btn-default" id="submit_btn" value="提交">
+                                <button type="button" data-dismiss="modal" class="btn btn-default" id="close">关闭
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+
+                </div>
+                <div class="modal-footer">
+                    <footer class="footer">点击图片更改名称和介绍</footer>
                 </div>
             </div>
         </div>
     </div>
     <!-- 上传用 -->
-    <div class="modal fade" id="upModal" tabindex="-1" role="dialog" aria-labelledby="upModalLabel">
-        <div class="modal-dialog" role="document">
+    <div class="modal fade" tabindex="-1" role="dialog" id="upModal">
+        <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                    <h4 class="modal-title" id="upModalLabel">下载文件夹</h4>
+                    <!--            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>-->
+                    <h4 class="modal-title">上传文件</h4>
                 </div>
                 <div class="modal-body">
-                    <div class="form-group">
-                        <label for="list_l" class="col-sm-1 control-label">下载</label>
-                        <div class="input-group col-md-9">
-                            <input id="Cata_now_3" type="text" class="form-control " placeholder="DAM">
-                            <div class="input-group-btn">
-                                <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">目录选择 <span class="caret"></span></button>
-                                <ul id="cata_3" class="dropdown-menu dropdown-menu-right">
-                                <!--这里会动态添加目录-->
-                                </ul>
-                            </div><!-- /btn-group -->
-                        </div><!-- /input-group -->
-                        <div>
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-primary">download</button>
-                            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                        </div>
+                    <div class="row">
+                        <div class="col-xs-offset-4 col-xs-4"><h2 class="text-center">上传</h2></div>
                     </div>
+                    <form class="form-horizontal" method="post" enctype="multipart/form-data">
+                        <div class="form-group">
+                            <label for="Cata_up" class="col-xs-2 control-label">文件夹</label>
+                            <div class="col-xs-9">
+                                <div class="input-group">
+                                    <input id="Cata_up" type="text" readonly="readonly" class="form-control "
+                                           placeholder="P1">
+                                    <div class="input-group-btn">
+                                        <button type="button" class="btn btn-default dropdown-toggle"
+                                                data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">目录选择
+                                            <span class="caret"></span></button>
+                                        <ul id="cataUp" class="dropdown-menu dropdown-menu-right">
+                                            <!--这里会动态添加目录-->
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="avatar_l" class="col-xs-2 control-label">图片</label>
+                            <div class="col-xs-3">
+                                <img onclick="file_up.click()" id="avatar_now" src="asset/image/avatarKen.png"
+                                     class="img-thumbnail avatar">
+                                <input type="file" id="file_up" name="file" style="display: none;"/>
+                            </div>
+                            <div class="col-xs-7">
+                                <p style="margin-top:80px;">点击图片上传</p>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="picName_up" class="col-xs-2 control-label">图片名</label>
+                            <div class="col-xs-9">
+                                <input maxlength="10" type="text" class="form-control" id="picName" value=""
+                                       placeholder="0-10字">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="picDes_up" class="col-xs-2 control-label">介绍</label>
+                            <div class="col-xs-9">
+                                <input maxlength="25" class="form-control" id="picDes" value="" placeholder="0-25字">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-xs-offset-2 col-xs-10">
+                                <input title="type" type="text" name="type" value="Photo" hidden>
+                                <input type="submit" class="btn btn-default" id="submit_btn" value="上传">
+                                <button type="button" data-dismiss="modal" class="btn btn-default" id="close">关闭
+                                </button>
+                            </div>
+                        </div>
+
+                    </form>
+
+                </div>
+                <div class="modal-footer">
+                    <footer class="footer">选择你要上传的文件夹，记得要写图片名和介绍哦！</footer>
                 </div>
             </div>
         </div>
     </div>
     <!-- 增加目录用 -->
-    <div class="modal fade" id="addModal" tabindex="-1" role="dialog" aria-labelledby="addModalLabel">
-        <div class="modal-dialog" role="document">
+    <div class="modal fade" tabindex="-1" role="dialog" id="addModal">
+        <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                    <h4 class="modal-title" id="addModalLabel">下载文件夹</h4>
+                    <!--            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>-->
+                    <h4 class="modal-title">在选择的文件夹下新建文件夹</h4>
                 </div>
                 <div class="modal-body">
-                    <div class="form-group">
-                        <label for="list_l" class="col-sm-1 control-label">下载</label>
-                        <div class="input-group col-md-9">
-                            <input id="Cata_now_4" type="text" class="form-control " placeholder="DAM">
-                            <div class="input-group-btn">
-                                <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">目录选择 <span class="caret"></span></button>
-                                <ul id = "cata_4" class="dropdown-menu dropdown-menu-right">
-                                <!--这里会动态添加目录-->
-                                </ul>
-                            </div><!-- /btn-group -->
-                        </div><!-- /input-group -->
-                        <div>
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-primary">download</button>
-                            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                        </div>
+                    <div class="row">
+                        <div class="col-xs-offset-4 col-xs-4"><h2 class="text-center">添加目录</h2></div>
                     </div>
+                    <form class="form-horizontal" method="post">
+                        <div class="form-group">
+                            <label for="Cata_add" class="col-xs-2 control-label">文件夹</label>
+                            <div class="col-xs-9">
+                                <div class="input-group">
+                                    <input id="Cata_add" type="text" readonly="readonly" class="form-control "
+                                           placeholder="DAM">
+                                    <div class="input-group-btn">
+                                        <button type="button" class="btn btn-default dropdown-toggle"
+                                                data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">目录选择
+                                            <span class="caret"></span></button>
+                                        <ul id="cataAdd" class="dropdown-menu dropdown-menu-right">
+                                            <!--这里会动态添加目录-->
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="folderName" class="col-xs-2 control-label">文件夹名</label>
+                            <div class="col-xs-9">
+                                <input maxlength="10" type="text" class="form-control" id="folderName" name="name"
+                                       placeholder="0-10字">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-xs-offset-2 col-xs-10">
+                                <div class="checkbox">
+                                    <label>
+                                        <input class="pull-left" type="checkbox"/>是否作为「父目录」
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-xs-offset-2 col-xs-10">
+                                <input title="type" type="text" name="type" value="Directory" hidden>
+                                <input type="submit" class="btn btn-default" id="submit_btn" value="新建">
+                                <button type="button" data-dismiss="modal" class="btn btn-default" id="close">关闭
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+
+                </div>
+                <div class="modal-footer">
+                    <footer class="footer">可以在「父文件夹」下新建父文件夹／普通文件夹</footer>
                 </div>
             </div>
         </div>
@@ -263,75 +334,316 @@
 {% endblock %}
 {% block scripts_after_jq %}
     <script>
-        function imgModal(){
-            $("#imgModal").modal("toggle");
+        // 这些是用来初始化sidebar的函数,和后端交互的部分被注释，自己构造的结果在最后注上了*号
+        var dataTemp = [{List: [1, 2, 3], type: [1, 1, 1], dName: ["DAM", "数字摄影", "计算机动画"]},
+            {List: [4, 5, 6], type: [2, 2, 2], dName: ["A1", "A2", "A3"]},
+            {List: [7, 8], type: [1, 2], dName: ["秋学期", "冬学期"]},
+            {List: [9, 10], type: [2, 2], dName: ["P1", "P2"]},
+            {fid: [1, 2]},
+            {fid: [3, 4, 5, 12]},
+            {fid: 6},
+            {List: [11, 12], type: [2, 2], dName: ["紫金港", "玉泉"]},
+            {fid: 7},
+            {fid: 8},
+            {fid: 9},
+            {fid: 10},
+            {fid: 11}];//*
+        var normalCata = [];//用来存放普通文件夹的名字
+        var nC_count = 0;
+        var Cata = [];//用来存放所有文件夹的名字
+        var C_count = 0;
+        var parentCata = [];
+        var pC_count = 0;
+
+        function init_f() {
+            init_sidebar();
+            show_init();
         }
-        function downModal(){
-            $("#downModal").modal("toggle");
-        }
-        function upModal(){
-            $("#upModal").modal("toggle");
-        }
-        function addModal(){
-            $("#addModal").modal("toggle");
-        }
-        function unfold(folderNum,count,blank){
-            var str= $("#folder"+folderNum).text();
-            var finalStr = str.substring(0,blank)+ "▲" + str.substring(1+blank);
-            $("#folder"+folderNum).text(finalStr);
-            $("#folder"+folderNum).attr( 'onclick', "fold("+folderNum+','+count+','+blank+");");
-            for(var i = 1; i <= count;i++){
-                $("#folder"+folderNum+i).show();
-            }
-        }
-        function fold(folderNum,count,blank){
-            var str= $("#folder"+folderNum).text();
-            $("#folder1.1").text("hei");
-            var finalStr = str.substring(0,blank)+"▼" + str.substring(1+blank);
-            $("#folder"+folderNum).text(finalStr);
-            $("#folder"+folderNum).attr( 'onclick', "unfold("+folderNum+','+count+','+blank+");");
-            for(var i = 1; i <= count;i++){
-                if($("#folder"+folderNum+i).attr("onclick").substring(0,4)!=="unfo"){
-                    $("#folder"+folderNum+i).click();
+
+        function getChildFolder(did) {
+            var Layer = dataTemp[did];//*
+            $.get("query", {'did': did}, function (data) {
+                Layer = data;
+                if (Layer.List) {
+                    var len = Layer.List.length;
+                    var flagHR = false;//用来控制加不加入hr的
+                    for (var i = 0; i < len; i++) {
+                        if (Layer.type[i] === 1) {
+                            var $li = $('<li data-toggle="collapse" class="f-nav"></li>');
+                            var $a = $('<a class="aWhite f-nav-a" onclick="changeFolder(this);">▲ ' + Layer.dName[i] + '</a>');
+                            parentCata[pC_count] = Layer.dName[i];
+                            pC_count++;
+                            Cata[C_count] = Layer.dName[i];
+                            C_count++;
+                            $li.attr("href", "#" + Layer.List[i]);
+                            $li.append($a);
+                            $("#" + did).append($li);
+                            var $ul = $('<ul style="list-style: none;" class="collapse" id="' + Layer.List[i] + '"></ul>');
+                            $("#" + did).append($ul);
+                            getChildFolder(Layer.List[i]);
+                        }
+                        else {
+                            var $li = $('<li class="f-nav"></li>');
+                            var $a = $('<a href="#' + Layer.List[i] + '" class="aWhite f-nav-a">■ ' + Layer.dName[i] + '</a>');
+                            $li.append($a);
+                            normalCata[nC_count] = Layer.dName[i];
+                            nC_count++;
+                            Cata[C_count] = Layer.dName[i];
+                            C_count++;
+                            $("#" + did).append($li);
+                            flagHR = true;
+                        }
+                    }
+                    if (flagHR) {
+                        parentCata[pC_count] = "-";
+                        pC_count++;
+                        Cata[C_count] = "-";
+                        C_count++;
+                    }
+                    normalCata[nC_count] = "-";
+                    nC_count++;
                 }
-                $("#folder"+folderNum+i).hide();
+            });
+        }
+
+        function init_sidebar() {
+            var Layer1 = {};
+            //前端向后端请求根目录root<不在页面上显示，相当于用户的界面>（假设did=0）下所有的文件夹的id和名字
+            $.get("query", {'did': {{ root_id }}}, function (data) {
+                Layer1 = data;
+                // Layer1 = dataTemp[0];//*
+                if (Layer1 === {}) {
+                    //获得的json对象为空
+                    alert("没有子文件夹喔！");
+                }
+                else {
+                    var len = Layer1.List.length;
+                    for (var i = 0; i < len; i++) {
+                        var $li;
+                        var $a;
+                        if (Layer1.type[i] === 1) {
+                            $li = $('<li data-toggle="collapse"></li>');
+                            $a = $('<a onclick=changeFolder(this);>▲ ' + Layer1.dName[i] + '</a>');
+                            $li.attr("href", "#" + Layer1.List[i]);
+                            parentCata[pC_count] = Layer1.dName[i];
+                            pC_count++;
+                        }
+                        else {
+                            $li = $('<li></li>');
+                            $a = $('<a class="f-nav-a">■ ' + Layer1.dName[i] + '</a>');
+                            $a.attr("href", "#" + Layer1.List[i]);
+                            Cata[C_count] = Layer1.dName[i];
+                            C_count++;
+                        }
+                        normalCata[nC_count] = Layer1.dName[i];
+                        nC_count++;
+                        $li.append($a);
+                        $("#myNav").append($li);
+                        if (Layer1.type[i] === 1) {
+                            var $ul = $('<ul style="list-style: none;" class="collapse" id="' + Layer1.List[i] + '"></ul>');
+                            $("#myNav").append($ul);
+                            getChildFolder(Layer1.List[i]);
+                        }
+                    }
+                    console.log(Cata);
+                    console.log(parentCata);
+                    console.log(normalCata);
+                    loadUpCata();
+                    loadCata();
+                    loadAddCata();
+                }
+            });
+        }
+
+        // 这是用来初始化展示界面，使用了location.hash
+        function show_init() {
+            $("#show").empty();
+            var did = location.hash;
+            if (did === "" || did === "#0") {
+                $("#show").append("<p style=color:#f08769>▶关于作品集的使用说明</p>");
+                $("#show").append("<p style=color:#867f75><u>Q:如何查看自己的作品？</u></p>");
+                $("#show").append("<p style=color:#867f75><b>A</b>:可以通过左边的文件浏览器查看，带有 ▲／▼ 的是「父文件夹」，可以展开和收起。带有 ■ 的是「普通文件夹」，用来存放作品。点击普通文件夹就可查看对应课程下的作品。</p>");
+                $("#show").append("<p style=color:#867f75><u>Q:什么是「父文件夹」&「普通文件夹」？</u></p>");
+                $("#show").append("<p style=color:#867f75><b>A</b>:带有 ▲／▼ 的是「父文件夹」，可以展开和收起。不能放入作品，只能放入下级文件夹。带有 ■ 的是「普通文件夹」，用来存放作品，不能增加下级文件夹。</p>");
+                $("#show").append("<p style=color:#f08769>▷待补充</p>");
+            }
+            else {
+                var IDint = parseInt(did.substring(1));
+                var IDfile;
+                $.get("query", {'did': IDint}, function (data) {
+                    IDfile = data;
+                    {#                    IDfile = dataTemp[5];//*统一用5来代替了！#}
+                    console.log(IDfile);
+                    IDfile.fid = IDfile.List;
+                    var len = IDfile.fid.length;
+                    var count = 0;
+                    for (var i = 0; i < len; i++) {
+                        if (count % 3 === 0) {
+                            $("#show").append("<div class=row id=pic" + count / 3 + "></div>");
+                        }
+                        var fileM;
+                        $.get("query", {'fid': IDfile.fid[i]}, function (data) {
+                            fileM = data;
+                            if (fileM.status === "success") {
+                                var IDnow = "pic" + parseInt(count / 3);
+                                $("#" + IDnow).append("<div class=col-md-4><div class=product-type-container><div class=product-type-overlay id=fid" + IDfile.fid[i] + " onclick=imgModal(this);><div class=product-type-info><h3  class=text-uppercase style=color:#000>" + fileM.title + "</h3><p class=text-uppercase style=color:#281a0d>" + fileM.description + "</p></div></div><img  src=" + fileM.path + " alt='Men fashion 1' class='product-type-img img-collection gold-border'></div></div>");
+                                count++;
+                            }
+                        });
+                        {#                        fileM = {#}
+                        {#                            description: "图片介绍：这本作业的一个成果展示图",#}
+                        {#                            filename: "图片名字",#}
+                        {#                            status: "success",#}
+                        {#                            path: "asset/source/1.jpg"#}
+                        {#                        };//*就用相同的表示了！#}
+
+                    }
+                });
+
             }
         }
     </script>
     <script>
-        function loadCata()//动态生成下拉菜单中的目录选项
-        {
-            var Cata = [];//在这个需要后端传递数据替换
-            Cata[0]="A1";
-            Cata[1]="A2";
-            Cata[2]="A3";
-            Cata[3]="-";//代表分界线
-            Cata[4]="P1";
-            for(var i=0; i < 5;i++){
-                var node=document.createElement("LI");
-                var Cata_a=document.createElement("A");
-                if(Cata[i]!=="-"){
-                    Cata_a.innerHTML=Cata[i];
-                    Cata_a.setAttribute( 'onclick', "changeCata(this.innerHTML);");
-                }
-                else{
-                    node.setAttribute( 'class', "divider");
-                    node.setAttribute( 'role', "separator");
-                }
-                node.appendChild(Cata_a);
-{#                node只能同时出现在一个地方，重复append只会把node移来移去，直到不再append#}
-                $('#cata_4').append('<li><a onclick="changeCata(this.innerHTML)">' + Cata[i] + '</span></a>');
-                $('#cata_3').append('<li><a onclick="changeCata(this.innerHTML)">' + Cata[i] + '</span></a>');
-                $('#cata_2').append('<li><a onclick="changeCata(this.innerHTML)">' + Cata[i] + '</span></a>');
-                $('#cata_1').append('<li><a onclick="changeCata(this.innerHTML)">' + Cata[i] + '</span></a>');
-{#                document.getElementById("cata_4").appendChild(node);#}
-{#                document.getElementById("cata_3").appendChild(node);#}
-{#                document.getElementById("cata_1").appendChild(node);#}
+        function imgModal(pic) {
+            var fid = parseInt($(pic).attr('id').substring(3));
+            var fileM;
+            // $get("query",{'fid':fid},function(data){fileM=data})
+            fileM = {
+                description: "图片介绍：这本作业的一个成果展示图",
+                filename: "图片名字",
+                status: "success",
+                path: "asset/source/1.jpg",
+                fid: 3,
+                pid: 1,
+                uid: 1
+            };
+            $("#picName").attr('value', fileM.filename);
+            $("#picDes").attr('value', fileM.description);
+            $("#pid").attr('value', fileM.pid);
+            $("#fid").attr('value', fid);
+            $("#imgModal").modal("toggle");
+        }
+
+        function downModal() {
+            $("#downModal").modal("toggle");
+        }
+
+        function upModal() {
+            $("#upModal").modal("toggle");
+        }
+
+        function addModal() {
+            $("#addModal").modal("toggle");
+        }
+
+        function changeFolder(obj) {
+            var finalStr = $(obj).text().substring(1);
+            if ($(obj).text()[0] === "▲") {
+                $(obj).text("▼" + finalStr);
+            }
+            else if ($(obj).text()[0] === "▼") {
+                $(obj).text("▲" + finalStr);
             }
         }
-        function changeCata(name){
-            document.getElementById("Cata_now_4").setAttribute('placeholder',name);
+
+        function unfold(folderNum, count, blank) {
+            var str = $("#folder" + folderNum).text();
+            var finalStr = str.substring(0, blank) + "▲" + str.substring(1 + blank);
+            $("#folder" + folderNum).text(finalStr);
+            $("#folder" + folderNum).attr('onclick', "fold(" + folderNum + ',' + count + ',' + blank + ");");
+            for (var i = 1; i <= count; i++) {
+                $("#folder" + folderNum + i).show();
+            }
         }
+
+        function fold(folderNum, count, blank) {
+            var str = $("#folder" + folderNum).text();
+            $("#folder1").text("hei");
+            var finalStr = str.substring(0, blank) + "▼" + str.substring(1 + blank);
+            $("#folder" + folderNum).text(finalStr);
+            $("#folder" + folderNum).attr('onclick', "unfold(" + folderNum + ',' + count + ',' + blank + ");");
+            for (var i = 1; i <= count; i++) {
+                if ($("#folder" + folderNum + i).attr("onclick").substring(0, 4) !== "unfo") {
+                    $("#folder" + folderNum + i).click();
+                }
+                $("#folder" + folderNum + i).hide();
+            }
+        }
+    </script>
+    <script>
+        function loadAddCata() {
+            for (var i = 0; i < pC_count; i++) {
+                var node = document.createElement("LI");
+                var Cata_a = document.createElement("A");
+                if (parentCata[i] !== "-") {
+                    Cata_a.innerHTML = parentCata[i];
+                    Cata_a.setAttribute('onclick', "changeAddCata(this.innerHTML);");
+                }
+                else {
+                    node.setAttribute('class', "divider");
+                    node.setAttribute('role', "separator");
+                }
+                node.appendChild(Cata_a);
+                document.getElementById("cataAdd").appendChild(node);
+            }
+        }
+
+        function changeAddCata(name) {
+            document.getElementById("Cata_add").setAttribute('placeholder', name);
+        }
+
+        function loadUpCata() {
+            for (var i = 0; i < normalCata.length; i++) {
+                var node = document.createElement("LI");
+                var Cata_a = document.createElement("A");
+                if (normalCata[i] !== "-") {
+                    Cata_a.innerHTML = normalCata[i];
+                    Cata_a.setAttribute('onclick', "changeUpCata(this.innerHTML);");
+                }
+                else {
+                    node.setAttribute('class', "divider");
+                    node.setAttribute('role', "separator");
+                }
+                node.appendChild(Cata_a);
+                document.getElementById("cataUp").appendChild(node);
+            }
+        }
+
+        function changeUpCata(name) {
+            document.getElementById("Cata_up").setAttribute('placeholder', name);
+        }
+
+        function loadCata()//动态生成下拉菜单中的目录选项
+        {
+            for (var i = 0; i < C_count; i++) {
+                var node = document.createElement("LI");
+                var Cata_a = document.createElement("A");
+                if (Cata[i] !== "-") {
+                    Cata_a.innerHTML = Cata[i];
+                    Cata_a.setAttribute('onclick', "changeCata(this.innerHTML);");
+                }
+                else {
+                    node.setAttribute('class', "divider");
+                    node.setAttribute('role', "separator");
+                }
+                node.appendChild(Cata_a);
+                document.getElementById("cata").appendChild(node);
+            }
+
+        }
+
+        function changeCata(name) {
+            document.getElementById("Cata_now").setAttribute('placeholder', name);
+        }
+
+        document.getElementById('file_up').onchange = function () {
+            var imgFile = this.files[0];
+            var fr = new FileReader();
+            fr.onload = function () {
+                document.getElementById('avatar_now').src = fr.result;
+            };
+            fr.readAsDataURL(imgFile);
+        };
     </script>
 {% endblock %}
 <!-- 写这个HTML遇到的难点 -->

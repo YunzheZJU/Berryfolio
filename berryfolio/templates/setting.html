@@ -1,8 +1,8 @@
 {% extends "base.html" %}
 {% block title %}用户设置{% endblock %}
 {% block head %}
-    <link rel="stylesheet" type="text/css" href={{ url_for('static', filename="include/style_set.css") }}>
-	<link rel="stylesheet" type="text/css" href={{ url_for('static', filename="css/animate.css") }} >
+    <link rel="stylesheet" type="text/css" href={{ url_for('static', filename="css/style_set.css") }}>
+	<link rel="stylesheet" type="text/css" href={{ url_for('static', filename="include/animate.css") }} >
 {% endblock %}
 {% block body_property %} style="font-family: time;" class="colorGreen"{% endblock %}
 {% block content %}
@@ -12,8 +12,8 @@
 				<h1 style="margin: 20px 0px 0px 0px; font-family: Special;color: #000000">BERRYFOLIO</h1>
 				<h4 style="font-family: time;color: #f8bb9c">上传你的课程作业，加快树莓生长！</h4>
 			</div>
-			<a id="ind_a" href="index_login.html" style="display: none;">index</a>
-			<a id="port_a" href="portfolio.html" style="display: none;">portfile</a>
+			<a id="ind_a" href="{{ url_for('login') }}" style="display: none;">index</a>
+			<a id="port_a" href="{{ url_for('portfolio') }}" style="display: none;">portfile</a>
 			<div class="col-md-2">
 				<div class="imgbutton indexbutton" style="margin: 15px 0px 0px 90px;" onclick="ind_a.click()"></div>
 			</div>
@@ -25,7 +25,7 @@
 	<div class="container">
         <!-- Start Sign In Form -->
 		<div class=" col-md-6 col-md-offset-3">
-			<form action="portfolio.html" class="fh5co-form animate-box" data-animate-effect="fadeIn">
+			<form class="fh5co-form animate-box" data-animate-effect="fadeIn" method="post" enctype="multipart/form-data">
                 <div class="row">
                     <h2>Setting</h2>
                 </div>
@@ -34,27 +34,27 @@
                         <label for="avatar_l" class="col-sm-3 control-label">
                             头像
                         </label>
-                        <img onclick="avatar.click()" id="avatar_now" src="asset/image/avatarKen.png"  class="img-thumbnail avatar">
+                        <img onclick="avatar.click()" id="avatar_now" src="{{ avatar }}" class="img-thumbnail avatar">
                         <p style="margin-left:135px">点击图片上传</p>
-                        <input type="file" id="avatar" name="file" style="display: none;"/>
+                        <input type="file" id="avatar" name="avatar" style="display: none;"/>
                     </div>
                 </div>
                 <div class="row">
                     <div class="form-group" >
                         <label for="intro_message" class="col-sm-3 control-label">主页介绍</label>
-                        <input type="text" class="form-control col-sm-3" id="intro_message" placeholder="0-25字"/>
+                        <input type="text" class="form-control col-sm-3" id="intro_message" name="introduction" placeholder="0-25字" value="{{ introduction }}"/>
                     </div>
                 </div>
                 <div class="row">
                     <div class="form-group" >
                         <label for="pName_message" class="col-sm-3 control-label">作品集名</label>
-                        <input type="text" class="form-control col-sm-3" id="pName_message" placeholder="数字媒体资源管理">
+                        <input type="text" class="form-control col-sm-3" id="pName_message" name="name" placeholder="数字媒体资源管理" value="{{ name }}">
                     </div>
                 </div>
                 <div class="row">
                     <div class="form-group" >
                         <label for="portofio_message" class="col-sm-3 control-label">作品集介绍</label>
-                        <textarea class="col-sm-3 form-control" id="portofio_message" rows="5"></textarea>
+                        <textarea class="col-sm-3 form-control" id="portofio_message" name="description" rows="5">{{ description }}</textarea>
                     </div>
                 </div>
                 <div class="row">

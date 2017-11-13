@@ -242,7 +242,7 @@ def get_file_info(file_info):
         return file_info['title'], file_info['description'], \
                os.path.join("", "data", remove_data_path_prefix(file_info['path'])).decode('utf-8')
     # 否则返回缺省图片
-    return u"foo", u"No description", u'/static/images/wm.jpg'
+    return u"My Portfolio", u"No description", u'/static/images/wm.jpg'
 
 
 def resize_avatar(src, dst):
