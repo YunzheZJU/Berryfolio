@@ -46,7 +46,7 @@ def init_db():
     # 第一个
     uid_1 = db.add_user(u"Yunzhe", u"123", 'images/avatar.jpg', u'这个人很懒', u'我的作品集', u'这是我的作品集')
     make_user_dir(uid_1)
-    did_1_1 = db.add_directory(u"root", 1, None, uid_1)
+    did_1_1 = db.add_directory(u"rootg", 1, None, uid_1)
     make_user_sub_dir(uid_1, None, did_1_1)
     # 第二个
     uid_2 = db.add_user(u"一个用户", u"password", 'images/avatar.jpg', u'sdgdg', u'egweag', u'ewgere')
@@ -147,14 +147,14 @@ def register():
                 # 创建用户目录
                 if make_user_dir(uid):
                     # 在数据库中新增目录信息
-                    did = db.add_directory(u"root", 1, None, uid)
+                    did = db.add_directory(u"rootg", 1, None, uid)
                     if did:
                         # 创建用户目录下的根目录
                         make_user_sub_dir(uid, None, did)
                         # 注册成功，登录一下
                         return redirect(url_for('login'))
                     else:
-                        logger.error("Fail to add dictionary: name=%s, user=%s" % ("root", username))
+                        logger.error("Fail to add dictionary: name=%s, user=%s" % ("rootg", username))
                         message = u"注册失败，内部错误"
                 else:
                     message = u"注册失败，读写错误"
@@ -421,11 +421,10 @@ def download():
                 # 构造目录路径
                 directory_path = add_data_path_prefix(os.path.join(str(uid), db.gen_parent_path(did)))
                 # 生成压缩包
-                zip_name = make_zip(directory_path, username)
+                zip_name = make_zip(db, directory_path, username)
                 print zip_name
                 if zip_name:
                     # 构造指向该压缩包的下载链接
-                    print 1
                     return send_from_directory(config.GLOBAL['TEMP_PATH'], zip_name, as_attachment=True)
         else:
             # 未注册过的假冒用户，踢掉踢掉
@@ -444,7 +443,7 @@ def query():
             {description: "对它的描述1", status: "success", title: "我的照片1"}
     :return: 请求uid和type时，返回该用户的类型为type的文件夹(id: name)，形如
         >   $.get("query", {'uid':1, 'type':1}, function(data){console.log(data)})
-            {1: "root", 4: "sub2", 5: "sub3", 6: "folder1"}
+            {1: "rootg", 4: "sub2", 5: "sub3", 6: "folder1"}
         >   $.get("query", {'uid':1, 'type':2}, function(data){console.log(data)})
             {3: "sub1"}
     :return: 请求did时，返回该目录下子目录或文件的id组成的list和名字组成的list，

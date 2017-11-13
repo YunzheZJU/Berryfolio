@@ -251,7 +251,7 @@ class DbConnect:
             return results
         return None
 
-    # Function 7: Get root directory
+    # Function 7: Get rootg directory
     def get_dir_root(self, uid):
         """
         根据用户名获得用户的根目录ID
@@ -297,7 +297,7 @@ class DbConnect:
         """
         获得文件的存储路径
         :param fid: 文件ID
-        :return: 成功则返回文件的存储路径，形如"Yunzhe/root/folder/1.jpg"，否则返回None
+        :return: 成功则返回文件的存储路径，形如"Yunzhe/rootg/folder/1.jpg"，否则返回None
         """
         sql = "SELECT path FROM File WHERE ROWID = %d" % fid
         results = self._query(sql)
@@ -341,7 +341,7 @@ class DbConnect:
         :param pid: 父目录ID
         :param filename: 文件名
         :param description: 描述
-        :param file_path: 文件存储路径，形如"Yunzhe/root/folder/1.jpg"
+        :param file_path: 文件存储路径，形如"Yunzhe/rootg/folder/1.jpg"
         :param tag_1: 标签1
         :param tag_2: 标签2
         :param tag_3: 标签3
@@ -416,7 +416,7 @@ class DbConnect:
         """
         递归构造节点树，囊括所有目录
         :param nid: 节点ID
-        :return: 节点，形如{1: ['root', {2: ['folder', {3: ['sub', {7: ['sud', {}]}]}], 4: ['folder1', {}]}]}
+        :return: 节点，形如{1: ['rootg', {2: ['folder', {3: ['sub', {7: ['sud', {}]}]}], 4: ['folder1', {}]}]}
         """
         cids = self.get_dir_children(nid)
         node = {nid: [self.get_name(nid, 1), {}]}
@@ -456,6 +456,19 @@ class DbConnect:
             return results
         return None
 
+    # Function 22: Get file title by path
+    def search_file_by_filename(self, filename):
+        """
+        通过文件路径查询文件标题
+        :param filename: 文件名，形如"source1.png"
+        :return: 成功则返回文件标题，否则返回None
+        """
+        sql = "SELECT title FROM File WHERE path LIKE '%" + filename + "'"
+        result = self._query(sql)
+        if result:
+            return result[0][0]
+        return None
+
 
 if __name__ == '__main__':
     db = DbConnect()
@@ -472,16 +485,16 @@ if __name__ == '__main__':
         print db.check_username("Yunzhe")
         print db.check_username("Y")
         # F4
-        print db.add_directory("root", 1, None, "Yunzhe")
+        print db.add_directory("rootg", 1, None, "Yunzhe")
         print db.add_directory("folder", 1, 1, "Yunzhe")
         print db.add_directory("sub", 1, 2, "Yunzhe")
         print db.add_directory("folder1", 1, 1, "Yunzhe")
         print db.add_directory("folder2", 1, 1, "Yunzhe")
-        print db.add_directory("root", 1, None, "Asaki")
+        print db.add_directory("rootg", 1, None, "Asaki")
         print db.add_directory("sud", 2, 3, "Yunzhe")
         # F5
-        print db.add_file(3, "photo1.jpg", "hahahah", "Yunzhe/root/folder/sub", "Yunzhe", "PNG", 500, 300)
-        print db.add_file(3, "photo1.jpg", None, "Yunzhe/root/folder/sub", "Yunzhe", "PNG", 500, 300)
+        print db.add_file(3, "photo1.jpg", "hahahah", "Yunzhe/rootg/folder/sub", "Yunzhe", "PNG", 500, 300)
+        print db.add_file(3, "photo1.jpg", None, "Yunzhe/rootg/folder/sub", "Yunzhe", "PNG", 500, 300)
         # F6
         print db.get_dir_children(1)
         print db.get_dir_children(2)
@@ -512,8 +525,8 @@ if __name__ == '__main__':
         # F12
         print db.get_files_by_user("Yunzhe")
         # F13
-        print db.update_file_info(1, 4, "photo", None, "Yunzhe/root/folder/sud")
-        print db.update_file_info(1, 3, "photo1.jpg", "hahahah", "Yunzhe/root/folder/sub")
+        print db.update_file_info(1, 4, "photo", None, "Yunzhe/rootg/folder/sud")
+        print db.update_file_info(1, 3, "photo1.jpg", "hahahah", "Yunzhe/rootg/folder/sub")
         # F14
         print db.get_parent_id(1, 1)
         print db.get_parent_id(2, 1)
@@ -536,4 +549,6 @@ if __name__ == '__main__':
         print db.generate_tree(1)
         # F18
         print db.del_file(1)
-    print db.search_files(u"4")
+        # F21
+        print db.search_files(u"4")
+    print db.search_file_by_filename("e:\\projects\\pycharm\\dams\\berryfolio\\data\\1\\1\\3\\source1.png")

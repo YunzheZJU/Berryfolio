@@ -46,8 +46,8 @@ def make_dir(path, clean=0):
 def add_data_path_prefix(path):
     """
     为路径套上前缀路径，前缀到data/为止
-    :param path: 用户目录物理路径，应以用户名开头，形如"Yunzhe/root"
-    :return: 结果路径，形如"/home/pi/data/Yunzhe/root"
+    :param path: 用户目录物理路径，应以用户名开头，形如"Yunzhe/rootg"
+    :return: 结果路径，形如"/home/pi/data/Yunzhe/rootg"
     """
     return os.path.join(config.GLOBAL['DATA_PATH'], path)
 
@@ -78,7 +78,7 @@ def make_user_dir(uid):
     """
     try:
         user_dir = add_data_path_prefix(str(uid))
-        make_dir([user_dir], clean=1)
+        make_dir(user_dir, clean=1)
         return user_dir
     except IOError:
         return None
@@ -95,7 +95,7 @@ def make_user_sub_dir(uid, parent, did):
     try:
         path = os.path.join(str(uid), parent) if parent else str(uid)
         sub_dir = os.path.join(add_data_path_prefix(path), str(did))
-        make_dir([sub_dir])
+        make_dir(sub_dir)
         return sub_dir
     except IOError:
         return None
@@ -163,20 +163,32 @@ def make_dict(file_info):
             'tag_1': file_info[10], 'tag_2': file_info[11], 'tag_3': file_info[12]}
 
 
-def make_zip(path_to_folder, name):  # FIXME
+def make_zip(db, path_to_folder, name):  # FIXME
     """
     对folder下的目录和文件压缩
+    :param db: 数据库操作对象
     :param path_to_folder: 输入的folder，相对路径或绝对路径
     :param name: 压缩文件名
     :return: 成功则返回压缩文件名，否则返回None
     """
     try:
         folder = path_to_folder.split(os.sep)[-1]
+        folder_name = db.get_name(int(folder), 1)
         folder_zip = os.path.join(config.GLOBAL['TEMP_PATH'], "zip")
         folder_copy = os.path.join(folder_zip, folder)
-        remove_tree(folder_copy)
+        for path, dirs, files in os.walk(folder_zip):
+            for d in dirs:
+                remove_tree(os.path.join(path, d))
         shutil.copytree(path_to_folder, folder_copy)
-        shutil.make_archive(os.path.join(config.GLOBAL['TEMP_PATH'], name), "zip", folder_copy)
+        for path, dirs, files in os.walk(folder_copy, topdown=False):
+            for f in files:
+                file_path = os.path.join(path, f)
+                print file_path
+                os.rename(file_path, os.path.join(path, db.search_file_by_filename(f) + "." + f.split(".")[-1]))
+            for d in dirs:
+                os.rename(os.path.join(path, d), os.path.join(path, db.get_name(int(d), 1).encode('utf-8')))
+        os.rename(folder_copy, os.path.join(folder_zip, folder_name))
+        shutil.make_archive(os.path.join(config.GLOBAL['TEMP_PATH'], name), "zip", folder_zip, folder_name)
         return name + ".zip"
     except StandardError as ex:
         logger.error(ex)
