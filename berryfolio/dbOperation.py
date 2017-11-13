@@ -199,7 +199,7 @@ class DbConnect:
         return 0
 
     # Function 5: Add file
-    def add_file(self, pid, filename, description, file_path, uid, fm, w, h):
+    def add_file(self, pid, filename, description, file_path, uid, fm, w, h, tag_1, tag_2, tag_3):
         """
         添加一条文件信息，文件ID自增
         :param pid: 存放文件的目录的ID
@@ -207,10 +207,17 @@ class DbConnect:
         :param description: 描述
         :param file_path: 文件存放路径
         :param uid: 文件所属用户ID
+        :param fm: 图片格式
+        :param w: 图片宽度
+        :param h: 图片高度
+        :param tag_1: 标签1
+        :param tag_2: 标签2
+        :param tag_3: 标签3
         :return: 成功则返回文件ID，否则返回None
         """
-        sql = "INSERT INTO File (title, parentID, path, user, format, width, height) " \
-              "VALUES ('%s', %d, '%s', %d, '%s', %d, %d)" % (filename, pid, file_path, uid, fm, w, h)
+        sql = "INSERT INTO File (title, parentID, path, user, format, width, height, date, tag_1, tag_2, tag_3) " \
+              "VALUES ('%s', %d, '%s', %d, '%s', %d, %d, CURRENT_DATE, '%s', '%s', '%s')" \
+              % (filename, pid, file_path, uid, fm, w, h, tag_1, tag_2, tag_3)
         if self._execute(sql):
             sql = "SELECT last_insert_ROWID() FROM File"
             results = self._query(sql)
@@ -327,7 +334,7 @@ class DbConnect:
         return None
 
     # Function 13: Update file
-    def update_file_info(self, fid, pid, filename, description, file_path):
+    def update_file_info(self, fid, pid, filename, description, file_path, tag_1, tag_2, tag_3):
         """
         更新文件信息
         :param fid: 文件ID
@@ -335,10 +342,13 @@ class DbConnect:
         :param filename: 文件名
         :param description: 描述
         :param file_path: 文件存储路径，形如"Yunzhe/root/folder/1.jpg"
+        :param tag_1: 标签1
+        :param tag_2: 标签2
+        :param tag_3: 标签3
         :return: 成功则返回1，否则返回0
         """
-        sql = "UPDATE File SET parentID = %d, title = '%s', path = '%s' WHERE ROWID = %d" \
-              % (pid, filename, file_path, fid)
+        sql = "UPDATE File SET parentID = %d, title = '%s', path = '%s', tag_1 = '%s', tag_2 = '%s', tag_3 = '%s' " \
+              "WHERE ROWID = %d" % (pid, filename, file_path, tag_1, tag_2, tag_3, fid)
         if self._execute(sql):
             if description:
                 sql = "UPDATE File SET description = '%s' WHERE ROWID = %d" % (description, fid)
@@ -429,6 +439,23 @@ class DbConnect:
             return 1
         return 0
 
+    # Function 21: Search files
+    def search_files(self, keyword):
+        """
+        查找标签内包含keyword的文件，返回文件id
+        :param keyword: 关键词
+        :return: 成功则返回文件id组成的list，否则返回None
+        """
+        sql = "SELECT ROWID FROM File WHERE tag_1 LIKE '%" + keyword + \
+              "%' OR tag_2 LIKE '%" + keyword + \
+              "%' OR tag_3 LIKE '%" + keyword + \
+              "%'"
+        results = self._query(sql)
+        if results:
+            results = map(lambda tp: tp[0], results)
+            return results
+        return None
+
 
 if __name__ == '__main__':
     db = DbConnect()
@@ -453,8 +480,8 @@ if __name__ == '__main__':
         print db.add_directory("root", 1, None, "Asaki")
         print db.add_directory("sud", 2, 3, "Yunzhe")
         # F5
-        print db.add_file(3, "photo1.jpg", "hahahah", "Yunzhe/root/folder/sub", "Yunzhe")
-        print db.add_file(3, "photo1.jpg", None, "Yunzhe/root/folder/sub", "Yunzhe")
+        print db.add_file(3, "photo1.jpg", "hahahah", "Yunzhe/root/folder/sub", "Yunzhe", "PNG", 500, 300)
+        print db.add_file(3, "photo1.jpg", None, "Yunzhe/root/folder/sub", "Yunzhe", "PNG", 500, 300)
         # F6
         print db.get_dir_children(1)
         print db.get_dir_children(2)
@@ -509,3 +536,4 @@ if __name__ == '__main__':
         print db.generate_tree(1)
         # F18
         print db.del_file(1)
+    print db.search_files(u"4")

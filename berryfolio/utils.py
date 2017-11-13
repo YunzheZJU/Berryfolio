@@ -31,13 +31,16 @@ def rnd_color2():
     return random.randint(32, 127), random.randint(32, 127), random.randint(32, 127)
 
 
-def make_dirs(paths, clean=0):
-    for path in paths:
-        if clean:
-            if os.path.exists(path):
-                shutil.rmtree(path)
-        if not os.path.exists(path):
-            os.mkdir(path)
+def remove_tree(path):
+    if os.path.exists(path):
+        shutil.rmtree(path)
+
+
+def make_dir(path, clean=0):
+    if clean:
+        remove_tree(path)
+    if not os.path.exists(path):
+        os.mkdir(path)
 
 
 def add_data_path_prefix(path):
@@ -53,9 +56,18 @@ def remove_data_path_prefix(path):
     """
     为路径去掉前缀路径，前缀到data/为止
     :param path: 用户目录物理路径，应以用户名开头，形如"e:\projects\pycharm\dams\berryfolio\data\1\1\3\source1.jpg"
-    :return: 结果路径，形如"1\1\3\source1.jpg
+    :return: 结果路径，形如"1/1/3/source1.jpg
     """
-    return path.replace(config.GLOBAL['DATA_PATH'] + os.path.sep, "")
+    return path.replace(config.GLOBAL['DATA_PATH'] + os.path.sep, "").replace(os.path.sep, "/")
+
+
+def remove_root_path_prefix(path):
+    """
+    为路径去掉前缀路径，前缀到berryfolio/为止
+    :param path: 用户目录物理路径，应以用户名开头，形如"e:\projects\pycharm\dams\berryfolio\data\1\1\3\source1.jpg"
+    :return: 结果路径，形如"/data/1/1/3/source1.jpg
+    """
+    return path.replace(config.GLOBAL['ROOT_PATH'], "").replace(os.path.sep, "/")
 
 
 def make_user_dir(uid):
@@ -66,7 +78,7 @@ def make_user_dir(uid):
     """
     try:
         user_dir = add_data_path_prefix(str(uid))
-        make_dirs([user_dir], clean=1)
+        make_dir([user_dir], clean=1)
         return user_dir
     except IOError:
         return None
@@ -83,7 +95,7 @@ def make_user_sub_dir(uid, parent, did):
     try:
         path = os.path.join(str(uid), parent) if parent else str(uid)
         sub_dir = os.path.join(add_data_path_prefix(path), str(did))
-        make_dirs([sub_dir])
+        make_dir([sub_dir])
         return sub_dir
     except IOError:
         return None
@@ -147,32 +159,27 @@ def make_dict(file_info):
     return {'status': 'success', 'fid': file_info[0], 'title': file_info[1],
             'description': file_info[2] if file_info[2] else '', 'pid': file_info[3],
             'path': file_info[4], 'uid': file_info[5], 'format': file_info[6],
-            'width': file_info[7], 'height': file_info[8]}
+            'width': file_info[7], 'height': file_info[8], 'date': file_info[9],
+            'tag_1': file_info[10], 'tag_2': file_info[11], 'tag_3': file_info[12]}
 
 
-def make_zip(folder, zipname):  # FIXME
+def make_zip(path_to_folder, name):  # FIXME
     """
     对folder下的目录和文件压缩
-    :param folder: 输入的folder，相对路径或绝对路径
-    :param zipname: 压缩文件名
-    :return: 成功则返回压缩文件的路径，否则返回None
+    :param path_to_folder: 输入的folder，相对路径或绝对路径
+    :param name: 压缩文件名
+    :return: 成功则返回压缩文件名，否则返回None
     """
-    z = None
     try:
-        zip_path = os.path.join(config.GLOBAL['TEMP_PATH'], zipname)
-        z = zipfile.ZipFile(zip_path, "w")
-        for path, dirs, files in os.walk(folder):
-            for filename in files:
-                file_path = os.path.join(path, filename)
-                file_path_in_zip = os.path.join(path, filename).split(folder + os.sep)[-1]
-                print file_path
-                print file_path_in_zip
-                z.write(file_path, file_path_in_zip)
-        z.close()
-        return zip_path
-    except StandardError:
-        if z:
-            z.close()
+        folder = path_to_folder.split(os.sep)[-1]
+        folder_zip = os.path.join(config.GLOBAL['TEMP_PATH'], "zip")
+        folder_copy = os.path.join(folder_zip, folder)
+        remove_tree(folder_copy)
+        shutil.copytree(path_to_folder, folder_copy)
+        shutil.make_archive(os.path.join(config.GLOBAL['TEMP_PATH'], name), "zip", folder_copy)
+        return name + ".zip"
+    except StandardError as ex:
+        logger.error(ex)
         return None
 
 
@@ -211,8 +218,8 @@ def add_watermark(src, dst, wm):
         # Close the files.
         s_img.close()
         w_img.close()
-        # d_img.close()
-        return fm, w, h
+        d_img.close()
+        return [fm, w, h]
     except StandardError as ex:
         logger.error("Error occurred during watermarking: " + ex.message)
         return None, None, None

@@ -67,16 +67,16 @@ def init_db():
     # 上传一些文件
     # 第一个
     file_path_old = os.path.join(config.GLOBAL['TEMP_PATH'], "source.jpg")
-    file_path = os.path.join(config.GLOBAL['DATA_PATH'], str(uid_1), db.gen_parent_path(did_1_2), "source1.jpg")
+    file_path = add_data_path_prefix(os.path.join(str(uid_1), db.gen_parent_path(did_1_2), "source1.png"))
     (fm, w, h) = add_watermark(add_data_path_prefix(file_path_old),
                                add_data_path_prefix(file_path), config.GLOBAL['WM_PATH'])
-    fid_1_1 = db.add_file(did_1_2, u"我的照片1", u"对它的描述1", file_path, uid_1, fm, w, h)
+    fid_1_1 = db.add_file(did_1_2, u"我的照片1", u"对它的描述1", file_path, uid_1, fm, w, h, u"标签1", u"标2", u"3")
     # 第二个
     file_path_old = os.path.join(config.GLOBAL['TEMP_PATH'], "source.jpg")
-    file_path = os.path.join(config.GLOBAL['DATA_PATH'], str(uid_1), db.gen_parent_path(did_1_2), "source2.jpg")
+    file_path = add_data_path_prefix(os.path.join(str(uid_1), db.gen_parent_path(did_1_2), "source2.png"))
     (fm, w, h) = add_watermark(add_data_path_prefix(file_path_old),
                                add_data_path_prefix(file_path), config.GLOBAL['WM_PATH'])
-    fid_1_2 = db.add_file(did_1_2, u"我的照片2", u"对它的描述2", file_path, uid_1, fm, w, h)
+    fid_1_2 = db.add_file(did_1_2, u"我的照片2", u"对它的描述2", file_path, uid_1, fm, w, h, u"标1", u"标", u"4")
 
 
 @app.cli.command('initdb')
@@ -116,10 +116,11 @@ def upload_file():
 @app.route('/home', methods=['GET'])
 def home():
     if 'uid' in session:
-        uid = session['uid']
+        uid = int(session['uid'])
         # 检查到这个用户曾经登陆过
         db = get_db()
-        if db.check_username(uid):
+        username = db.get_name(uid, 0)
+        if username:
             # 这是一个注册了的用户并且已经登录过，去个人主页
             return redirect(url_for('mypage'))
         else:
@@ -135,7 +136,7 @@ def register():
     (vcode, filename) = generate_verify_code()
     # vcode_url = url_for('static', filename=filename).decode('utf-8')
     if request.method == 'POST':
-        # 获得表单内容，检查并存入数据库，初始化目录并存入数据库（）未做SQL注入的防范）
+        # 获得表单内容，检查并存入数据库，初始化目录并存入数据库（未做SQL注入的防范）
         username = request.form['username']
         password = request.form['password']
         code = request.form['vcode']
@@ -311,20 +312,25 @@ def portfolio():
                     pid = int(request.form['pid'])
                     input_name = request.form['title']
                     description = request.form['description']
-                    dir_path = os.path.join(config.GLOBAL['DATA_PATH'], str(uid),
-                                            db.gen_parent_path(pid))
+                    tag_1 = request.form['tag_1']
+                    tag_2 = request.form['tag_2']
+                    tag_3 = request.form['tag_3']
+                    dir_path = add_data_path_prefix(os.path.join(str(uid), db.gen_parent_path(pid)))
                     # 保存文件至临时目录
                     m = hashlib.md5()
                     m.update(str(time.time()))
                     filename = photos.save(request.files['photo'], name=m.hexdigest() + ".")
                     file_path_old = os.path.join(config.GLOBAL['TEMP_PATH'], filename)
+                    ext = filename.split(".")[-1]
+                    filename = filename.replace(ext, "png")
                     file_path = os.path.join(dir_path, filename)
                     # 为文件添加数字水印
                     (fm, width, height) = add_watermark(add_data_path_prefix(file_path_old),
                                                         add_data_path_prefix(file_path), config.GLOBAL['WM_PATH'])
                     if fm:
                         # 文件信息存入数据库
-                        fid = db.add_file(pid, input_name, description, file_path, uid, fm, width, height)
+                        fid = db.add_file(pid, input_name, description, file_path, uid, fm, width, height,
+                                          tag_1, tag_2, tag_3)
                         if fid:
                             message = u"上传成功"
                         else:
@@ -336,12 +342,15 @@ def portfolio():
                     fid = int(request.form['fid'])
                     pid = int(request.form['pid'])
                     title = request.form['title']
+                    tag_1 = request.form['tag_1']
+                    tag_2 = request.form['tag_2']
+                    tag_3 = request.form['tag_3']
                     description = request.form['description']
                     file_path_old = db.get_file_path(fid)
-                    file_path = os.path.join(config.GLOBAL['DATA_PATH'], str(uid), db.gen_parent_path(pid),
-                                             file_path_old.split('\\')[-1])
+                    file_path = add_data_path_prefix(os.path.join(str(uid), db.gen_parent_path(pid),
+                                                                  file_path_old.split('\\')[-1]))
                     # 存入数据库
-                    if db.update_file_info(fid, pid, title, description, file_path):
+                    if db.update_file_info(fid, pid, title, description, file_path, tag_1, tag_2, tag_3):
                         # 比对文件位置
                         if file_path != file_path_old:
                             # 移动文件
@@ -371,6 +380,24 @@ def portfolio():
     return redirect(url_for('home'))
 
 
+@app.route('/search', methods=['GET', 'POST'])
+def search():
+    # message = None
+    if 'uid' in session:
+        uid = int(session['uid'])
+        # 检查到这个用户曾经登陆过
+        db = get_db()
+        username = db.get_name(uid, 0)
+        if username:
+            # 这是一个注册了的用户，给你搜索
+            keyword = request.form['keyword']
+            results = db.search_files(keyword)
+        else:
+            # 未注册过的假冒用户，踢掉踢掉
+            session.pop('username', None)
+    return redirect(url_for('home'))
+
+
 # 下载接口
 @app.route('/download', methods=['GET'])
 def download():
@@ -386,20 +413,19 @@ def download():
                 # 获得file id
                 fid = int(request.args['fid'])
                 # 构造指向该文件的下载链接
-                file_path = remove_data_path_prefix(db.get_file_path(fid)).replace(os.path.sep, "/")
+                file_path = remove_data_path_prefix(db.get_file_path(fid))
                 return redirect(url_for('data', filename=file_path, _external=True))
             elif 'did' in request.args:
                 # 获得directory id
                 did = int(request.args['did'])
                 # 构造目录路径
-                directory_name = db.get_name(did, 1)
-                parent_path = db.gen_parent_path(did)  # FIXME
-                directory_path = add_data_path_prefix(os.path.join(username, parent_path, directory_name))
+                directory_path = add_data_path_prefix(os.path.join(str(uid), db.gen_parent_path(did)))
                 # 生成压缩包
-                zip_name = username + ".zip"
-                zip_path = make_zip(directory_path, zip_name)
-                if zip_path:
+                zip_name = make_zip(directory_path, username)
+                print zip_name
+                if zip_name:
                     # 构造指向该压缩包的下载链接
+                    print 1
                     return send_from_directory(config.GLOBAL['TEMP_PATH'], zip_name, as_attachment=True)
         else:
             # 未注册过的假冒用户，踢掉踢掉
@@ -435,7 +461,8 @@ def query():
         db = get_db()
         # 获得该文件的相关信息
         file_info = db.get_file_info(fid)
-        file_info.pop("path")
+        if file_info['status'] == 'success':
+            file_info['path'] = remove_root_path_prefix(file_info['path'])
         # 返回文件信息
         return json.dumps(file_info), [('Content-Type', 'application/json;charset=utf-8')]
     if 'uid' in request.args and 'type' in request.args:

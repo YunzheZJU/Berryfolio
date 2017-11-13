@@ -3,6 +3,7 @@
 import os
 import zipfile
 import config
+import shutil
 
 
 def zip(folder):
@@ -26,4 +27,5 @@ def zip(folder):
 
 
 if __name__ == '__main__':
-    print zip("data/Yunzhe")
+    # print zip("data/Yunzhe")
+    shutil.make_archive("e:\\a", 'zip', "e:\\123")
