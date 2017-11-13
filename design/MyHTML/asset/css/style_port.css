@@ -114,8 +114,14 @@ body {
 .upB:hover{
    background-image:url('../button/upbutton_down.png');
 }
+ul{
+  list-style: none;
+}
 hr {
-  color:#feeac5;
+  height:0px;
+  padding:0px;
+  border:none;
+  border-top:1px solid #867f75;
 }
 a {
   color: #feeac5;
@@ -125,11 +131,15 @@ a {
   -webkit-transition: all 0.3s ease;
   -ms-transition: all 0.3s ease;
   transition: all 0.3s ease;
+
 }
 a:hover {
-  color: #a39b8f;
+  color: #867f75;
 }
 
+.aWhite:hover{
+  color: #FFF;
+}
 .showroom{
   display: block;
 
