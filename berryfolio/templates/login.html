@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 {% block title %}用户登录{% endblock %}
 {% block head %}
+	<link type="text/css" href="{{ url_for('static', filename="css/style.css") }}" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename="include/animate.css") }}">
 {% endblock %}
 {% block body_property %} class="colorGreen" onload="draw()"{% endblock %}
