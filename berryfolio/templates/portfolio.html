@@ -70,12 +70,14 @@
             <div class="col-md-3">
                 <form class="form-horizontal" method="post" action="{{ url_for('search') }}">
                     <div class="input-group" style="margin-top:5px;margin-right: -80px;margin-left: 60px; ">
-                        <input title="type" type="text" name="type" value="" hidden>
-                        <input type="text" id="search" class="form-control" placeholder="Search for...">
+                        <input type="text" id="search" class="form-control" placeholder="Search for..." name="keyword">
                         <span class="input-group-btn">
-              <button class="btn btn-default" type="submit"><span class="glyphicon glyphicon-search"
-                                                                  aria-hidden="true"></span></button>
-            </span>
+                            <button class="btn btn-default" type="submit">
+                                <span class="glyphicon" aria-hidden="true">
+                                    给我搜！
+                                </span>
+                            </button>
+                        </span>
                     </div><!-- /input-group -->
                 </form>
             </div>
@@ -86,9 +88,6 @@
             <!-- 试图在这里面塞下图片们 -->
         </div>
     </div>
-
-
-
 
     <!-- 按钮触发模态框 -->
     <!-- Button trigger modal -->

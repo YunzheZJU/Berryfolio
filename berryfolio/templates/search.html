@@ -1,10 +1,150 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
+{% extends "base.html" %}
+{% block title %}Search!Go 0w0{% endblock %}
+{% block head %}
+    <link rel="stylesheet" href="{{ url_for('static', filename="css/style_port.css") }}">
+{% endblock %}
+{% block body_property %} style="background-color: #e6f3f7; font-family: Time;"
+    onhashchange="init_result();"{% endblock %}
+{% block content %}
+    <div id="Layer1"
+         style="position:absolute; width:1px; height:700px; z-index:1; background-color: #459fba; border: 1px none  #459fba; left: 230px; top: 140px"></div>
+    <div style="background-color: #459fba; padding:20px; margin-top: -20px; ">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-9">
+                    <h1 style="margin: 20px 0 0 0; font-family: Special;color: #000000">BERRYFPOLIO</h1>
+                    <h4 style="font-family: time;color: #e6e6e6">这里是搜索结果页面！</h4>
+                </div>
+                <a id="ind_a" href="{{ url_for('home') }}" style="display: none;">index</a>
+                <a id="port_a" href="{{ url_for('portfolio') }}" style="display: none;">portfolio</a>
+                <div class="col-md-2">
+                    <div class="imgbutton indexbutton" style="margin: 15px 0 0 90px;" onclick="ind_a.click()"></div>
+                </div>
+                <div class="col-md-1">
+                    <div class="imgbutton portbutton" style="margin: 15px 0 0 0;" onclick="port_a.click()"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-2" style="margin-left: 10px;">
+        <h4 style="margin-top: 30px; margin-bottom: 15px;color: #459fba;">说明</h4>
+        <p>这些是按照标签搜索的结果。</p>
+        <p>单击图片跳转到图片所在文件夹</p>
+    </div>
+    <div class="col-md-9">
+        <div class="row">
+            <div class="col-md-12" style="margin-top: 20px;margin-left: 30px;">
+                <form class="form-horizontal">
+                    <div class="input-group" style="margin-top:5px; ">
+                        <input type="text" id="search" class="form-control" placeholder="Search for..." name="keyword"
+                               value="{{ keyword }}">
+                        <span class="input-group-btn">
+                            <button class="btn btn-default" type="submit">
+                                <span class="glyphicon" aria-hidden="true">
+                                    给我搜！
+                                </span>
+                            </button>
+                        </span>
+                    </div><!-- /input-group -->
+                </form>
+            </div>
+            <div class="col-md-12" style="margin-top: 20px;margin-left: 30px;">
+                <div class="row" id="result">
+                </div>
+            </div>
+            <div class="col-md-12" style="margin-top: 20px;margin-left: 30px;">
+                <nav aria-label="...">
+                    <ul class="pager">
+                        <li class="previous"><a onclick="lastPage();" style="color: #459fba;"><span aria-hidden="true">&larr;</span>
+                            Older</a></li>
+                        <li class="next"><a onclick="nextPage();" style="color: #459fba;">Newer <span aria-hidden="true">&rarr;</span></a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </div>
+    <br>
+{% endblock %}
+{% block scripts_after_jq %}
+    <!-- <a onclick="init_result();">尝试用</a> -->
+    <script type="text/javascript">
+        //假设后端接受表单传过去的搜索数据，传回来一个！关键词！和！包含所有相关图片的信息的dict数组！
+        //自己构造的dict
+        //！！注意：这里用了did，用来点击图片跳转到对应portfolio的文件夹下
+        var fileM = [{
+            description: "图片介绍：这本作业的一个成果展示图",
+            filename: "图片名字",
+            status: "success",
+            path: "asset/source/1.jpg",
+            did: "6"
+        }, {description: "第二页的图片", filename: "图片名字", status: "success", path: "asset/source/2.jpg", did: "8"}];
+        var pageCount;
+        var keyword = $('#search').attr('value');
+        if (keyword) {
+            $.get('query', {'keyword': keyword}, function (data) {
+                fileM = data;
+                pageCount = parseInt((fileM.length - 1) / 9) + 1;
+                //!!这个是根据这个dict数组的长度来的。用来统计有多少页pageCount=parseInt((fileM.length-1)/9)+1;<用这个公式为了防止有9页出现了2页的情况>
+                init_result();
+            });
+        }
 
-</body>
-</html>
+        function init_result() {
+            $("#result").empty();
+            var did = location.hash;
+            if (did === "")
+                did = "#0";
+            var PageInt = parseInt(did.substring(1));//获取是第几个页面
+            //假设一个页面放三行,每行三张图，目前展示只放了一行
+            //从fileM中获取PageInt*9-PageInt*9+8的图片信息，这里用fileM[PageInt]来代替所有图片
+            var fileNum;
+            if (PageInt === pageCount - 1) {
+                fileNum = fileM.length % 9
+            }
+            else {
+                fileNum = 9;//实际上为9
+            }
+
+            for (var i = 0; i < fileNum; i++)//假设后端传回来的都是存在的图片
+            {
+                if (i % 3 === 0) {
+                    $("#result").append('<div class=row id="pic' + i / 3 + '"></div>');
+                }
+                var IDnow = "pic" + parseInt(i / 3);
+                $("#" + IDnow).append('<div class="col-md-4"><div class="product-type-container"><div class="product-type-overlay"  onclick=location="portfolio#' + fileM[i].pid + '"><div class="product-type-info"><h3  class="text-uppercase" style="color:#000;">' + fileM[i].title + '</h3><p class="text-uppercase" style="color:#281a0d;">' + fileM[i].description + '</p></div></div><img  src="' + fileM[i].path + '" alt="Men fashion 1" class="product-type-img img-collection gold-border"></div></div>')
+
+            }
+        }
+
+    </script>
+    <script type="text/javascript">
+        function lastPage() {
+            $("#show").empty();
+            var did = location.hash;
+            if (did === "")
+                did = "#0";
+            var PageInt = parseInt(did.substring(1));//获取是第几个页面
+            if (PageInt === 0) {
+                window.location.hash = "#" + (pageCount - 1);
+            }
+            else {
+                window.location.hash = "#" + (PageInt - 1);
+            }
+        }
+
+        function nextPage() {
+            $("#show").empty();
+            var did = location.hash;
+            if (did === "")
+                did = "#0";
+            var PageInt = parseInt(did.substring(1));//获取是第几个页面
+            if (PageInt === pageCount - 1) {
+                window.location.hash = "#0";
+            }
+            else {
+                window.location.hash = "#" + (PageInt + 1);
+            }
+        }
+    </script>
+{% endblock %}

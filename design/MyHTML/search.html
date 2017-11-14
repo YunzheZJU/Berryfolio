@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Search!Go 0w0</title>
+	<link rel="stylesheet" href="asset/bootstrap/css/bootstrap.min.css">
+  	<script src="asset/bootstrap/js/jquery.min.js"></script>
+  	<script src="asset/bootstrap/js/bootstrap.min.js"></script>
+	<link rel="stylesheet" href="asset/css/style_port.css" type="text/css">
+	<script src="asset/js/jquery-1.8.3.min.js"></script>
+	<!--[if IE 6]> 
+	<script src="asset/js/iepng.js" type="text/javascript"></script> 
+	<script type="text/javascript">
+   		EvPNG.fix('div, ul, img, li, input,a,span');  
+	</script>
+	<![endif]-->
+</head>
+
+
+<body style="background-color: #e6f3f7; font-family: Time;" onload="init_result();" onhashchange="init_result();">
+	<!-- <a onclick="init_result();">尝试用</a> -->
+	<script type="text/javascript">
+		//假设后端接受表单传过去的搜索数据，传回来一个！关键词！和！包含所有相关图片的信息的dict数组！
+		//自己构造的dict
+		//！！注意：这里用了did，用来点击图片跳转到对应portfolio的文件夹下
+		var fileM=[{description:"图片介绍：这本作业的一个成果展示图",filename:"图片名字",status:"success",path:"asset/source/1.jpg",did:"6"},{description:"第二页的图片",filename:"图片名字",status:"success",path:"asset/source/2.jpg",did:"8"}]
+		var pageCount = 2;
+		//!!这个是根据这个dict数组的长度来的。用来统计有多少页pageCount=parseInt((fileM.length-1)/9)+1;<用这个公式为了防止有9页出现了2页的情况>
+		function init_result(){	
+			$("#result").empty();
+    		var did=location.hash;
+    		if(did=="")
+    			did="#0";
+    		var PageInt=parseInt(did.substring(1));//获取是第几个页面
+    		//假设一个页面放三行,每行三张图，目前展示只放了一行
+    		//从fileM中获取PageInt*9-PageInt*9+8的图片信息，这里用fileM[PageInt]来代替所有图片
+    		var fileNum;
+    		if(PageInt==pageCount-1){
+    			fileNum=2;//实际上应该是 fileM.length-9*pageCount
+    		}
+    		else{
+    			fileNum=3;//实际上为9
+    		}
+
+    		for(var i = 0; i < fileNum;i++)//假设后端传回来的都是存在的图片
+    		{
+    			if(i%3==0){
+    				$("#result").append("<div class=row id=pic"+i/3+"></div>");
+    			}
+      			var IDnow="pic"+parseInt(i/3);
+      				$("#"+IDnow).append("<div class=col-md-4><div class=product-type-container><div class=product-type-overlay  onclick=location='portfolio.html#"+fileM[PageInt].did+"'><div class=product-type-info><h3  class=text-uppercase style=color:#000>"+fileM[PageInt].filename+"</h3><p class=text-uppercase style=color:#281a0d>"+fileM[PageInt].description+"</p></div></div><img  src="+fileM[PageInt].path+" alt='Men fashion 1' class='product-type-img img-collection gold-border'></div></div>")
+      								
+      		}
+		}
+
+	</script>
+	<div id="Layer1" style="position:absolute; width:1px; height:700px; z-index:1; background-color: #459fba;layer-background-color: #459fba; border: 1px none  #459fba; left: 230px; top: 140px"></div>
+	<div style="background-color: #459fba; padding:20px; margin-top: -20px; ">
+	<div class="container" >
+		<div class="row" >
+			<div class="col-md-9">
+				<h1 style="margin: 20px 0px 0px 0px; font-family: Special;color: #000000">BERRYFPOLIO</h1>
+				<h4 style="font-family: time;color: #e6e6e6">这里是搜索结果页面！</h4>
+			</div>
+			<a id="ind_a" href="index_login.html" style="display: none;">index</a>
+			<a id="port_a" href="porfolio.html" style="display: none;">portfolio</a>
+			<div class="col-md-2">
+				<div class="imgbutton indexbutton" style="margin: 15px 0px 0px 90px;" onclick="ind_a.click()"></div>
+			</div>
+			<div class="col-md-1">
+				<div class="imgbutton portbutton" style="margin: 15px 0px 0px 0px;" onclick="port_a.click()"></div>
+			</div>
+		</div>
+	</div>
+	</div>
+	<div class="col-md-2" style="margin-left: 10px;">
+		<h4 style="margin-top: 30px; margin-bottom: 15px;color: #459fba;">搜索引擎说明</h4>
+		<p>很多很多的文字，比如这个引擎怎么使用。</p>
+		<p>有什么关键词之类的呀，很多很多。</p>
+		<p>搜索引擎（Search Engine）是指根据一定的策略、运用特定的计算机程序从互联网上搜集信息，在对信息进行组织和处理后，为用户提供检索服务，将用户检索相关的信息展示给用户的系统。</p>
+	</div>
+
+	<div class="row" >
+		<div class="col-md-8" style="margin-top: 20px;margin-left: 30px;">
+			<form class="form-horizontal">
+          		<div class="input-group" style="margin-top:5px; ">
+           			<input type="text" id="search" class="form-control" placeholder="Search for..." >
+            		<span class="input-group-btn">
+              			<button class="btn btn-default" type="submit"><span class="glyphicon glyphicon-search" aria-hidden="true"></span></button>
+            		</span>
+          		</div><!-- /input-group -->
+          	</form>
+		</div>
+		<div class = "col-md-8" style="margin-top: 20px;margin-left: 30px;">
+			<div class="row" id="result">
+			</div>
+		</div>
+		
+		<div class="col-md-8" style="margin-top: 20px;margin-left: 30px;">
+			<nav aria-label="..." >
+  				<ul class="pager">
+   					<li class="previous" ><a onclick="lastPage();" style="color: #459fba;"><span aria-hidden="true">&larr;</span> Older</a></li>
+    				<li class="next"><a onclick="nextPage();" style="color: #459fba;">Newer <span aria-hidden="true">&rarr;</span></a></li>
+  				</ul>
+			</nav>
+		</div>
+		
+
+	</div>
+	
+	
+
+	<br>
+	<br>
+	<footer>
+		<div class="row">
+			<div class="text-center"><p><small>&copy; Copyright DAM</small></p></div>
+		</div>
+	</footer>
+	<script type="text/javascript">
+		function lastPage(){
+			$("#show").empty();
+    		var did=location.hash;
+    		if(did=="")
+    			did="#0";
+    		var PageInt=parseInt(did.substring(1));//获取是第几个页面
+    		if(PageInt == 0){
+    			window.location.hash="#"+(pageCount-1);
+    		}
+    		else{
+    			var str="#"+(PageInt-1);
+    			window.location.hash=str;
+    		}
+		}
+		function nextPage(){
+			$("#show").empty();
+    		var did=location.hash;
+    		if(did=="")
+    			did="#0";
+    		var PageInt=parseInt(did.substring(1));//获取是第几个页面
+    		if(PageInt == pageCount-1){
+    			window.location.hash="#0";
+    		}
+    		else{
+    			var str="#"+(PageInt+1)
+    			window.location.hash=str;
+    		}
+		}
+	</script>
+
+</body>
+</html>

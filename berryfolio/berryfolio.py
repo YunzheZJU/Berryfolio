@@ -14,7 +14,6 @@ from flask_wtf import FlaskForm
 from flask_wtf.file import FileField, FileRequired, FileAllowed
 from wtforms import SubmitField
 
-
 # 我也不知道为什么，总之这句必须有
 app = Flask(__name__)
 generate_global(app.root_path)
@@ -301,15 +300,15 @@ def portfolio():
         if username:
             # 这是一个注册了的用户，给你管理自己的作品集
             # if request.method == 'GET':
-                # # 从数据库获取这个用户的目录信息，传入模板
-                # root_id = db.get_dir_root(uid)
-                # try:
-                #     tree = db.generate_tree(root_id)
-                # except Exception as ex:
-                #     logger.error("Failure in constructing directory tree: " + ex.message)
-                #     message = u"获取目录信息失败"
-                #     tree = {}
-                # return render_template('portfolio.html', username=username, message=message)
+            # # 从数据库获取这个用户的目录信息，传入模板
+            # root_id = db.get_dir_root(uid)
+            # try:
+            #     tree = db.generate_tree(root_id)
+            # except Exception as ex:
+            #     logger.error("Failure in constructing directory tree: " + ex.message)
+            #     message = u"获取目录信息失败"
+            #     tree = {}
+            # return render_template('portfolio.html', username=username, message=message)
             if request.method == 'POST':
                 message = u"未知上传类型"
                 if request.form['type'] == u'Photo' and 'photo' in request.files:
@@ -386,18 +385,26 @@ def portfolio():
     return redirect(url_for('home'))
 
 
-@app.route('/search', methods=['POST'])
+@app.route('/search', methods=['GET', 'POST'])
 def search():
-    # message = None
+    message = None
     if 'uid' in session:
         uid = int(session['uid'])
         # 检查到这个用户曾经登陆过
         db = get_db()
         username = db.get_name(uid, 0)
         if username:
+            if request.method == 'GET':
+                keyword = request.args['keyword'] if 'keyword' in request.args else u""
+            elif request.method == 'POST':
+                keyword = request.form['keyword'] if 'keyword' in request.form else u""
+            print request.form
+            print request.args
+            print keyword
             # 这是一个注册了的用户，给你搜索
-            keyword = request.form['keyword']
-            results = db.search_files(keyword)
+            # keyword = request.form['keyword'] if 'keyword' in request.form else u""
+
+            return render_template('search.html', uid=uid, username=username, message=message, keyword=keyword)
         else:
             # 未注册过的假冒用户，踢掉踢掉
             session.pop('username', None)
@@ -422,15 +429,15 @@ def download():
             #     file_path = remove_data_path_prefix(db.get_file_path(fid))
             #     return redirect(url_for('data', filename=file_path, _external=True))
             # elif 'did' in request.args:
-                # 获得directory id
-                did = int(request.form['did'])
-                # 构造目录路径
-                directory_path = add_data_path_prefix(os.path.join(str(uid), db.gen_parent_path(did)))
-                # 生成压缩包
-                zip_name = make_zip(db, directory_path, username)
-                if zip_name:
-                    # 构造指向该压缩包的下载链接
-                    return send_from_directory(config.GLOBAL['TEMP_PATH'], zip_name, as_attachment=True)
+            # 获得directory id
+            did = int(request.form['did'])
+            # 构造目录路径
+            directory_path = add_data_path_prefix(os.path.join(str(uid), db.gen_parent_path(did)))
+            # 生成压缩包
+            zip_name = make_zip(db, directory_path, username)
+            if zip_name:
+                # 构造指向该压缩包的下载链接
+                return send_from_directory(config.GLOBAL['TEMP_PATH'], zip_name, as_attachment=True)
         else:
             # 未注册过的假冒用户，踢掉踢掉
             session.pop('username', None)
@@ -458,6 +465,7 @@ def query():
             可以这样获取值：data['list'][1]（值为4）
         >   $.get("query", {'did':3}, function(data){console.log(data)})
             {list: [1, 2], type: 2}
+    :return: 请求keyword时，返回按关键字搜索标签得到的所有文件的信息
     """
     if 'fid' in request.args:
         # 获得file id
@@ -469,7 +477,7 @@ def query():
             file_info['path'] = remove_root_path_prefix(file_info['path'])
         # 返回文件信息
         return json.dumps(file_info), [('Content-Type', 'application/json;charset=utf-8')]
-    if 'uid' in request.args and 'type' in request.args:
+    elif 'uid' in request.args and 'type' in request.args:
         uid = int(request.args['uid'])
         rtype = int(request.args['type'])
         db = get_db()
@@ -478,7 +486,7 @@ def query():
         for did in did_list:
             result[did] = db.get_name(did, 1)
         return json.dumps(result), [('Content-Type', 'application/json;charset=utf-8')]
-    if 'did' in request.args:
+    elif 'did' in request.args:
         did = int(request.args['did'])
         db = get_db()
         children = db.get_dir_children(did)
@@ -492,6 +500,17 @@ def query():
         else:
             result = {}
         return json.dumps(result), [('Content-Type', 'application/json;charset=utf-8')]
+    elif 'keyword' in request.args:
+        keyword = request.args['keyword']
+        print keyword
+        db = get_db()
+        results = map(lambda fid: db.get_file_info(fid), db.search_files(keyword))
+        search_results = []
+        for file_info in results:
+            if file_info['status'] == 'success':
+                file_info['path'] = remove_root_path_prefix(file_info['path'])
+            search_results.append(file_info)
+        return json.dumps(search_results), [('Content-Type', 'application/json;charset=utf-8')]
 
 
 # 删除接口
