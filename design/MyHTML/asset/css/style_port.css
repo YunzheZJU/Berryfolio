@@ -75,10 +75,10 @@ body {
 .indexbutton{
   display:block;
   background-size: 90px 80px;
-  background-image:url('../button/exitbutton_up.png');
+  background-image:url('../button/indexbutton_up.png');
 }
 .indexbutton:hover{
-  background-image:url('../button/exitbutton_down.png');
+  background-image:url('../button/indexbutton_down.png');
 }
 
 /*这里是文件夹的格式*/

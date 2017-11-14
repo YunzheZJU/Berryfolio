@@ -98,10 +98,10 @@ img.meo{
 .indexbutton{
   display:block;
   background-size: 90px 80px;
-  background-image:url('../images/exitbutton_up.png');
+  background-image:url('../images/indexbutton_up.png');
 }
 .indexbutton:hover{
-  background-image:url('../images/exitbutton_down.png');
+  background-image:url('../images/indexbutton_down.png');
 }
 p.center{
   text-align: center;

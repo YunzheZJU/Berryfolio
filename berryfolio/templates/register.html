@@ -3,7 +3,7 @@
 {% block head %}
     <link rel="stylesheet" href="{{ url_for('static', filename="include/animate.css") }}">
 {% endblock %}
-{% block body_property %} class="colorGreen" onload="draw()"{% endblock %}
+{% block body_property %} onload="draw()" style="background-color: #eedff4"{% endblock %}
 {% block content %}
     <div class="container" >
 		<div class="row">
@@ -56,10 +56,10 @@
 					</div>
 
 					<div class="form-group">
-						<p>已经有了账号？ <a href="{{ url_for('login') }}">登陆</a> | <a>忘记密码?</a></p>
+						<p style="font-family: Time;">已经有了账号？ <a href="{{ url_for('login') }}">登陆</a> | <a>忘记密码</a></p>
 					</div>
 					<div class="form-group">
-                        <input style="margin-right: 250px;" type="submit" title="Register" class="btn-primary" value="">
+                        <input style="margin: 0px 0px 0px 250px;" type="submit" title="Register" class="btn-primary" value="">
 					</div>
 				</form>
 					<!-- END Sign In Form -->
