@@ -66,7 +66,7 @@
     <!-- 右边的展示区 -->
     <div class="col-md-10">
         <div class="row">
-            <div class="col-md-6"><h4>当前目录：作品集首页</h4></div>
+            <div class="col-md-6"><h4>当前目录：<span id="curdir">作品集首页</span></h4></div>
             <div class="col-md-3">
                 <form class="form-horizontal" method="post" action="{{ url_for('search') }}">
                     <div class="input-group" style="margin-top:5px;margin-right: -80px;margin-left: 60px; ">
@@ -479,6 +479,7 @@
             $("#show").empty();
             var did = location.hash;
             if (did === "" || did === "#0") {
+                $('#curdir').html("作品集首页");
                 $("#show").append("<p style=color:#f08769>▶关于作品集的使用说明</p>");
                 $("#show").append("<p style=color:#867f75><u>Q:如何查看自己的作品？</u></p>");
                 $("#show").append("<p style=color:#867f75><b>A</b>:可以通过左边的文件浏览器查看，带有 ▲／▼ 的是「父文件夹」，可以展开和收起。带有 ■ 的是「普通文件夹」，用来存放作品。点击普通文件夹就可查看对应课程下的作品。</p>");
@@ -488,6 +489,11 @@
             }
             else {
                 var IDint = parseInt(did.substring(1));
+                $.get("query", {'namefordid': IDint}, function (data) {
+                    var dname = data;
+                    console.log(dname);
+                    $('#curdir').html(dname);
+                });
                 var IDfile;
                 $.get("query", {'did': IDint}, function (data) {
                     IDfile = data;

@@ -466,6 +466,7 @@ def query():
         >   $.get("query", {'did':3}, function(data){console.log(data)})
             {list: [1, 2], type: 2}
     :return: 请求keyword时，返回按关键字搜索标签得到的所有文件的信息
+    :return: 请求namefordid时，返回目录名
     """
     if 'fid' in request.args:
         # 获得file id
@@ -502,7 +503,6 @@ def query():
         return json.dumps(result), [('Content-Type', 'application/json;charset=utf-8')]
     elif 'keyword' in request.args:
         keyword = request.args['keyword']
-        print keyword
         db = get_db()
         results = map(lambda fid: db.get_file_info(fid), db.search_files(keyword))
         search_results = []
@@ -511,6 +511,12 @@ def query():
                 file_info['path'] = remove_root_path_prefix(file_info['path'])
             search_results.append(file_info)
         return json.dumps(search_results), [('Content-Type', 'application/json;charset=utf-8')]
+    elif 'namefordid' in request.args:
+        did = int(request.args['namefordid'])
+        db = get_db()
+        result = db.get_name(did, 1)
+        print result
+        return json.dumps(result), [('Content-Type', 'application/json;charset=utf-8')]
 
 
 # 删除接口
