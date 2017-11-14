@@ -467,9 +467,6 @@
                             getChildFolder(Layer1.List[i]);
                         }
                     }
-                    console.log(Cata);
-                    console.log(parentCata);
-                    console.log(normalCata);
                 }
             });
         }
@@ -491,14 +488,12 @@
                 var IDint = parseInt(did.substring(1));
                 $.get("query", {'namefordid': IDint}, function (data) {
                     var dname = data;
-                    console.log(dname);
                     $('#curdir').html(dname);
                 });
                 var IDfile;
                 $.get("query", {'did': IDint}, function (data) {
                     IDfile = data;
                     {#                    IDfile = dataTemp[5];//*统一用5来代替了！#}
-                    console.log(IDfile);
                     IDfile.fid = IDfile.List;
                     var len = IDfile.fid.length;
                     var count = 0;
@@ -629,7 +624,6 @@
         function loadUpCata() {
             $.get("query", {'uid': uid, 'type': 2}, function (data) {
                 normalCata = data;
-                console.log(normalCata);
                 for (var k in normalCata) {
                     var node = document.createElement("LI");
                     var Cata_a = document.createElement("A");
@@ -656,7 +650,6 @@
         {
             $.get("query", {'uid': uid, 'type': 0}, function (data) {
                 Cata = data;
-                console.log(Cata);
                 for (var k in Cata) {
                     var node = document.createElement("LI");
                     var Cata_a = document.createElement("A");

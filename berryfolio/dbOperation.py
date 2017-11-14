@@ -68,7 +68,6 @@ class DbConnect:
             for sql in scripts:
                 # 执行SQL语句
                 cursor.execute(sql)
-                # print sql
             # 提交数据库事务
             self.db.commit()
             return 1
@@ -415,7 +414,7 @@ class DbConnect:
             return current_path
 
     # Function 17: Generate directory tree
-    def generate_tree(self, nid):  # FIXME
+    def generate_tree(self, nid):
         """
         递归构造节点树，囊括所有目录
         :param nid: 节点ID

@@ -180,13 +180,11 @@ def make_zip(db, path_to_folder, name):  # FIXME
             for d in dirs:
                 remove_tree(os.path.join(path, d))
         shutil.copytree(path_to_folder, folder_copy)
-        print "copy ok"
         for path, dirs, files in os.walk(folder_copy, topdown=False):
             for f in files:
                 file_path = os.path.join(path, f)
                 os.rename(file_path, os.path.join(path, db.search_file_by_filename(f) + "." + f.split(".")[-1]))
             for d in dirs:
-                print d, db.get_name(int(d), 1)
                 os.rename(os.path.join(path, d), os.path.join(path, db.get_name(int(d), 1)))
         os.rename(folder_copy, os.path.join(folder_zip, folder_name))
         shutil.make_archive(os.path.join(config.GLOBAL['TEMP_PATH'], name), "zip", folder_zip, folder_name)
@@ -215,7 +213,6 @@ def add_watermark(src, dst, wm):
         # Create an image for storing results
         d_img = Image.new("RGB", (w, h))
         d_p = d_img.load()
-        # print s_img.format, "%dx%d" % (w, h), s_img.mode
         for x in range(w):
             for y in range(h):
                 (rw, gw, bw) = w_p[x, y]
@@ -224,7 +221,6 @@ def add_watermark(src, dst, wm):
                 gd = encode_color(gs, gw)
                 bd = encode_color(bs, bw)
                 d_p[x, y] = (rd, gd, bd)
-                # print rs, rw, (rw & 248) >> 5, rs & 7, rs & 248
                 # exit(0)
         # Save the result
         d_img.save(dst)

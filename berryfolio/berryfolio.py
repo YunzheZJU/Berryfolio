@@ -394,15 +394,12 @@ def search():
         db = get_db()
         username = db.get_name(uid, 0)
         if username:
+            keyword = u""
             if request.method == 'GET':
                 keyword = request.args['keyword'] if 'keyword' in request.args else u""
             elif request.method == 'POST':
                 keyword = request.form['keyword'] if 'keyword' in request.form else u""
-            print request.form
-            print request.args
-            print keyword
             # 这是一个注册了的用户，给你搜索
-            # keyword = request.form['keyword'] if 'keyword' in request.form else u""
 
             return render_template('search.html', uid=uid, username=username, message=message, keyword=keyword)
         else:
@@ -522,7 +519,7 @@ def query():
 # 删除接口
 @app.route('/delete', methods=['POST'])
 def delete():
-    # TODO: 从数据库和文件系统中删除文件或目录及其相关信息
+    # 从数据库和文件系统中删除文件或目录及其相关信息
     if 'fid' in request.args:
         # 删除文件
         pass
