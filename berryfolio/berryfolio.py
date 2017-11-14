@@ -405,7 +405,7 @@ def search():
 
 
 # 下载接口
-@app.route('/download', methods=['GET'])
+@app.route('/download', methods=['POST'])
 def download():
     # message = None
     if 'uid' in session:
@@ -413,17 +413,19 @@ def download():
         # 检查到这个用户曾经登陆过
         db = get_db()
         username = db.get_name(uid, 0)
+        print 1, username
         if username:
             # 这是一个注册了的用户，给你下载
-            if 'fid' in request.args:
-                # 获得file id
-                fid = int(request.args['fid'])
-                # 构造指向该文件的下载链接
-                file_path = remove_data_path_prefix(db.get_file_path(fid))
-                return redirect(url_for('data', filename=file_path, _external=True))
-            elif 'did' in request.args:
+            # if 'fid' in request.args:
+            #     # 获得file id
+            #     fid = int(request.args['fid'])
+            #     # 构造指向该文件的下载链接
+            #     file_path = remove_data_path_prefix(db.get_file_path(fid))
+            #     return redirect(url_for('data', filename=file_path, _external=True))
+            # elif 'did' in request.args:
                 # 获得directory id
-                did = int(request.args['did'])
+                print 2, request.form
+                did = int(request.form['did'])
                 # 构造目录路径
                 directory_path = add_data_path_prefix(os.path.join(str(uid), db.gen_parent_path(did)))
                 # 生成压缩包

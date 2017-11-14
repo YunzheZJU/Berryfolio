@@ -278,14 +278,17 @@ class DbConnect:
         return 0
 
     # Function 9: Get directory ID where type == 1
-    def get_dirs_by_user(self, uid, rtype=1):
+    def get_dirs_by_user(self, uid, rtype=0):
         """
         获取某用户的所有指定类型的目录ID，
         :param uid: 用户ID
-        :param rtype: 目录类型，1或2，默认为1
+        :param rtype: 目录类型，1或2，默认为0，查询所有目录
         :return: 成功则返回list，存储所有目录ID，否则返回None
         """
-        sql = "SELECT ROWID FROM Directory WHERE user = %d AND type = %d " % (uid, rtype)
+        if rtype:
+            sql = "SELECT ROWID FROM Directory WHERE user = %d AND type = %d " % (uid, rtype)
+        else:
+            sql = "SELECT ROWID FROM Directory WHERE user = %d" % uid
         results = self._query(sql)
         if results:
             results = map(lambda tp: tp[0], results)

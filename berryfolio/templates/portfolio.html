@@ -105,13 +105,14 @@
                     <div class="row">
                         <div class="col-xs-offset-4 col-xs-4"><h2 class="text-center">下载</h2></div>
                     </div>
-                    <form class="form-horizontal">
+                    <form class="form-horizontal" method="post" action="{{ url_for('download') }}">
                         <div class="form-group">
                             <label for="Cata_now" class="col-xs-2 control-label">文件夹</label>
                             <div class="col-xs-9">
                                 <div class="input-group">
-                                    <input id="Cata_now" type="text" readonly="readonly" class="form-control "
-                                           placeholder="DAM">
+                                    <input title="did" id="Cata_now_did" type="text" name="did" hidden>
+                                    <input id="Cata_now" type="text" readonly="readonly" class="form-control"
+                                           placeholder="DAM" required>
                                     <div class="input-group-btn">
                                         <button type="button" class="btn btn-default dropdown-toggle"
                                                 data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">目录选择
@@ -577,7 +578,6 @@
         function loadAddCata() {
             $.get("query", {'uid': uid, 'type': 1}, function (data) {
                 parentCata = data;
-                console.log(parentCata);
                 for (var k in parentCata) {
                     var node = document.createElement("LI");
                     var Cata_a = document.createElement("A");
@@ -623,25 +623,29 @@
 
         function loadCata()//动态生成下拉菜单中的目录选项
         {
-            for (var i = 0; i < C_count; i++) {
-                var node = document.createElement("LI");
-                var Cata_a = document.createElement("A");
-                if (Cata[i] !== "-") {
-                    Cata_a.innerHTML = Cata[i];
-                    Cata_a.setAttribute('onclick', "changeCata(this.innerHTML);");
+            $.get("query", {'uid': uid, 'type': 1}, function (data) {
+                Cata = data;
+                console.log(Cata);
+                for (var k in Cata) {
+                    var node = document.createElement("LI");
+                    var Cata_a = document.createElement("A");
+{#                    if (Cata[i] !== "-") {#}
+                        Cata_a.innerHTML = Cata[k];
+                        Cata_a.setAttribute('onclick', "changeCata(this.innerHTML, " + k + ");");
+{#                    }#}
+{#                    else {#}
+{#                        node.setAttribute('class', "divider");#}
+{#                        node.setAttribute('role', "separator");#}
+{#                    }#}
+                    node.appendChild(Cata_a);
+                    document.getElementById("cata").appendChild(node);
                 }
-                else {
-                    node.setAttribute('class', "divider");
-                    node.setAttribute('role', "separator");
-                }
-                node.appendChild(Cata_a);
-                document.getElementById("cata").appendChild(node);
-            }
-
+            });
         }
 
-        function changeCata(name) {
-            document.getElementById("Cata_now").setAttribute('placeholder', name);
+        function changeCata(name, id) {
+            document.getElementById("Cata_now").setAttribute('value', name);
+            document.getElementById("Cata_now_did").setAttribute('value', id);
         }
 
         document.getElementById('file_up').onchange = function () {
