@@ -1,23 +1,18 @@
 # -*- coding: utf-8 -*-
 # 为方便阅读，使用中文注释
-import os
 import time
-import shutil
 import hashlib
 from utils import *
 from logger import logger
 from dbOperation import DbConnect
-from flask import Flask, render_template, g, make_response, json, request, session, redirect, url_for, \
-    send_from_directory, abort
+from flask import Flask, render_template, g, json, request, session, redirect, url_for, \
+    send_from_directory
 from flask_uploads import UploadSet, configure_uploads, IMAGES, patch_request_class
-from flask_wtf import FlaskForm
-from flask_wtf.file import FileField, FileRequired, FileAllowed
-from wtforms import SubmitField
 
 # 我也不知道为什么，总之这句必须有
 app = Flask(__name__)
 generate_global(app.root_path)
-app.config.from_object(__name__)  # load config from this file, berryfolio.py
+app.config.from_object(__name__)
 # 加载默认配置
 app.config.update(dict(
     SECRET_KEY='Thisismykeyafuibsvseibgf',
@@ -69,13 +64,13 @@ def init_db():
     file_path = add_data_path_prefix(os.path.join(str(uid_1), db.gen_parent_path(did_1_2), "source1.png"))
     (fm, w, h) = add_watermark(add_data_path_prefix(file_path_old),
                                add_data_path_prefix(file_path), config.GLOBAL['WM_PATH'])
-    fid_1_1 = db.add_file(did_1_2, u"我的照片1", u"对它的描述1", file_path, uid_1, fm, w, h, u"标签1", u"标2", u"3")
+    db.add_file(did_1_2, u"我的照片1", u"对它的描述1", file_path, uid_1, fm, w, h, u"标签1", u"标2", u"3")
     # 第二个
     file_path_old = os.path.join(config.GLOBAL['TEMP_PATH'], "source.jpg")
     file_path = add_data_path_prefix(os.path.join(str(uid_1), db.gen_parent_path(did_1_2), "source2.png"))
     (fm, w, h) = add_watermark(add_data_path_prefix(file_path_old),
                                add_data_path_prefix(file_path), config.GLOBAL['WM_PATH'])
-    fid_1_2 = db.add_file(did_1_2, u"我的照片2", u"对它的描述2", file_path, uid_1, fm, w, h, u"标1", u"标", u"4")
+    db.add_file(did_1_2, u"我的照片2", u"对它的描述2", file_path, uid_1, fm, w, h, u"标1", u"标", u"4")
 
 
 @app.cli.command('initdb')
@@ -85,30 +80,9 @@ def initdb_command():
     logger.info('Initialized the database.')
 
 
-class UploadForm(FlaskForm):
-    photo = FileField(validators=[
-        FileAllowed(photos, u'只能上传图片！'),
-        FileRequired(u'文件未选择！')])
-    submit = SubmitField(u'上传')
-
-
 @app.route('/')
 def index():
-    return "<h1>Hello</h1>"
-
-
-@app.route('/upload', methods=['GET', 'POST'])
-def upload_file():
-    form = UploadForm()
-    if form.validate_on_submit():
-        filename = photos.save(form.photo.data)
-        file_url = photos.url(filename)
-    else:
-        file_url = None
-    rsp = make_response(render_template('test.html', form=form, file_url=file_url))
-    rsp.headers['Cache-Control'] = 'no-cache'
-    rsp.set_cookie('username', 'the username')
-    return rsp
+    return redirect(url_for('home'))
 
 
 # 这是通往网站首页的大门
@@ -299,16 +273,6 @@ def portfolio():
         username = db.get_name(uid, 0)
         if username:
             # 这是一个注册了的用户，给你管理自己的作品集
-            # if request.method == 'GET':
-            # # 从数据库获取这个用户的目录信息，传入模板
-            # root_id = db.get_dir_root(uid)
-            # try:
-            #     tree = db.generate_tree(root_id)
-            # except Exception as ex:
-            #     logger.error("Failure in constructing directory tree: " + ex.message)
-            #     message = u"获取目录信息失败"
-            #     tree = {}
-            # return render_template('portfolio.html', username=username, message=message)
             if request.method == 'POST':
                 message = u"未知上传类型"
                 if request.form['type'] == u'Photo' and 'photo' in request.files:
@@ -418,14 +382,6 @@ def download():
         db = get_db()
         username = db.get_name(uid, 0)
         if username:
-            # 这是一个注册了的用户，给你下载
-            # if 'fid' in request.args:
-            #     # 获得file id
-            #     fid = int(request.args['fid'])
-            #     # 构造指向该文件的下载链接
-            #     file_path = remove_data_path_prefix(db.get_file_path(fid))
-            #     return redirect(url_for('data', filename=file_path, _external=True))
-            # elif 'did' in request.args:
             # 获得directory id
             did = int(request.form['did'])
             # 构造目录路径
@@ -501,7 +457,7 @@ def query():
     elif 'keyword' in request.args:
         keyword = request.args['keyword']
         db = get_db()
-        results = map(lambda fid: db.get_file_info(fid), db.search_files(keyword))
+        results = map(lambda fid_result: db.get_file_info(fid_result), db.search_files(keyword))
         search_results = []
         for file_info in results:
             if file_info['status'] == 'success':
