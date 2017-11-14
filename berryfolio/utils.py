@@ -4,7 +4,6 @@ import shutil
 import config
 from PIL import Image, ImageDraw, ImageFont, ImageFilter
 import random
-import zipfile
 from logger import logger
 
 

@@ -1,5 +1,8 @@
 {% extends "base.html" %}
 {% block title %}欢迎使用Berryfolio{% endblock %}
+{% block head %}
+	<link type="text/css" href="{{ url_for('static', filename="css/style.css") }}" rel="stylesheet">
+{% endblock %}
 {% block style %}
 <style type="text/css">
     *{ margin:0; padding:0; list-style:none;}

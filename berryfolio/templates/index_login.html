@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 {% block title %}欢迎进入Berryfolio{% endblock %}
 {% block head %}
+	<link type="text/css" href="{{ url_for('static', filename="css/style.css") }}" rel="stylesheet">
     <link type="text/css" rel="stylesheet" href={{ url_for('static', filename="include/component.css") }}>
 {% endblock %}
 {% block body_property %} class="no-js"{% endblock %}
