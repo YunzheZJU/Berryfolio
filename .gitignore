@@ -49,7 +49,7 @@ docs/_build/
 venv/
 
 # Config files:
-# config.*
+config.*
 
 # Data folder:
 berryfolio/data/

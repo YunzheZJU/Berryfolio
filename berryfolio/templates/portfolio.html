@@ -9,6 +9,7 @@
         <div class="container">
             <div class="row">
                 <div class="col-md-9">
+                    <p id="uid" hidden>{{ uid }}</p>
                     <h1 style="margin: 20px 0 0 0; font-family: time,serif;color: #000000">{{ username }}的作品集</h1>
                     <h4 style="font-family: time,serif;color: #feeac5">{{ introduction }}</h4>
 
@@ -286,7 +287,8 @@
                             <div class="col-xs-9">
                                 <div class="input-group">
                                     <input id="Cata_add" type="text" readonly="readonly" class="form-control "
-                                           placeholder="DAM">
+                                           placeholder="DAM" name="pname" required>
+                                    <input title="pid" id="Cata_add_pid" type="text" name="pid" hidden>
                                     <div class="input-group-btn">
                                         <button type="button" class="btn btn-default dropdown-toggle"
                                                 data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">目录选择
@@ -302,14 +304,14 @@
                             <label for="folderName" class="col-xs-2 control-label">文件夹名</label>
                             <div class="col-xs-9">
                                 <input maxlength="10" type="text" class="form-control" id="folderName" name="name"
-                                       placeholder="0-10字">
+                                       placeholder="0-10字" required>
                             </div>
                         </div>
                         <div class="form-group">
                             <div class="col-xs-offset-2 col-xs-10">
                                 <div class="checkbox">
                                     <label>
-                                        <input class="pull-left" type="checkbox"/>是否作为「父目录」
+                                        <input class="pull-left" type="checkbox" name="rtype">是否作为「父目录」
                                     </label>
                                 </div>
                             </div>
@@ -354,10 +356,14 @@
         var C_count = 0;
         var parentCata = [];
         var pC_count = 0;
+        var uid=$('#uid').html();
 
         function init_f() {
             init_sidebar();
             show_init();
+            loadUpCata();
+            loadCata();
+            loadAddCata();
         }
 
         function getChildFolder(did) {
@@ -371,10 +377,10 @@
                         if (Layer.type[i] === 1) {
                             var $li = $('<li data-toggle="collapse" class="f-nav"></li>');
                             var $a = $('<a class="aWhite f-nav-a" onclick="changeFolder(this);">▲ ' + Layer.dName[i] + '</a>');
-                            parentCata[pC_count] = Layer.dName[i];
-                            pC_count++;
-                            Cata[C_count] = Layer.dName[i];
-                            C_count++;
+{#                            parentCata[pC_count] = Layer.dName[i];#}
+{#                            pC_count++;#}
+{#                            Cata[C_count] = Layer.dName[i];#}
+{#                            C_count++;#}
                             $li.attr("href", "#" + Layer.List[i]);
                             $li.append($a);
                             $("#" + did).append($li);
@@ -386,22 +392,22 @@
                             var $li = $('<li class="f-nav"></li>');
                             var $a = $('<a href="#' + Layer.List[i] + '" class="aWhite f-nav-a">■ ' + Layer.dName[i] + '</a>');
                             $li.append($a);
-                            normalCata[nC_count] = Layer.dName[i];
-                            nC_count++;
-                            Cata[C_count] = Layer.dName[i];
-                            C_count++;
+{#                            normalCata[nC_count] = Layer.dName[i];#}
+{#                            nC_count++;#}
+{#                            Cata[C_count] = Layer.dName[i];#}
+{#                            C_count++;#}
                             $("#" + did).append($li);
                             flagHR = true;
                         }
                     }
-                    if (flagHR) {
-                        parentCata[pC_count] = "-";
-                        pC_count++;
-                        Cata[C_count] = "-";
-                        C_count++;
-                    }
-                    normalCata[nC_count] = "-";
-                    nC_count++;
+{#                    if (flagHR) {#}
+{#                        parentCata[pC_count] = "-";#}
+{#                        pC_count++;#}
+{#                        Cata[C_count] = "-";#}
+{#                        C_count++;#}
+{#                    }#}
+{#                    normalCata[nC_count] = "-";#}
+{#                    nC_count++;#}
                 }
             });
         }
@@ -425,18 +431,18 @@
                             $li = $('<li data-toggle="collapse"></li>');
                             $a = $('<a onclick=changeFolder(this);>▲ ' + Layer1.dName[i] + '</a>');
                             $li.attr("href", "#" + Layer1.List[i]);
-                            parentCata[pC_count] = Layer1.dName[i];
-                            pC_count++;
+{#                            parentCata[pC_count] = Layer1.dName[i];#}
+{#                            pC_count++;#}
                         }
                         else {
                             $li = $('<li></li>');
                             $a = $('<a class="f-nav-a">■ ' + Layer1.dName[i] + '</a>');
                             $a.attr("href", "#" + Layer1.List[i]);
-                            Cata[C_count] = Layer1.dName[i];
-                            C_count++;
+{#                            Cata[C_count] = Layer1.dName[i];#}
+{#                            C_count++;#}
                         }
-                        normalCata[nC_count] = Layer1.dName[i];
-                        nC_count++;
+{#                        normalCata[nC_count] = Layer1.dName[i];#}
+{#                        nC_count++;#}
                         $li.append($a);
                         $("#myNav").append($li);
                         if (Layer1.type[i] === 1) {
@@ -448,9 +454,6 @@
                     console.log(Cata);
                     console.log(parentCata);
                     console.log(normalCata);
-                    loadUpCata();
-                    loadCata();
-                    loadAddCata();
                 }
             });
         }
@@ -572,24 +575,29 @@
     </script>
     <script>
         function loadAddCata() {
-            for (var i = 0; i < pC_count; i++) {
-                var node = document.createElement("LI");
-                var Cata_a = document.createElement("A");
-                if (parentCata[i] !== "-") {
-                    Cata_a.innerHTML = parentCata[i];
-                    Cata_a.setAttribute('onclick', "changeAddCata(this.innerHTML);");
+            $.get("query", {'uid': uid, 'type': 1}, function (data) {
+                parentCata = data;
+                console.log(parentCata);
+                for (var k in parentCata) {
+                    var node = document.createElement("LI");
+                    var Cata_a = document.createElement("A");
+    {#                if (parentCata[i] !== "-") {#}
+                        Cata_a.innerHTML = parentCata[k];
+                        Cata_a.setAttribute('onclick', "changeAddCata(this.innerHTML, " + k + ");");
+    {#                }#}
+    {#                else {#}
+    {#                    node.setAttribute('class', "divider");#}
+    {#                    node.setAttribute('role', "separator");#}
+    {#                }#}
+                    node.appendChild(Cata_a);
+                    document.getElementById("cataAdd").appendChild(node);
                 }
-                else {
-                    node.setAttribute('class', "divider");
-                    node.setAttribute('role', "separator");
-                }
-                node.appendChild(Cata_a);
-                document.getElementById("cataAdd").appendChild(node);
-            }
+            });
         }
 
-        function changeAddCata(name) {
-            document.getElementById("Cata_add").setAttribute('placeholder', name);
+        function changeAddCata(name, id) {
+            document.getElementById("Cata_add").setAttribute('value', name);
+            document.getElementById("Cata_add_pid").setAttribute('value', id);
         }
 
         function loadUpCata() {

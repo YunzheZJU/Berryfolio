@@ -46,7 +46,7 @@ def init_db():
     # 第一个
     uid_1 = db.add_user(u"Yunzhe", u"123", 'images/avatar.jpg', u'这个人很懒', u'我的作品集', u'这是我的作品集')
     make_user_dir(uid_1)
-    did_1_1 = db.add_directory(u"rootg", 1, None, uid_1)
+    did_1_1 = db.add_directory(u"root", 1, None, uid_1)
     make_user_sub_dir(uid_1, None, did_1_1)
     # 第二个
     uid_2 = db.add_user(u"一个用户", u"password", 'images/avatar.jpg', u'sdgdg', u'egweag', u'ewgere')
@@ -147,14 +147,14 @@ def register():
                 # 创建用户目录
                 if make_user_dir(uid):
                     # 在数据库中新增目录信息
-                    did = db.add_directory(u"rootg", 1, None, uid)
+                    did = db.add_directory(u"root", 1, None, uid)
                     if did:
                         # 创建用户目录下的根目录
                         make_user_sub_dir(uid, None, did)
                         # 注册成功，登录一下
                         return redirect(url_for('login'))
                     else:
-                        logger.error("Fail to add dictionary: name=%s, user=%s" % ("rootg", username))
+                        logger.error("Fail to add dictionary: name=%s, user=%s" % ("root", username))
                         message = u"注册失败，内部错误"
                 else:
                     message = u"注册失败，读写错误"
@@ -367,7 +367,7 @@ def portfolio():
                 elif request.form['type'] == u'Directory':
                     # 获取表单内容
                     name = request.form['name']
-                    rtype = int(request.form['rtype'])
+                    rtype = 1 if request.form['rtype'] == u"on" else 2
                     pid = int(request.form['pid'])
                     # 存入数据库
                     did = db.add_directory(name, rtype, pid, uid)
@@ -378,7 +378,7 @@ def portfolio():
                         message = u"增加目录成功"
                     else:
                         message = u"增加目录失败"
-            return render_template('portfolio.html', username=username, introduction=db.get_user_info(uid)[1],
+            return render_template('portfolio.html', uid=uid, username=username, introduction=db.get_user_info(uid)[1],
                                    message=message, root_id=db.get_dir_root(uid))
         else:
             # 未注册过的假冒用户，踢掉踢掉
@@ -449,7 +449,7 @@ def query():
             {description: "对它的描述1", status: "success", title: "我的照片1"}
     :return: 请求uid和type时，返回该用户的类型为type的文件夹(id: name)，形如
         >   $.get("query", {'uid':1, 'type':1}, function(data){console.log(data)})
-            {1: "rootg", 4: "sub2", 5: "sub3", 6: "folder1"}
+            {1: "root", 4: "sub2", 5: "sub3", 6: "folder1"}
         >   $.get("query", {'uid':1, 'type':2}, function(data){console.log(data)})
             {3: "sub1"}
     :return: 请求did时，返回该目录下子目录或文件的id组成的list和名字组成的list，
