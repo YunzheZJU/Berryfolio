@@ -514,6 +514,7 @@ def query():
         result = db.get_name(did, 1)
         print result
         return json.dumps(result), [('Content-Type', 'application/json;charset=utf-8')]
+    print request.args
 
 
 # 删除接口
