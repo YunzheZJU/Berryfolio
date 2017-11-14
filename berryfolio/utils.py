@@ -180,18 +180,19 @@ def make_zip(db, path_to_folder, name):  # FIXME
             for d in dirs:
                 remove_tree(os.path.join(path, d))
         shutil.copytree(path_to_folder, folder_copy)
+        print "copy ok"
         for path, dirs, files in os.walk(folder_copy, topdown=False):
             for f in files:
                 file_path = os.path.join(path, f)
-                print file_path
                 os.rename(file_path, os.path.join(path, db.search_file_by_filename(f) + "." + f.split(".")[-1]))
             for d in dirs:
-                os.rename(os.path.join(path, d), os.path.join(path, db.get_name(int(d), 1).encode('utf-8')))
+                print d, db.get_name(int(d), 1)
+                os.rename(os.path.join(path, d), os.path.join(path, db.get_name(int(d), 1)))
         os.rename(folder_copy, os.path.join(folder_zip, folder_name))
         shutil.make_archive(os.path.join(config.GLOBAL['TEMP_PATH'], name), "zip", folder_zip, folder_name)
         return name + ".zip"
     except StandardError as ex:
-        logger.error(ex)
+        logger.error(ex.message)
         return None
 
 

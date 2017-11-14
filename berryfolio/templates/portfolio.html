@@ -154,8 +154,8 @@
                         <div class="col-xs-offset-4 col-xs-4"><h2 class="text-center">更新</h2></div>
                     </div>
                     <form class="form-horizontal" method="post">
-                        <input type="hidden" class="form-control" id="pid" name="pid" value="0">
-                        <input type="hidden" class="form-control" id="fid" name="fid" value="0">
+                        <input type="hidden" class="form-control" id="imgModal_pid" name="pid" value="0">
+                        <input type="hidden" class="form-control" id="imgModal_fid" name="fid" value="0">
                         <div class="form-group">
                             <label for="picName" class="col-xs-2 control-label">图片名</label>
                             <div class="col-xs-10">
@@ -165,19 +165,20 @@
                         <div class="form-group">
                             <label for="picDes" class="col-xs-2 control-label">介绍</label>
                             <div class="col-xs-10">
-                                <input maxlength="25" class="form-control" id="picDes" name="description" placeholder="0-25字">
+                                <input maxlength="25" class="form-control" id="picDes" name="description"
+                                       placeholder="0-25字">
                             </div>
                         </div>
                         <div class="form-group">
                             <label for="tag" class="col-xs-2 control-label">标签</label>
                             <div class="col-xs-3">
-                                <input maxlength="4" class="form-control" id="tag_1" name="tag_1" placeholder="标签1">
+                                <input maxlength="4" class="form-control" id="imgModal_tag_1" name="tag_1" placeholder="标签1">
                             </div>
                             <div class="col-xs-3">
-                                <input maxlength="4" class="form-control" id="tag_2" name="tag_2" placeholder="标签2">
+                                <input maxlength="4" class="form-control" id="imgModal_tag_2" name="tag_2" placeholder="标签2">
                             </div>
                             <div class="col-xs-3">
-                                <input maxlength="4" class="form-control" id="tag_3" name="tag_3" placeholder="标签3">
+                                <input maxlength="4" class="form-control" id="imgModal_tag_3" name="tag_3" placeholder="标签3">
                             </div>
                         </div>
                         <div class="form-group">
@@ -214,8 +215,9 @@
                             <label for="Cata_up" class="col-xs-2 control-label">文件夹</label>
                             <div class="col-xs-9">
                                 <div class="input-group">
-                                    <input id="Cata_up" type="text" readonly="readonly" class="form-control "
-                                           placeholder="P1">
+                                    <input title="pid" id="Cata_up_pid" type="text" name="pid" hidden>
+                                    <input id="Cata_up" type="text" readonly="readonly" class="form-control"
+                                           placeholder="P1" required>
                                     <div class="input-group-btn">
                                         <button type="button" class="btn btn-default dropdown-toggle"
                                                 data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">目录选择
@@ -230,9 +232,10 @@
                         <div class="form-group">
                             <label for="avatar_l" class="col-xs-2 control-label">图片</label>
                             <div class="col-xs-3">
-                                <img onclick="file_up.click()" id="avatar_now" src="asset/image/avatarKen.png"
+                                <img onclick="file_up.click()" id="avatar_now"
+                                     src="{{ url_for('static', filename="images/avatarKen.png") }}"
                                      class="img-thumbnail avatar">
-                                <input type="file" id="file_up" name="file" style="display: none;"/>
+                                <input type="file" id="file_up" name="photo" style="display: none;"/>
                             </div>
                             <div class="col-xs-7">
                                 <p style="margin-top:80px;">点击图片上传</p>
@@ -242,14 +245,27 @@
                         <div class="form-group">
                             <label for="picName_up" class="col-xs-2 control-label">图片名</label>
                             <div class="col-xs-9">
-                                <input maxlength="10" type="text" class="form-control" id="picName" value=""
-                                       placeholder="0-10字">
+                                <input maxlength="10" type="text" class="form-control" id="picName" name="title"
+                                       placeholder="0-10字" required>
                             </div>
                         </div>
                         <div class="form-group">
                             <label for="picDes_up" class="col-xs-2 control-label">介绍</label>
                             <div class="col-xs-9">
-                                <input maxlength="25" class="form-control" id="picDes" value="" placeholder="0-25字">
+                                <input maxlength="25" class="form-control" id="picDes" name="description"
+                                       placeholder="0-25字" required>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="tag" class="col-xs-2 control-label">标签</label>
+                            <div class="col-xs-3">
+                                <input maxlength="4" class="form-control" id="tag_1" name="tag_1" placeholder="标签1">
+                            </div>
+                            <div class="col-xs-3">
+                                <input maxlength="4" class="form-control" id="tag_2" name="tag_2" placeholder="标签2">
+                            </div>
+                            <div class="col-xs-3">
+                                <input maxlength="4" class="form-control" id="tag_3" name="tag_3" placeholder="标签3">
                             </div>
                         </div>
                         <div class="form-group">
@@ -357,7 +373,7 @@
         var C_count = 0;
         var parentCata = [];
         var pC_count = 0;
-        var uid=$('#uid').html();
+        var uid = $('#uid').html();
 
         function init_f() {
             init_sidebar();
@@ -378,10 +394,10 @@
                         if (Layer.type[i] === 1) {
                             var $li = $('<li data-toggle="collapse" class="f-nav"></li>');
                             var $a = $('<a class="aWhite f-nav-a" onclick="changeFolder(this);">▲ ' + Layer.dName[i] + '</a>');
-{#                            parentCata[pC_count] = Layer.dName[i];#}
-{#                            pC_count++;#}
-{#                            Cata[C_count] = Layer.dName[i];#}
-{#                            C_count++;#}
+                            {#                            parentCata[pC_count] = Layer.dName[i];#}
+                            {#                            pC_count++;#}
+                            {#                            Cata[C_count] = Layer.dName[i];#}
+                            {#                            C_count++;#}
                             $li.attr("href", "#" + Layer.List[i]);
                             $li.append($a);
                             $("#" + did).append($li);
@@ -393,22 +409,22 @@
                             var $li = $('<li class="f-nav"></li>');
                             var $a = $('<a href="#' + Layer.List[i] + '" class="aWhite f-nav-a">■ ' + Layer.dName[i] + '</a>');
                             $li.append($a);
-{#                            normalCata[nC_count] = Layer.dName[i];#}
-{#                            nC_count++;#}
-{#                            Cata[C_count] = Layer.dName[i];#}
-{#                            C_count++;#}
+                            {#                            normalCata[nC_count] = Layer.dName[i];#}
+                            {#                            nC_count++;#}
+                            {#                            Cata[C_count] = Layer.dName[i];#}
+                            {#                            C_count++;#}
                             $("#" + did).append($li);
                             flagHR = true;
                         }
                     }
-{#                    if (flagHR) {#}
-{#                        parentCata[pC_count] = "-";#}
-{#                        pC_count++;#}
-{#                        Cata[C_count] = "-";#}
-{#                        C_count++;#}
-{#                    }#}
-{#                    normalCata[nC_count] = "-";#}
-{#                    nC_count++;#}
+                    {#                    if (flagHR) {#}
+                    {#                        parentCata[pC_count] = "-";#}
+                    {#                        pC_count++;#}
+                    {#                        Cata[C_count] = "-";#}
+                    {#                        C_count++;#}
+                    {#                    }#}
+                    {#                    normalCata[nC_count] = "-";#}
+                    {#                    nC_count++;#}
                 }
             });
         }
@@ -432,18 +448,18 @@
                             $li = $('<li data-toggle="collapse"></li>');
                             $a = $('<a onclick=changeFolder(this);>▲ ' + Layer1.dName[i] + '</a>');
                             $li.attr("href", "#" + Layer1.List[i]);
-{#                            parentCata[pC_count] = Layer1.dName[i];#}
-{#                            pC_count++;#}
+                            {#                            parentCata[pC_count] = Layer1.dName[i];#}
+                            {#                            pC_count++;#}
                         }
                         else {
                             $li = $('<li></li>');
                             $a = $('<a class="f-nav-a">■ ' + Layer1.dName[i] + '</a>');
                             $a.attr("href", "#" + Layer1.List[i]);
-{#                            Cata[C_count] = Layer1.dName[i];#}
-{#                            C_count++;#}
+                            {#                            Cata[C_count] = Layer1.dName[i];#}
+                            {#                            C_count++;#}
                         }
-{#                        normalCata[nC_count] = Layer1.dName[i];#}
-{#                        nC_count++;#}
+                        {#                        normalCata[nC_count] = Layer1.dName[i];#}
+                        {#                        nC_count++;#}
                         $li.append($a);
                         $("#myNav").append($li);
                         if (Layer1.type[i] === 1) {
@@ -490,7 +506,7 @@
                             fileM = data;
                             if (fileM.status === "success") {
                                 var IDnow = "pic" + parseInt(count / 3);
-                                $("#" + IDnow).append("<div class=col-md-4><div class=product-type-container><div class=product-type-overlay id=fid" + IDfile.fid[i] + " onclick=imgModal(this);><div class=product-type-info><h3  class=text-uppercase style=color:#000>" + fileM.title + "</h3><p class=text-uppercase style=color:#281a0d>" + fileM.description + "</p></div></div><img  src=" + fileM.path + " alt='Men fashion 1' class='product-type-img img-collection gold-border'></div></div>");
+                                $("#" + IDnow).append('<div class=col-md-4><div class=product-type-container><div class=product-type-overlay id=fid' + fileM.fid + ' onclick=imgModal(' + fileM.fid + ');><div class=product-type-info><h3  class=text-uppercase style=color:#000>' + fileM.title + '</h3><p class=text-uppercase style=color:#281a0d>' + fileM.description + '</p></div></div><img  src=' + fileM.path + ' alt=\'Men fashion 1\' class=\'product-type-img img-collection gold-border\'></div></div>');
                                 count++;
                             }
                         });
@@ -508,24 +524,29 @@
         }
     </script>
     <script>
-        function imgModal(pic) {
-            var fid = parseInt($(pic).attr('id').substring(3));
+        function imgModal(fid) {
+{#            var fid = parseInt($(pic).attr('id').substring(3));#}
             var fileM;
-            // $get("query",{'fid':fid},function(data){fileM=data})
-            fileM = {
-                description: "图片介绍：这本作业的一个成果展示图",
-                filename: "图片名字",
-                status: "success",
-                path: "asset/source/1.jpg",
-                fid: 3,
-                pid: 1,
-                uid: 1
-            };
-            $("#picName").attr('value', fileM.filename);
-            $("#picDes").attr('value', fileM.description);
-            $("#pid").attr('value', fileM.pid);
-            $("#fid").attr('value', fid);
-            $("#imgModal").modal("toggle");
+            $.get("query",{'fid': fid},function(data){
+                fileM=data;
+                $("#picName").attr('value', fileM.title);
+                $("#picDes").attr('value', fileM.description);
+                $("#imgModal_pid").attr('value', fileM.pid);
+                $("#imgModal_fid").attr('value', fid);
+                $("#imgModal_tag_1").attr('value', fileM.tag_1);
+                $("#imgModal_tag_2").attr('value', fileM.tag_2);
+                $("#imgModal_tag_3").attr('value', fileM.tag_3);
+                $("#imgModal").modal("toggle");
+            });
+{#            fileM = {#}
+{#                description: "图片介绍：这本作业的一个成果展示图",#}
+{#                filename: "图片名字",#}
+{#                status: "success",#}
+{#                path: "asset/source/1.jpg",#}
+{#                fid: 3,#}
+{#                pid: 1,#}
+{#                uid: 1#}
+{#            };#}
         }
 
         function downModal() {
@@ -581,14 +602,14 @@
                 for (var k in parentCata) {
                     var node = document.createElement("LI");
                     var Cata_a = document.createElement("A");
-    {#                if (parentCata[i] !== "-") {#}
-                        Cata_a.innerHTML = parentCata[k];
-                        Cata_a.setAttribute('onclick', "changeAddCata(this.innerHTML, " + k + ");");
-    {#                }#}
-    {#                else {#}
-    {#                    node.setAttribute('class', "divider");#}
-    {#                    node.setAttribute('role', "separator");#}
-    {#                }#}
+                    {#                if (parentCata[i] !== "-") {#}
+                    Cata_a.innerHTML = parentCata[k];
+                    Cata_a.setAttribute('onclick', "changeAddCata(this.innerHTML, " + k + ");");
+                    {#                }#}
+                    {#                else {#}
+                    {#                    node.setAttribute('class', "divider");#}
+                    {#                    node.setAttribute('role', "separator");#}
+                    {#                }#}
                     node.appendChild(Cata_a);
                     document.getElementById("cataAdd").appendChild(node);
                 }
@@ -601,42 +622,47 @@
         }
 
         function loadUpCata() {
-            for (var i = 0; i < normalCata.length; i++) {
-                var node = document.createElement("LI");
-                var Cata_a = document.createElement("A");
-                if (normalCata[i] !== "-") {
-                    Cata_a.innerHTML = normalCata[i];
-                    Cata_a.setAttribute('onclick', "changeUpCata(this.innerHTML);");
+            $.get("query", {'uid': uid, 'type': 2}, function (data) {
+                normalCata = data;
+                console.log(normalCata);
+                for (var k in normalCata) {
+                    var node = document.createElement("LI");
+                    var Cata_a = document.createElement("A");
+                    {#                    if (normalCata[i] !== "-") {#}
+                    Cata_a.innerHTML = normalCata[k];
+                    Cata_a.setAttribute('onclick', "changeUpCata(this.innerHTML, " + k + ");");
+                    {#                    }#}
+                    {#                    else {#}
+                    {#                        node.setAttribute('class', "divider");#}
+                    {#                        node.setAttribute('role', "separator");#}
+                    {#                    }#}
+                    node.appendChild(Cata_a);
+                    document.getElementById("cataUp").appendChild(node);
                 }
-                else {
-                    node.setAttribute('class', "divider");
-                    node.setAttribute('role', "separator");
-                }
-                node.appendChild(Cata_a);
-                document.getElementById("cataUp").appendChild(node);
-            }
+            });
         }
 
-        function changeUpCata(name) {
-            document.getElementById("Cata_up").setAttribute('placeholder', name);
+        function changeUpCata(name, id) {
+            document.getElementById("Cata_up").setAttribute('value', name);
+            document.getElementById("Cata_up_pid").setAttribute('value', id);
         }
 
         function loadCata()//动态生成下拉菜单中的目录选项
         {
-            $.get("query", {'uid': uid, 'type': 1}, function (data) {
+            $.get("query", {'uid': uid, 'type': 0}, function (data) {
                 Cata = data;
                 console.log(Cata);
                 for (var k in Cata) {
                     var node = document.createElement("LI");
                     var Cata_a = document.createElement("A");
-{#                    if (Cata[i] !== "-") {#}
-                        Cata_a.innerHTML = Cata[k];
-                        Cata_a.setAttribute('onclick', "changeCata(this.innerHTML, " + k + ");");
-{#                    }#}
-{#                    else {#}
-{#                        node.setAttribute('class', "divider");#}
-{#                        node.setAttribute('role', "separator");#}
-{#                    }#}
+                    {#                    if (Cata[i] !== "-") {#}
+                    Cata_a.innerHTML = Cata[k];
+                    Cata_a.setAttribute('onclick', "changeCata(this.innerHTML, " + k + ");");
+                    {#                    }#}
+                    {#                    else {#}
+                    {#                        node.setAttribute('class', "divider");#}
+                    {#                        node.setAttribute('role', "separator");#}
+                    {#                    }#}
                     node.appendChild(Cata_a);
                     document.getElementById("cata").appendChild(node);
                 }

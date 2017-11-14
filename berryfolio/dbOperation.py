@@ -384,7 +384,7 @@ class DbConnect:
         """
         根据ID获得name
         :param rid: 请求的ID
-        :param rtype: 传入ID的类型，目录ID为1，文件ID为2
+        :param rtype: 传入ID的类型，用户为0，目录ID为1，文件ID为2
         :return: 成功则返回name，否则返回None
         """
         sql = ""
@@ -396,7 +396,7 @@ class DbConnect:
             sql = "SELECT username FROM User WHERE ROWID = %d" % rid
         results = self._query(sql)
         if results:
-            return results[0][0].encode('utf-8')
+            return results[0][0] if rtype == 1 else results[0][0].encode('utf-8')
         return None
 
     # Function 16: Generate parent path of dir

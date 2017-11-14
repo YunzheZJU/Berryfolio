@@ -367,7 +367,7 @@ def portfolio():
                 elif request.form['type'] == u'Directory':
                     # 获取表单内容
                     name = request.form['name']
-                    rtype = 1 if request.form['rtype'] == u"on" else 2
+                    rtype = 1 if 'rtype' in request.form else 2
                     pid = int(request.form['pid'])
                     # 存入数据库
                     did = db.add_directory(name, rtype, pid, uid)
@@ -413,7 +413,6 @@ def download():
         # 检查到这个用户曾经登陆过
         db = get_db()
         username = db.get_name(uid, 0)
-        print 1, username
         if username:
             # 这是一个注册了的用户，给你下载
             # if 'fid' in request.args:
@@ -424,13 +423,11 @@ def download():
             #     return redirect(url_for('data', filename=file_path, _external=True))
             # elif 'did' in request.args:
                 # 获得directory id
-                print 2, request.form
                 did = int(request.form['did'])
                 # 构造目录路径
                 directory_path = add_data_path_prefix(os.path.join(str(uid), db.gen_parent_path(did)))
                 # 生成压缩包
                 zip_name = make_zip(db, directory_path, username)
-                print zip_name
                 if zip_name:
                     # 构造指向该压缩包的下载链接
                     return send_from_directory(config.GLOBAL['TEMP_PATH'], zip_name, as_attachment=True)

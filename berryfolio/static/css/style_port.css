@@ -393,6 +393,7 @@ input, textarea {
 
 .f-nav:hover {
     background-color: #efefee;
+  transition: all 0.3s ease;
 }
 
 .f-nav-a {
