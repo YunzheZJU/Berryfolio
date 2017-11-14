@@ -29,7 +29,7 @@
 	<div class="container">
 		<div class="row">
 			<div class="col-md-4 ">
-                <img width="324" height="450" src={{ url_for('static', filename="images/idol.png") }}>
+                <img width="324" height="450" src={{ url_for('static', filename="images/nya.png") }}>
 			</div>
 			<div class="col-md-4 .col-md-offset-4">
 					<!-- Start Sign In Form -->
@@ -91,11 +91,11 @@
                 ctx.drawImage(img1,0,0,324,450);
             };
 
-      		ctx.font = "18px Special";
-            ctx.fillStyle = "#da7256";
+      		ctx.font = "26px time";
+            ctx.fillStyle = "#211b2f";
             var txt="{{ vcode }}";
             ctx.globalCompositeOperation="source-over";
-            ctx.fillText(txt, 135, 310);
+            ctx.fillText(txt, 140, 310);
 		}
 	</script>
 {% endblock %}
