@@ -465,6 +465,7 @@ def query():
     :return: 请求keyword时，返回按关键字搜索标签得到的所有文件的信息
     :return: 请求namefordid时，返回目录名
     """
+    print request.args
     if 'fid' in request.args:
         # 获得file id
         fid = int(request.args['fid'])
@@ -510,11 +511,11 @@ def query():
         return json.dumps(search_results), [('Content-Type', 'application/json;charset=utf-8')]
     elif 'namefordid' in request.args:
         did = int(request.args['namefordid'])
+        print "did", did
         db = get_db()
         result = db.get_name(did, 1)
-        print result
+        print "result", result
         return json.dumps(result), [('Content-Type', 'application/json;charset=utf-8')]
-    print request.args
 
 
 # 删除接口
