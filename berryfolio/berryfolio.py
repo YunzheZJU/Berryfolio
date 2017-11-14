@@ -465,6 +465,7 @@ def query():
     :return: 请求keyword时，返回按关键字搜索标签得到的所有文件的信息
     :return: 请求namefordid时，返回目录名
     """
+    logger.info(request)
     logger.info(request.args)
     if 'fid' in request.args:
         # 获得file id
@@ -500,9 +501,12 @@ def query():
             result = {}
         return json.dumps(result), [('Content-Type', 'application/json;charset=utf-8')]
     elif 'keyword' in request.args:
+        logger.info("in keyword")
         keyword = request.args['keyword']
+        logger.info(keyword)
         db = get_db()
         results = map(lambda fid: db.get_file_info(fid), db.search_files(keyword))
+        logger.info(results)
         search_results = []
         for file_info in results:
             if file_info['status'] == 'success':
@@ -510,11 +514,12 @@ def query():
             search_results.append(file_info)
         return json.dumps(search_results), [('Content-Type', 'application/json;charset=utf-8')]
     elif 'namefordid' in request.args:
+        logger.info("in namefordid")
         did = int(request.args['namefordid'])
-        print "did", did
+        logger.info(did)
         db = get_db()
         result = db.get_name(did, 1)
-        print "result", result
+        logger.info(result)
         return json.dumps(result), [('Content-Type', 'application/json;charset=utf-8')]
 
 
