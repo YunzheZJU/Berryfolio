@@ -472,6 +472,7 @@ def query():
 
 
 # 删除接口
+# Deprecated
 @app.route('/delete', methods=['POST'])
 def delete():
     # 从数据库和文件系统中删除文件或目录及其相关信息
