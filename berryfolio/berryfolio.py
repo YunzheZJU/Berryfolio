@@ -437,8 +437,9 @@ def query():
         db = get_db()
         did_list = db.get_dirs_by_user(uid, rtype)
         result = {}
-        for did in did_list:
-            result[did] = db.get_name(did, 1)
+        if did_list:
+            for did in did_list:
+                result[did] = db.get_name(did, 1)
         return json.dumps(result), [('Content-Type', 'application/json;charset=utf-8')]
     elif 'did' in request.args:
         did = int(request.args['did'])
