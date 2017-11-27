@@ -453,7 +453,7 @@ def query():
                 result['dName'].append(db.get_name(cid, d_type))
                 result['type'].append(db.get_dir_type(cid))
         else:
-            result = {}
+            result = {'List': []}
         return json.dumps(result), [('Content-Type', 'application/json;charset=utf-8')]
     elif 'keyword' in request.args:
         keyword = request.args['keyword']
