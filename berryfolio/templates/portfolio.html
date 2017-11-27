@@ -433,37 +433,40 @@
             $.get("query", {'did': {{ root_id }}}, function (data) {
                 Layer1 = data;
                 // Layer1 = dataTemp[0];//*
+                console.log(Layer1);
                 if (Layer1 === {}) {
                     //获得的json对象为空
                     alert("没有子文件夹喔！");
                 }
                 else {
-                    var len = Layer1.List.length;
-                    for (var i = 0; i < len; i++) {
-                        var $li;
-                        var $a;
-                        if (Layer1.type[i] === 1) {
-                            $li = $('<li data-toggle="collapse"></li>');
-                            $a = $('<a onclick=changeFolder(this);>▲ ' + Layer1.dName[i] + '</a>');
-                            $li.attr("href", "#" + Layer1.List[i]);
-                            {#                            parentCata[pC_count] = Layer1.dName[i];#}
-                            {#                            pC_count++;#}
-                        }
-                        else {
-                            $li = $('<li></li>');
-                            $a = $('<a class="f-nav-a">■ ' + Layer1.dName[i] + '</a>');
-                            $a.attr("href", "#" + Layer1.List[i]);
-                            {#                            Cata[C_count] = Layer1.dName[i];#}
-                            {#                            C_count++;#}
-                        }
-                        {#                        normalCata[nC_count] = Layer1.dName[i];#}
-                        {#                        nC_count++;#}
-                        $li.append($a);
-                        $("#myNav").append($li);
-                        if (Layer1.type[i] === 1) {
-                            var $ul = $('<ul style="list-style: none;" class="collapse" id="' + Layer1.List[i] + '"></ul>');
-                            $("#myNav").append($ul);
-                            getChildFolder(Layer1.List[i]);
+                    if (Layer1.List) {
+                        var len = Layer1.List.length;
+                        for (var i = 0; i < len; i++) {
+                            var $li;
+                            var $a;
+                            if (Layer1.type[i] === 1) {
+                                $li = $('<li data-toggle="collapse"></li>');
+                                $a = $('<a onclick=changeFolder(this);>▲ ' + Layer1.dName[i] + '</a>');
+                                $li.attr("href", "#" + Layer1.List[i]);
+                                {#                            parentCata[pC_count] = Layer1.dName[i];#}
+                                {#                            pC_count++;#}
+                            }
+                            else {
+                                $li = $('<li></li>');
+                                $a = $('<a class="f-nav-a">■ ' + Layer1.dName[i] + '</a>');
+                                $a.attr("href", "#" + Layer1.List[i]);
+                                {#                            Cata[C_count] = Layer1.dName[i];#}
+                                {#                            C_count++;#}
+                            }
+                            {#                        normalCata[nC_count] = Layer1.dName[i];#}
+                            {#                        nC_count++;#}
+                            $li.append($a);
+                            $("#myNav").append($li);
+                            if (Layer1.type[i] === 1) {
+                                var $ul = $('<ul style="list-style: none;" class="collapse" id="' + Layer1.List[i] + '"></ul>');
+                                $("#myNav").append($ul);
+                                getChildFolder(Layer1.List[i]);
+                            }
                         }
                     }
                 }
