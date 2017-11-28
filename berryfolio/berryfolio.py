@@ -402,24 +402,6 @@ def download():
 def query():
     """
     查询接口
-    :return: 请求fid时，返回文件信息，形如
-        {"description": "\u5bf9\u5b83\u7684\u63cf\u8ff01", "filename": "\u6211\u7684\u7167\u72471", "status": "success"}
-        >   $.get("query", {'fid':1}, function(data){console.log(data)})
-            {description: "对它的描述1", status: "success", title: "我的照片1"}
-    :return: 请求uid和type时，返回该用户的类型为type的文件夹(id: name)，形如
-        >   $.get("query", {'uid':1, 'type':1}, function(data){console.log(data)})
-            {1: "root", 4: "sub2", 5: "sub3", 6: "folder1"}
-        >   $.get("query", {'uid':1, 'type':2}, function(data){console.log(data)})
-            {3: "sub1"}
-    :return: 请求did时，返回该目录下子目录或文件的id组成的list和名字组成的list，
-        'type'键存储该父目录的类型，同时也表示子元素的类型，形如
-        >   $.get("query", {'did':1}, function(data){console.log(data)})
-            {list: [3, 4, 5], type: 1}
-            可以这样获取值：data['list'][1]（值为4）
-        >   $.get("query", {'did':3}, function(data){console.log(data)})
-            {list: [1, 2], type: 2}
-    :return: 请求keyword时，返回按关键字搜索标签得到的所有文件的信息
-    :return: 请求namefordid时，返回目录名
     """
     if 'fid' in request.args:
         # 获得file id

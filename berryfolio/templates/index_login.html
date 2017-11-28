@@ -72,7 +72,6 @@
 				</figure>
                 {% endfor %}
 			</div>
-			<!-- 这里出现了一个nav……emmm -->
 		</section>
 	</div>
 	<br>
@@ -81,10 +80,8 @@
     <script src={{ url_for('static', filename="include/classie.js") }}></script>
     <script src={{ url_for('static', filename="include/photostack.js") }}></script>
     <script>
-        // [].slice.call( document.querySelectorAll( '.photostack' ) ).forEach( function( el ) { new Photostack( el ); } );
         new Photostack( document.getElementById( 'photostack-1' ), {
             callback : function( item ) {
-                //console.log(item)
             }
         } );
     </script>

@@ -21,8 +21,8 @@ class BerryfolioTestCase(unittest.TestCase):
         os.unlink(berryfolio.GLOBAL['DB_PATH'])
 
     def test_homepage(self):
-        rv = self.app.get('/')
-        assert "<h1>Hello</h1>" in rv.data
+        rv = self.app.get('/', follow_redirects=True)
+        assert "<title>欢迎使用Berryfolio</title>" in rv.data
 
     def register(self, username, password, vcode):
         return self.app.post('/register', data=dict(
@@ -158,21 +158,7 @@ class BerryfolioTestCase(unittest.TestCase):
         assert "欢迎进入Berryfolio" in rv.data
         # 更新设置
         rv = self.setting(u"新的介绍", u"树莓树莓", u"树莓真好吃")
-        print rv.data
         assert "更新设置成功" in rv.data
-
-    # def download_file(self, fid):
-    #     return self.app.get('/download?fid=%d' % fid)
-    #
-    # def test_download(self):
-    #     # 登录
-    #     rv = self.login(u'Yunzhe', u'123', u'1234')
-    #     assert "欢迎进入Berryfolio" in rv.data
-    #     with open('testdownload.jpg', 'rb') as img:
-    #         img_io = StringIO(img.read())
-    #     rv = self.download_file(1)
-    #     img_io.seek(0)
-    #     assert rv.data == img_io.read()
 
 
 if __name__ == '__main__':

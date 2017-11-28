@@ -487,11 +487,12 @@ class DbConnect:
 
 if __name__ == '__main__':
     db = DbConnect()
-    if 0:
+    if 1:
         with open('schema.sql', mode='r') as f:
             db.execute_scripts(f.readlines())
         # F1
         print db.add_user("Yunzhe", "123456", 'images/avatar.jpg', u'这个人很懒', u'我的作品集', u'这是我的作品集')
+        print db.add_user("Asaki", "123456", 'images/avatar.jpg', u'这个人很懒', u'我的作品集', u'这是我的作品集')
         # F2
         print db.match_user_pw("Yunzhe", "123456")
         print db.match_user_pw("Yunzhe", "12345")
@@ -500,24 +501,26 @@ if __name__ == '__main__':
         print db.check_username("Yunzhe")
         print db.check_username("Y")
         # F4
-        print db.add_directory("rootg", 1, None, "Yunzhe")
-        print db.add_directory("folder", 1, 1, "Yunzhe")
-        print db.add_directory("sub", 1, 2, "Yunzhe")
-        print db.add_directory("folder1", 1, 1, "Yunzhe")
-        print db.add_directory("folder2", 1, 1, "Yunzhe")
-        print db.add_directory("rootg", 1, None, "Asaki")
-        print db.add_directory("sud", 2, 3, "Yunzhe")
+        print db.add_directory("rootg", 1, None, 1)
+        print db.add_directory("folder", 1, 1, 1)
+        print db.add_directory("sub", 1, 2, 1)
+        print db.add_directory("folder1", 1, 1, 1)
+        print db.add_directory("folder2", 1, 1, 1)
+        print db.add_directory("rootg", 1, None, 2)
+        print db.add_directory("sud", 2, 3, 1)
         # F5
-        print db.add_file(3, "photo1.jpg", "hahahah", "Yunzhe/rootg/folder/sub", "Yunzhe", "PNG", 500, 300)
-        print db.add_file(3, "photo1.jpg", None, "Yunzhe/rootg/folder/sub", "Yunzhe", "PNG", 500, 300)
+        print db.add_file(3, "photo1.jpg", "hahahah", "Yunzhe/rootg/folder/sub", 1, "PNG", 500, 300,
+                          "tag1", "", "")
+        print db.add_file(3, "photo1.jpg", None, "Yunzhe/rootg/folder/sub", 1, "PNG", 500, 300,
+                          "tag tag", "tag", "")
         # F6
         print db.get_dir_children(1)
         print db.get_dir_children(2)
         print db.get_dir_children(3)
         # F7
-        print db.get_dir_root("Yunzhe")
-        print db.get_dir_root("Asaki")
-        print db.get_dir_root("A")
+        print db.get_dir_root(1)
+        print db.get_dir_root(2)
+        print db.get_dir_root(3)
         # F8
         print db.get_dir_type(1)
         print db.get_dir_type(2)
@@ -525,10 +528,10 @@ if __name__ == '__main__':
         print db.get_dir_type(4)
         print db.get_dir_type(5)
         # F9
-        print db.get_dirs_by_user("Yunzhe")
-        print db.get_dirs_by_user("Yunzhe", 2)
-        print db.get_dirs_by_user("Asaki")
-        print db.get_dirs_by_user("Asaki", 2)
+        print db.get_dirs_by_user(1)
+        print db.get_dirs_by_user(1, 2)
+        print db.get_dirs_by_user(3)
+        print db.get_dirs_by_user(3, 2)
         # F10
         print db.get_file_path(1)
         print db.get_file_path(2)
@@ -538,10 +541,10 @@ if __name__ == '__main__':
         print db.get_file_info(2)
         print db.get_file_info(3)
         # F12
-        print db.get_files_by_user("Yunzhe")
+        print db.get_files_by_user(1)
         # F13
-        print db.update_file_info(1, 4, "photo", None, "Yunzhe/rootg/folder/sud")
-        print db.update_file_info(1, 3, "photo1.jpg", "hahahah", "Yunzhe/rootg/folder/sub")
+        print db.update_file_info(1, 4, "photo", None, "Yunzhe/rootg/folder/sud", "啊啊", "aaa", "fssd")
+        print db.update_file_info(1, 3, "photo1.jpg", "hahahah", "Yunzhe/rootg/folder/sub", "", "", "")
         # F14
         print db.get_parent_id(1, 1)
         print db.get_parent_id(2, 1)
@@ -566,4 +569,5 @@ if __name__ == '__main__':
         print db.del_file(1)
         # F21
         print db.search_files(u"4")
-    print db.search_file_by_filename("e:\\projects\\pycharm\\dams\\berryfolio\\data\\1\\1\\3\\source1.png")
+        # F22
+        print db.search_file_by_filename("e:\\projects\\pycharm\\dams\\berryfolio\\data\\1\\1\\3\\source1.png")

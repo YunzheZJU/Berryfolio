@@ -51,12 +51,6 @@
             </div>
         </div>
         <hr>
-        <!-- 一开始空格有问题是因为ul和li嵌套混乱 -->
-        <!--*最上层文件夹为li， collapse展开的是一个ul（对应id目前为该文件的名字，可改），ul下套都是li -->
-        <!--如果还有子文件夹，在子文件夹外套ul，class=collapse -->
-        <!-- 父文件夹前为▲，a中有changeFolder()函数用于改变三角符号 -->
-        <!-- 子文件夹前为■，点击跳转到对应文件夹下的内容 -->
-        <!-- 最上层文件夹没有class，其他都是class"aWhite" -->
         <ul id="myNav" class="nav nav-sidebar">
 
         </ul>
@@ -96,7 +90,6 @@
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <!--            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>-->
                     <h4 class="modal-title">下载文件夹</h4>
                 </div>
                 <div class="modal-body">
@@ -144,7 +137,6 @@
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <!--            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>-->
                     <h4 class="modal-title">更改图片信息</h4>
                 </div>
                 <div class="modal-body">
@@ -201,7 +193,6 @@
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <!--            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>-->
                     <h4 class="modal-title">上传文件</h4>
                 </div>
                 <div class="modal-body">
@@ -289,7 +280,6 @@
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <!--            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>-->
                     <h4 class="modal-title">在选择的文件夹下新建文件夹</h4>
                 </div>
                 <div class="modal-body">
@@ -392,10 +382,6 @@
                         if (Layer.type[i] === 1) {
                             var $li = $('<li data-toggle="collapse" class="f-nav"></li>');
                             var $a = $('<a class="aWhite f-nav-a" onclick="changeFolder(this);">▲ ' + Layer.dName[i] + '</a>');
-                            {#                            parentCata[pC_count] = Layer.dName[i];#}
-                            {#                            pC_count++;#}
-                            {#                            Cata[C_count] = Layer.dName[i];#}
-                            {#                            C_count++;#}
                             $li.attr("href", "#" + Layer.List[i]);
                             $li.append($a);
                             $("#" + did).append($li);
@@ -407,22 +393,10 @@
                             var $li = $('<li class="f-nav"></li>');
                             var $a = $('<a href="#' + Layer.List[i] + '" class="aWhite f-nav-a">■ ' + Layer.dName[i] + '</a>');
                             $li.append($a);
-                            {#                            normalCata[nC_count] = Layer.dName[i];#}
-                            {#                            nC_count++;#}
-                            {#                            Cata[C_count] = Layer.dName[i];#}
-                            {#                            C_count++;#}
                             $("#" + did).append($li);
                             flagHR = true;
                         }
                     }
-                    {#                    if (flagHR) {#}
-                    {#                        parentCata[pC_count] = "-";#}
-                    {#                        pC_count++;#}
-                    {#                        Cata[C_count] = "-";#}
-                    {#                        C_count++;#}
-                    {#                    }#}
-                    {#                    normalCata[nC_count] = "-";#}
-                    {#                    nC_count++;#}
                 }
             });
         }
@@ -432,7 +406,6 @@
             //前端向后端请求根目录root<不在页面上显示，相当于用户的界面>（假设did=0）下所有的文件夹的id和名字
             $.get("query", {'did': {{ root_id }}}, function (data) {
                 Layer1 = data;
-                // Layer1 = dataTemp[0];//*
                 console.log(Layer1);
                 if (Layer1 === {}) {
                     //获得的json对象为空
@@ -448,18 +421,12 @@
                                 $li = $('<li data-toggle="collapse"></li>');
                                 $a = $('<a onclick=changeFolder(this);>▲ ' + Layer1.dName[i] + '</a>');
                                 $li.attr("href", "#" + Layer1.List[i]);
-                                {#                            parentCata[pC_count] = Layer1.dName[i];#}
-                                {#                            pC_count++;#}
                             }
                             else {
                                 $li = $('<li></li>');
                                 $a = $('<a class="f-nav-a">■ ' + Layer1.dName[i] + '</a>');
                                 $a.attr("href", "#" + Layer1.List[i]);
-                                {#                            Cata[C_count] = Layer1.dName[i];#}
-                                {#                            C_count++;#}
                             }
-                            {#                        normalCata[nC_count] = Layer1.dName[i];#}
-                            {#                        nC_count++;#}
                             $li.append($a);
                             $("#myNav").append($li);
                             if (Layer1.type[i] === 1) {
@@ -495,7 +462,6 @@
                 var IDfile;
                 $.get("query", {'did': IDint}, function (data) {
                     IDfile = data;
-                    {#                    IDfile = dataTemp[5];//*统一用5来代替了！#}
                     IDfile.fid = IDfile.List;
                     var len = IDfile.fid.length;
                     var count = 0;
@@ -512,22 +478,13 @@
                                 count++;
                             }
                         });
-                        {#                        fileM = {#}
-                        {#                            description: "图片介绍：这本作业的一个成果展示图",#}
-                        {#                            filename: "图片名字",#}
-                        {#                            status: "success",#}
-                        {#                            path: "asset/source/1.jpg"#}
-                        {#                        };//*就用相同的表示了！#}
-
                     }
                 });
-
             }
         }
     </script>
     <script>
         function imgModal(fid) {
-{#            var fid = parseInt($(pic).attr('id').substring(3));#}
             var fileM;
             $.get("query",{'fid': fid},function(data){
                 fileM=data;
@@ -540,15 +497,6 @@
                 $("#imgModal_tag_3").attr('value', fileM.tag_3);
                 $("#imgModal").modal("toggle");
             });
-{#            fileM = {#}
-{#                description: "图片介绍：这本作业的一个成果展示图",#}
-{#                filename: "图片名字",#}
-{#                status: "success",#}
-{#                path: "asset/source/1.jpg",#}
-{#                fid: 3,#}
-{#                pid: 1,#}
-{#                uid: 1#}
-{#            };#}
         }
 
         function downModal() {
@@ -604,14 +552,8 @@
                 for (var k in parentCata) {
                     var node = document.createElement("LI");
                     var Cata_a = document.createElement("A");
-                    {#                if (parentCata[i] !== "-") {#}
                     Cata_a.innerHTML = parentCata[k];
                     Cata_a.setAttribute('onclick', "changeAddCata(this.innerHTML, " + k + ");");
-                    {#                }#}
-                    {#                else {#}
-                    {#                    node.setAttribute('class', "divider");#}
-                    {#                    node.setAttribute('role', "separator");#}
-                    {#                }#}
                     node.appendChild(Cata_a);
                     document.getElementById("cataAdd").appendChild(node);
                 }
@@ -629,14 +571,8 @@
                 for (var k in normalCata) {
                     var node = document.createElement("LI");
                     var Cata_a = document.createElement("A");
-                    {#                    if (normalCata[i] !== "-") {#}
                     Cata_a.innerHTML = normalCata[k];
                     Cata_a.setAttribute('onclick', "changeUpCata(this.innerHTML, " + k + ");");
-                    {#                    }#}
-                    {#                    else {#}
-                    {#                        node.setAttribute('class', "divider");#}
-                    {#                        node.setAttribute('role', "separator");#}
-                    {#                    }#}
                     node.appendChild(Cata_a);
                     document.getElementById("cataUp").appendChild(node);
                 }
@@ -658,11 +594,6 @@
                     {#                    if (Cata[i] !== "-") {#}
                     Cata_a.innerHTML = Cata[k];
                     Cata_a.setAttribute('onclick', "changeCata(this.innerHTML, " + k + ");");
-                    {#                    }#}
-                    {#                    else {#}
-                    {#                        node.setAttribute('class', "divider");#}
-                    {#                        node.setAttribute('role', "separator");#}
-                    {#                    }#}
                     node.appendChild(Cata_a);
                     document.getElementById("cata").appendChild(node);
                 }
@@ -684,6 +615,3 @@
         };
     </script>
 {% endblock %}
-<!-- 写这个HTML遇到的难点 -->
-<!-- 1.按钮排版很难弄，最后决定把所有按钮都放在一起，排版稍微好了一点 -->
-<!-- 2.文件夹的展开和收起：主要问题在于（1）需要解决空白（在html里需要用特殊的符号&nbsp;代替，但是在jquery里写这个符号就会被转化成字符串不乏识别）的问题，让文件夹之间有关系序列。（2）如果子文件夹还有子文件夹，会出现收起该文件夹没有收起来其子文件夹的问题……-->
