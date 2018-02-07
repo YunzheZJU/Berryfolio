@@ -4,6 +4,9 @@
 ## Project Due: 2017.11.30
 ## Project Target: Demo
 
+**This project is licenced under MIT(code) and CC BY-NC-ND 4.0(media files like images under berryfolio/static/images)**
+**本项目采用MIT协议开源（代码文件）和CC BY-NC-ND 4.0（媒体文件，如berryfolio/static/images下的图片素材），对于后者您不可以进行任何编辑和盈利行为。**
+
 * 如何运行？
 * 运行scripts目录下的INIT_DB.cmd以初始化数据库
 * 运行RUN.bat以运行系统
