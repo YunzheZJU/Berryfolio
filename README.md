@@ -50,7 +50,7 @@ $ RUN.bat
 ```
 Done! Now you can open [http://localhost:8080][localhost] for fun!
 
-For moe information, please see PDFs under `/documents`
+For more information, please see PDFs under `/documents`
 
 Structure
 -------------
