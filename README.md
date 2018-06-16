@@ -50,7 +50,7 @@ $ RUN.bat
 ```
 Done! Now you can open [http://localhost:8080][localhost] for fun!
 
-For more information, please see PDFs under `/documents`
+For more information, please see PDFs under `/docs`
 
 Structure
 -------------
@@ -152,17 +152,17 @@ For any question, please mail to [yunzhe@zju.edu.cn][Mail]
 
 [localhost]: http://localhost:8080
 
-[HomePage]: documents/HomePage.png "Home Page"
-[CreateFolder]: documents/CreateFolder.png "Create Folder"
-[Download]: documents/Download.png "Download"
-[LoggedIn]: documents/LoggedIn.png "Logged In"
-[LogIn]: documents/LogIn.png "Log In"
-[MyPage]: documents/MyPage.png "My Page"
-[Search]: documents/Search.png "Search"
-[SignIn]: documents/SignIn.png "Sign In"
-[Update]: documents/Update.png "Update"
-[Upload]: documents/Upload.png "Upload"
-[UserInfo]: documents/UserInfo.png "User Info"
+[HomePage]: docs/HomePage.png "Home Page"
+[CreateFolder]: docs/CreateFolder.png "Create Folder"
+[Download]: docs/Download.png "Download"
+[LoggedIn]: docs/LoggedIn.png "Logged In"
+[LogIn]: docs/LogIn.png "Log In"
+[MyPage]: docs/MyPage.png "My Page"
+[Search]: docs/Search.png "Search"
+[SignIn]: docs/SignIn.png "Sign In"
+[Update]: docs/Update.png "Update"
+[Upload]: docs/Upload.png "Upload"
+[UserInfo]: docs/UserInfo.png "User Info"
 
 [MIT]: /LICENCE_MIT.md
 [CC BY-NC-ND 4.0]: /LICENCE_CC_BY_NC_ND_4_0.md
